@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Kira Kucing · Darab &amp; Bahagi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: setup card (mode + sifir chips) -> one big sum with an on-screen keypad -> result with mistakes to review. */
+:root{
+  --bg:#F2F7F5; --surface:#FFFFFF; --ink:#1D2A31; --muted:#58696F; --line:#D5E4DF; --sun:#F2B33D;
+  --mt:#1F6E94; --mt-soft:#E2EEF5; --good:#278A4C; --good-bg:#E3F4E8; --bad:#C8463F; --bad-bg:#FBE7E5;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif; --body:"Nunito","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0F191C; --surface:#172529; --ink:#E7F0ED; --muted:#9DB2AC; --line:#2A3F40; --sun:#F5C25B;
+  --mt:#5FAED6; --mt-soft:#16303C; --good:#5CCB83; --good-bg:#173525; --bad:#F07E77; --bad-bg:#3A1F1E; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:640px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.top svg{width:60px;height:60px;flex:none}
+.top h1{font-size:clamp(1.6rem,6vw,2.2rem);font-weight:800;color:var(--mt)}
+.top p{margin:0;color:var(--muted);font-size:.95rem}
+.top a{color:inherit}
+.card{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:18px}
+.lbl{font-family:var(--display);font-weight:800;font-size:1.15rem;margin:0 0 8px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.seg button,.chip{border:2px solid var(--line);background:var(--bg);border-radius:14px;padding:10px 6px;font-family:var(--display);font-weight:800;font-size:1.15rem}
+.seg button[aria-pressed="true"],.chip[aria-pressed="true"]{background:var(--mt);border-color:var(--mt);color:#fff}
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.chip{font-size:1.3rem;padding:8px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 18px;font-weight:800}
+.go{display:block;width:100%;margin-top:16px;border:0;background:var(--mt);color:#fff;border-radius:16px;padding:14px;font-family:var(--display);font-weight:800;font-size:1.35rem}
+.best{margin-top:10px;color:var(--muted);font-size:.9rem;text-align:center}
+.hud{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:800;font-variant-numeric:tabular-nums}
+.prog{flex:1;height:12px;background:var(--line);border-radius:999px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--mt);transition:width .3s}
+.sum{font-family:var(--display);font-weight:800;font-size:clamp(3rem,15vw,4.6rem);text-align:center;line-height:1.1;font-variant-numeric:tabular-nums;margin:6px 0}
+.ans{display:inline-block;min-width:1.8em;border-bottom:5px solid var(--mt);color:var(--mt)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.pad button{border:2px solid var(--line);background:var(--bg);border-radius:16px;padding:10px 0;font-family:var(--display);font-weight:800;font-size:1.8rem;font-variant-numeric:tabular-nums}
+.pad .ok{background:var(--mt);border-color:var(--mt);color:#fff;font-size:1.3rem}
+.pad button:disabled{opacity:.4}
+.fb{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px;border-radius:16px;padding:12px 14px;border:2px solid var(--line)}
+.fb svg{width:50px;height:50px;flex:none}
+.fb.ok{background:var(--good-bg);border-color:var(--good)}
+.fb.no{background:var(--bad-bg);border-color:var(--bad)}
+.fb b{font-family:var(--display);font-size:1.25rem;display:block}
+.fb .t{flex:1 1 160px;min-width:0}
+.fb .next{flex:1 0 100%;border:0;background:var(--mt);color:#fff;border-radius:999px;padding:10px;font-weight:800;font-size:1.05rem}
+.result{text-align:center}
+.result svg{width:100px;height:100px}
+.big{font-family:var(--display);font-size:3rem;font-weight:800;color:var(--mt);font-variant-numeric:tabular-nums}
+.stars{font-size:2.4rem;letter-spacing:6px;color:var(--line)}
+.stars .on{color:var(--sun)}
+.wrong{text-align:left;margin-top:12px}
+.wrong div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:6px 2px;font-weight:700;font-variant-numeric:tabular-nums}
+.wrong span:last-child{color:var(--muted);font-weight:500}
+.result .row{justify-content:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@keyframes pop{0%{transform:scale(.92)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
+.pop{animation:pop .3s ease}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+function cat(m){return `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M18 40 L22 10 L44 28 Z" fill="#F0A64A"/><path d="M82 40 L78 10 L56 28 Z" fill="#F0A64A"/><path d="M24 34 L25 18 L37 28 Z" fill="#F7C9D0"/><path d="M76 34 L75 18 L63 28 Z" fill="#F7C9D0"/><ellipse cx="50" cy="56" rx="36" ry="32" fill="#F5B861"/><path d="M50 26 q-4 8 0 14 q4 -6 0 -14" fill="#E08F2E"/><ellipse cx="50" cy="66" rx="17" ry="12" fill="#FFF3E2"/>${m==='sad'?'<circle cx="38" cy="49" r="4.5" fill="#3a2a22"/><circle cx="62" cy="49" r="4.5" fill="#3a2a22"/><path d="M42 66 q8 -6 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/>':'<path d="M33 49 q5 -6 10 0 M57 49 q5 -6 10 0" fill="none" stroke="#3a2a22" stroke-width="3.5" stroke-linecap="round"/><path d="M42 62 q8 9 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/><circle cx="28" cy="62" r="5" fill="#F7A8B3" opacity=".7"/><circle cx="72" cy="62" r="5" fill="#F7A8B3" opacity=".7"/>'}<path d="M46 57 h8 l-4 4 z" fill="#E86A7E"/><path d="M22 60 h-14 M22 65 h-13 M78 60 h14 M78 65 h13" stroke="#3a2a22" stroke-width="1.6" stroke-linecap="round"/></svg>`}
+const KEY='kiraKucing.v1';let store={mode:'campur',sifir:[2,3,4,5,6,7,8,9],best:{}};
+try{store=Object.assign(store,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
+const app=document.getElementById('app');
+const N=15,MODES={darab:'Darab ×',bahagi:'Bahagi ÷',campur:'Campur'};
+let G=null;
+const stars=n=>[1,2,3].map(i=>`<span class="${i<=n?'on':''}">★</span>`).join('');
+function header(){return `<div class="top">${cat('happy')}<div><h1>Kira Kucing</h1><p><a href="../">← Matematik</a> · Darab dan bahagi 1 digit</p></div></div>`}
+function home(){
+  const bk=store.mode+':'+store.sifir.join('');
+  app.innerHTML=header()+`<div class="card">
+   <p class="lbl">Pilih permainan</p>
+   <div class="seg">${Object.entries(MODES).map(([k,v])=>`<button data-m="${k}" aria-pressed="${store.mode===k}">${v}</button>`).join('')}</div>
+   <p class="lbl">Pilih sifir</p>
+   <div class="chips">${[2,3,4,5,6,7,8,9].map(n=>`<button class="chip" data-s="${n}" aria-pressed="${store.sifir.includes(n)}">${n}</button>`).join('')}</div>
+   <div class="row"><button class="btn" id="all">Pilih semua</button><button class="btn" id="none">Kosongkan</button></div>
+   <button class="go" id="go" ${store.sifir.length?'':'disabled'}>Mula! (${N} soalan)</button>
+   <p class="best">Rekod terbaik untuk pilihan ini: <span class="stars" style="font-size:1.2rem;letter-spacing:2px">${stars(store.best[bk]||0)}</span></p></div>`;
+  app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{store.mode=b.dataset.m;save();home()});
+  app.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const n=+b.dataset.s;store.sifir=store.sifir.includes(n)?store.sifir.filter(x=>x!==n):[...store.sifir,n].sort();save();home()});
+  document.getElementById('all').onclick=()=>{store.sifir=[2,3,4,5,6,7,8,9];save();home()};
+  document.getElementById('none').onclick=()=>{store.sifir=[];save();home()};
+  document.getElementById('go').onclick=start;
+}
+function makeQ(){
+  const a=store.sifir[Math.floor(Math.random()*store.sifir.length)],b=1+Math.floor(Math.random()*9);
+  const div=store.mode==='bahagi'||(store.mode==='campur'&&Math.random()<.5);
+  return div?{txt:`${a*b} ÷ ${a}`,ans:b,fact:`${a} × ${b} = ${a*b}`}:(Math.random()<.5?{txt:`${a} × ${b}`,ans:a*b,fact:`sifir ${a}`}:{txt:`${b} × ${a}`,ans:a*b,fact:`sifir ${a}`});
+}
+function start(){
+  const qs=[],seen=new Set();let guard=0;
+  while(qs.length<N&&guard++<500){const q=makeQ();if(seen.has(q.txt)&&guard<300)continue;seen.add(q.txt);qs.push(q)}
+  G={qs,i:0,score:0,input:'',done:false,wrong:[]};play();
+}
+function play(){
+  const q=G.qs[G.i];
+  app.innerHTML=header()+`<div class="hud"><span>${G.i+1}/${N}</span><div class="prog"><i style="width:${G.i/N*100}%"></i></div><span>★ ${G.score}</span></div>
+  <div class="card"><div class="sum">${q.txt} = <span class="ans">${G.input||'?'}</span></div>
+  <div class="pad">${[7,8,9,4,5,6,1,2,3].map(n=>`<button data-n="${n}" ${G.done?'disabled':''}>${n}</button>`).join('')}<button data-del ${G.done?'disabled':''} aria-label="Padam">⌫</button><button data-n="0" ${G.done?'disabled':''}>0</button><button class="ok" data-ok ${G.done||!G.input?'disabled':''}>Semak</button></div><div id="fb"></div></div>
+  <div class="row" style="justify-content:center"><button class="btn" id="quit">Berhenti</button></div>`;
+  app.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{if(G.input.length<2){G.input+=b.dataset.n;play()}});
+  const d=app.querySelector('[data-del]');d.onclick=()=>{G.input=G.input.slice(0,-1);play()};
+  app.querySelector('[data-ok]').onclick=check;
+  document.getElementById('quit').onclick=home;
+  if(G.done)fb();
+}
+function check(){
+  const q=G.qs[G.i];G.done=true;G.ok=+G.input===q.ans;
+  if(G.ok)G.score++;else G.wrong.push(q);
+  play();
+}
+const PRAISE=['Syabas!','Bagus!','Hebat!','Pandai!','Betul!'];
+function fb(){
+  const q=G.qs[G.i],last=G.i===N-1;
+  const el=document.getElementById('fb');
+  el.innerHTML=`<div class="fb ${G.ok?'ok':'no'} pop">${cat(G.ok?'happy':'sad')}<div class="t"><b>${G.ok?PRAISE[Math.floor(Math.random()*5)]:'Hampir! Jawapan: '+q.ans}</b>${q.txt.includes('÷')?`Ingat: ${q.fact}`:`${q.txt} = ${q.ans}`}</div><button class="next" id="nx">${last?'Lihat keputusan':'Seterusnya →'}</button></div>`;
+  const nx=document.getElementById('nx');nx.focus({preventScroll:true});
+  nx.onclick=()=>{if(last)result();else{G.i++;G.input='';G.done=false;play()}};
+}
+document.addEventListener('keydown',e=>{if(!G||!document.querySelector('.pad'))return;if(/^[0-9]$/.test(e.key)&&!G.done&&G.input.length<2){G.input+=e.key;play()}else if(e.key==='Backspace'&&!G.done){G.input=G.input.slice(0,-1);play()}else if(e.key==='Enter'){const nx=document.getElementById('nx');if(nx)nx.click();else if(G.input&&!G.done)check()}});
+function result(){
+  const s=G.score/N>=.9?3:G.score/N>=.7?2:G.score/N>=.5?1:0;
+  const bk=store.mode+':'+store.sifir.join('');if((store.best[bk]||0)<s){store.best[bk]=s;save()}
+  const msg=s===3?'Cemerlang! Kucing sangat bangga!':s===2?'Bagus! Sikit lagi untuk 3 bintang.':s===1?'Boleh! Cuba sekali lagi.':'Jom latih sifir sekali lagi.';
+  app.innerHTML=header()+`<div class="card result pop">${cat(s?'happy':'sad')}<div class="big">${G.score}/${N}</div><div class="stars">${stars(s)}</div><p style="font-weight:800;font-size:1.15rem">${msg}</p>
+  ${G.wrong.length?`<div class="wrong"><p class="lbl">Ulang kaji soalan ini</p>${G.wrong.map(q=>`<div><span>${q.txt} = ${q.ans}</span><span>${q.txt.includes('÷')?q.fact:''}</span></div>`).join('')}</div>`:''}
+  <div class="row"><button class="btn" style="background:var(--mt);border-color:var(--mt);color:#fff" id="again">Main lagi</button><button class="btn" id="menu">Tukar pilihan</button></div></div>`;
+  document.getElementById('again').onclick=start;document.getElementById('menu').onclick=home;
+}
+home();
+</script>
+</body>
+</html>
