@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Misi Kucing Pintar PI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Baloo+2:wght@600;800&family=Noto+Naskh+Arabic:wght@500;700&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: a hopscotch of topic tiles coloured by the textbook's bidang (Al-Quran, Jawi, Akidah, Ibadah, Adab); one play screen with a cat guide. */
+:root{
+  --bg:#F2F7F5; --surface:#FFFFFF; --ink:#1D2A31; --muted:#58696F; --line:#D5E4DF;
+  --accent:#0E8577; --accent-ink:#FFFFFF; --sun:#F2B33D; --good:#278A4C; --good-bg:#E3F4E8; --bad:#C8463F; --bad-bg:#FBE7E5;
+  --quran:#C2306B; --jawi:#D85F22; --akidah:#1F6E94; --ibadah:#3A8F36; --adab:#6A4C9C; --ujian:#0E8577;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+  --quranf:"Amiri","Traditional Arabic","Noto Naskh Arabic",serif;
+  --jawif:"Noto Naskh Arabic","Amiri","Traditional Arabic",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F191C; --surface:#172529; --ink:#E7F0ED; --muted:#9DB2AC; --line:#2A3F40;
+  --accent:#36BFAE; --accent-ink:#06201C; --sun:#F5C25B; --good:#5CCB83; --good-bg:#173525; --bad:#F07E77; --bad-bg:#3A1F1E;
+  --quran:#EE6C9C; --jawi:#F28D58; --akidah:#5FAED6; --ibadah:#78C873; --adab:#A98BDB; --ujian:#36BFAE; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F191C; --surface:#172529; --ink:#E7F0ED; --muted:#9DB2AC; --line:#2A3F40;
+  --accent:#36BFAE; --accent-ink:#06201C; --sun:#F5C25B; --good:#5CCB83; --good-bg:#173525; --bad:#F07E77; --bad-bg:#3A1F1E;
+  --quran:#EE6C9C; --jawi:#F28D58; --akidah:#5FAED6; --ibadah:#78C873; --adab:#A98BDB; --ujian:#36BFAE; color-scheme:dark}
+*{box-sizing:border-box}
+html{color-scheme:light}
+@media (prefers-color-scheme:dark){html{color-scheme:dark}}
+body{margin:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.ar{font-family:var(--quranf);direction:rtl;font-size:1.6em;line-height:1.9}
+.jw{font-family:var(--jawif);direction:rtl;font-size:1.45em;line-height:1.8}
+
+/* header */
+.top{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.top svg{flex:none;width:64px;height:64px}
+.top h1{font-size:clamp(1.6rem,4.5vw,2.3rem);font-weight:800}
+.top p{margin:2px 0 0;color:var(--muted);font-size:.95rem}
+.starbank{margin-left:auto;display:flex;align-items:center;gap:6px;background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.starbank b{color:var(--sun);font-size:1.2em}
+
+.exam-note{background:var(--surface);border:2px dashed var(--line);border-radius:16px;padding:12px 16px;margin-bottom:18px;color:var(--muted);font-size:.95rem}
+.exam-note strong{color:var(--ink)}
+
+/* topic grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.tile{--c:var(--accent);text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:14px 16px 14px;display:flex;flex-direction:column;gap:6px;position:relative;transition:transform .15s,border-color .15s}
+.tile:hover{transform:translateY(-3px);border-color:var(--c)}
+.tile .bidang{align-self:flex-start;background:var(--c);color:#fff;font-weight:800;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:2px 10px}
+.tile h3{font-size:1.25rem;font-weight:800}
+.tile .ms{color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums}
+.tile .stars{font-size:1.15rem;letter-spacing:2px;color:var(--line)}
+.tile .stars .on{color:var(--sun)}
+.tile.big{grid-column:1/-1;flex-direction:row;align-items:center;gap:16px;background:var(--c);border-color:var(--c);color:var(--accent-ink)}
+.tile.big h3{font-size:1.45rem}
+.tile.big .ms{color:inherit;opacity:.85}
+.tile.big .go{margin-left:auto;font-family:var(--display);font-weight:800;font-size:1.1rem;background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 16px;white-space:nowrap}
+
+/* topic screen */
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.back{background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:800}
+.bar h2{font-size:clamp(1.35rem,4vw,1.8rem);font-weight:800;color:var(--c)}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tabs button{flex:1;border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:10px;font-family:var(--display);font-weight:800;font-size:1.1rem}
+.tabs button[aria-selected="true"]{background:var(--c);border-color:var(--c);color:#fff}
+
+.note{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:16px 18px;margin-bottom:12px}
+.note h3{font-size:1.15rem;color:var(--c);margin-bottom:6px}
+.note p{margin:6px 0}
+.note ul,.note ol{margin:6px 0;padding-left:1.3em}
+.note li{margin:3px 0}
+.pill{display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:0 10px;font-weight:700;font-size:.9rem}
+.ayat{display:grid;gap:6px}
+.ayat div{display:flex;gap:12px;align-items:baseline;justify-content:space-between;border-bottom:1px dashed var(--line);padding-bottom:4px;flex-wrap:wrap}
+.ayat small{color:var(--muted);font-size:.9rem;flex:1 1 220px;min-width:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:6px}
+.cards .c{border:2px solid var(--line);border-radius:14px;padding:8px 10px;text-align:center;background:var(--bg)}
+.cards .c .em{font-size:1.6rem}
+.cards .c .r{font-weight:800;font-size:.95rem}
+.cards .c .s{color:var(--muted);font-size:.82rem}
+.tbl{overflow-x:auto}
+.tbl table{border-collapse:collapse;width:100%;min-width:300px}
+.tbl td,.tbl th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:middle}
+.tbl th{font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cta{display:block;width:100%;margin-top:6px;background:var(--c);color:#fff;border:0;border-radius:16px;padding:14px;font-family:var(--display);font-weight:800;font-size:1.25rem}
+
+/* play */
+.hud{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:800;font-variant-numeric:tabular-nums}
+.prog{flex:1;height:12px;background:var(--line);border-radius:999px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--c);width:0;transition:width .3s}
+.qcard{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:18px}
+.qtag{display:inline-block;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--c);border-radius:999px;padding:2px 10px;margin-bottom:8px}
+.qtext{font-size:1.2rem;font-weight:800;margin:0 0 6px}
+.qshow{text-align:center;margin:8px 0 4px}
+.qshow .em{font-size:3rem;line-height:1.1}
+.qshow .ar,.qshow .jw{font-size:2.2rem}
+.opts{display:grid;gap:10px;margin-top:12px}
+.opts.two{grid-template-columns:1fr 1fr}
+.opt{border:2px solid var(--line);background:var(--bg);border-radius:16px;padding:12px 14px;font-weight:700;font-size:1.05rem;text-align:left;min-height:54px}
+.opt.ar,.opt.jw{text-align:right;font-size:1.55rem;padding:6px 16px}
+.opt:hover:not(:disabled){border-color:var(--c)}
+.opt.ok{background:var(--good-bg);border-color:var(--good)}
+.opt.no{background:var(--bad-bg);border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.two .opt{text-align:center;font-family:var(--display);font-weight:800;font-size:1.3rem}
+.slot{min-height:76px;border:3px dashed var(--line);border-radius:16px;display:flex;align-items:center;justify-content:center;padding:6px 14px;margin-top:10px;background:var(--bg)}
+.slot .jw{font-size:2.3rem}
+.slot.order{flex-direction:column;align-items:stretch;gap:6px;justify-content:flex-start}
+.slot.order .ar{font-size:1.45rem;text-align:right;border-bottom:1px dashed var(--line)}
+.slot .hint{color:var(--muted);font-size:.95rem}
+.tiles{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;justify-content:center}
+.tiles.col{flex-direction:column;align-items:stretch}
+.tilebtn{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:4px 16px;min-width:64px}
+.tilebtn.jw{font-size:1.9rem}
+.tilebtn.ar{font-size:1.45rem;text-align:right}
+.tilebtn:disabled{opacity:.3;cursor:default}
+.row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 18px;font-weight:800}
+.btn.main{background:var(--c);border-color:var(--c);color:#fff}
+.fb{display:flex;gap:12px;align-items:flex-start;margin-top:14px;border-radius:16px;padding:12px 14px;background:var(--bg);border:2px solid var(--line)}
+.fb svg{flex:none;width:52px;height:52px}
+.fb.ok{background:var(--good-bg);border-color:var(--good)}
+.fb.no{background:var(--bad-bg);border-color:var(--bad)}
+.fb b{font-family:var(--display);font-size:1.25rem}
+.fb p{margin:2px 0 0}
+.fb{flex-wrap:wrap}
+.fb .next{flex:1 0 100%;padding:10px 18px;font-size:1.05rem}
+.fbtext{min-width:0;flex:1 1 160px}
+.tiles{direction:rtl}
+
+.result{text-align:center;background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:22px 18px}
+.result svg{width:110px;height:110px}
+.result .big{font-family:var(--display);font-size:3rem;font-weight:800;color:var(--c);font-variant-numeric:tabular-nums}
+.result .stars{font-size:2.4rem;letter-spacing:6px;color:var(--line)}
+.result .stars .on{color:var(--sun)}
+.result .row{justify-content:center}
+.break{margin-top:14px;text-align:left}
+.break div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding:6px 2px;font-variant-numeric:tabular-nums}
+.break .weak{color:var(--bad);font-weight:800}
+.foot{margin-top:24px;color:var(--muted);font-size:.85rem;text-align:center}
+@media (max-width:480px){.tile.big{flex-wrap:wrap}.tile.big .go{margin-left:0}.opts.two{grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@keyframes pop{0%{transform:scale(.9)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
+.pop{animation:pop .35s ease}
+</style>
+</head>
+<body>
+
+
+<div class="wrap" id="app"></div>
+
+<script>
+/* ---------- cat guide (original drawing) ---------- */
+function cat(mood){
+  const mouth = mood==='sad' ? '<path d="M42 66 q8 -6 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/>'
+    : '<path d="M42 62 q8 9 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/>';
+  const eyes = mood==='happy' ? '<path d="M33 49 q5 -6 10 0 M57 49 q5 -6 10 0" fill="none" stroke="#3a2a22" stroke-width="3.5" stroke-linecap="round"/>'
+    : '<circle cx="38" cy="49" r="4.5" fill="#3a2a22"/><circle cx="62" cy="49" r="4.5" fill="#3a2a22"/><circle cx="39.5" cy="47.5" r="1.4" fill="#fff"/><circle cx="63.5" cy="47.5" r="1.4" fill="#fff"/>';
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">
+    <path d="M18 40 L22 10 L44 28 Z" fill="#F0A64A"/><path d="M82 40 L78 10 L56 28 Z" fill="#F0A64A"/>
+    <path d="M24 34 L25 18 L37 28 Z" fill="#F7C9D0"/><path d="M76 34 L75 18 L63 28 Z" fill="#F7C9D0"/>
+    <ellipse cx="50" cy="56" rx="36" ry="32" fill="#F5B861"/>
+    <path d="M50 26 q-4 8 0 14 q4 -6 0 -14" fill="#E08F2E"/><path d="M30 34 q6 2 8 8" stroke="#E08F2E" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M70 34 q-6 2 -8 8" stroke="#E08F2E" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <ellipse cx="50" cy="66" rx="17" ry="12" fill="#FFF3E2"/>
+    ${eyes}
+    <path d="M46 57 h8 l-4 4 z" fill="#E86A7E"/>
+    ${mouth}
+    <path d="M22 60 h-14 M22 65 h-13 M78 60 h14 M78 65 h13" stroke="#3a2a22" stroke-width="1.6" stroke-linecap="round"/>
+    ${mood==='happy'?'<circle cx="28" cy="62" r="5" fill="#F7A8B3" opacity=".7"/><circle cx="72" cy="62" r="5" fill="#F7A8B3" opacity=".7"/>':''}
+  </svg>`;
+}
+
+/* ---------- helpers ---------- */
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function mcq(q,opts,a,extra={}){return Object.assign({t:'mcq',q,opts,a},extra)}
+const S_KEY='misiKucingPI.v1';
+let best={};
+try{best=JSON.parse(localStorage.getItem(S_KEY)||'{}')||{}}catch(e){best={}}
+function saveBest(id,stars){if((best[id]||0)>=stars)return;best[id]=stars;try{localStorage.setItem(S_KEY,JSON.stringify(best))}catch(e){}}
+
+/* ---------- content (Buku Teks Pendidikan Islam Tahun 2, KSSR Semakan) ---------- */
+const FALAQ=[
+  ['قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ','Katakanlah: Aku berlindung kepada Tuhan yang menguasai waktu subuh,'],
+  ['مِنْ شَرِّ مَا خَلَقَ','daripada kejahatan makhluk yang Dia ciptakan,'],
+  ['وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ','dan daripada kejahatan malam apabila ia gelap gelita,'],
+  ['وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ','dan daripada kejahatan ahli sihir yang meniup pada simpulan tali,'],
+  ['وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ','dan daripada kejahatan orang yang dengki apabila dia dengki.']
+];
+const NUN=['إِنَّ','هُنَّ','يَمُنُّ','فَإِنَّ','فَلَهُنَّ','إِنَّهُ'];
+const MIM=['ثُمَّ','أُمَّ','عَمَّ','مِمَّا','فَأَمَّا','جَهَنَّمَ'];
+const PLAIN=['مِنْ','هُمْ','لَمْ','عَنْ','كُنْتُمْ','عَلَيْهِمْ','أَنْتَ','قُلْ'];
+
+const JAWI3=[ // rumi, emoji, syllables (Jawi), maksud/info
+  ['perahu','🛶',['ڤ','را','هو']],
+  ['harimau','🐯',['ه','ري','ماو']],
+  ['cendawan','🍄',['چن','دا','ون']],
+  ['pelita','🪔',['ڤ','لي','تا']],
+  ['nelayan','🎣',['ن','لا','ين']],
+  ['cahaya','☀️',['چ','ها','ي']],
+  ['bahaya','⚠️',['ب','ها','ي']],
+  ['pelampung','🛟',['ڤ','لم','ڤوڠ']],
+  ['sembilang','🐟',['سم','بي','لڠ']],
+  ['terumbu','🪸',['ت','روم','بو']],
+  ['belalang','🦗',['ب','لا','لڠ']],
+  ['pusara','🪦',['ڤو','سا','را']]
+];
+const JAWI3_WRONG={perahu:['ڤرهو','ڤاراهو'],harimau:['هاريماو','هريمو'],cendawan:['چينداون','چنداوان'],pelita:['ڤيليتا','ڤلتا'],nelayan:['نيلاين','نلايان'],cahaya:['چاهاي','چهايا'],bahaya:['باهاي','بهايا'],pelampung:['ڤلامڤوڠ','ڤلمڤڠ'],sembilang:['سمبيلن','سيمبيلڠ'],terumbu:['تيرومبو','ترمبو'],belalang:['بالالڠ','بلالڠن'],pusara:['ڤوسارو','ڤسارا']};
+
+const RANGKAI=[ // w1, w2, gabung, rumi, emoji
+  ['چرمين','مات','چرمين مات','cermin mata','👓'],
+  ['كاسوت','بولا','كاسوت بولا','kasut bola','👟'],
+  ['ڤاسو','بوڠا','ڤاسو بوڠا','pasu bunga','🪴'],
+  ['چيلي','ڤادي','چيلي ڤادي','cili padi','🌶️'],
+  ['بيليق','اءير','بيليق اءير','bilik air','🚿'],
+  ['بوكو','توليس','بوكو توليس','buku tulis','📓'],
+  ['بيݢ','سكوله','بيݢ سكوله','beg sekolah','🎒'],
+  ['كايو','ڤمباريس','كايو ڤمباريس','kayu pembaris','📏'],
+  ['ڤينسيل','ورنا','ڤينسيل ورنا','pensel warna','🖍️'],
+  ['كوتق','ڤينسيل','كوتق ڤينسيل','kotak pensel','✏️'],
+  ['ميجا','ݢورو','ميجا ݢورو','meja guru','🧑‍🏫'],
+  ['سابون','مندي','سابون مندي','sabun mandi','🧼']
+];
+
+const MALAIKAT=[
+  ['Jibril','جبرائيل','menyampaikan wahyu kepada para nabi'],
+  ['Mikail','ميكائيل','menurunkan hujan dan rezeki'],
+  ['Israfil','إسرافيل','meniup sangkakala'],
+  ['Izrail','عزرائيل','mencabut nyawa'],
+  ['Raqib','رقيب','mencatat amalan baik'],
+  ['Atid','عتيد','mencatat amalan buruk'],
+  ['Munkar dan Nakir','منكر دان نكير','menyoal orang mati di dalam kubur'],
+  ['Ridwan','رضوان','menjaga syurga'],
+  ['Malik','مالك','menjaga neraka']
+];
+
+const WAJIB=[
+  ['Takbiratul ihram','اللَّهُ أَكْبَرُ'],
+  ['Membaca Surah al-Fatihah','بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ...'],
+  ['Tasyahhud akhir','التَّحِيَّاتُ الْمُبَارَكَاتُ ...'],
+  ['Selawat ke atas Nabi dalam tasyahhud akhir','اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ'],
+  ['Salam yang pertama','السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ']
+];
+const SUNAT=[
+  ['Doa iftitah','اللَّهُ أَكْبَرُ كَبِيرًا ...'],
+  ["Ta'awwuz",'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ'],
+  ['Membaca "Amin" selepas al-Fatihah','آمِين'],
+  ['Membaca surah selepas al-Fatihah',''],
+  ['Takbir intiqalat (takbir ketika berpindah rukun)','اللَّهُ أَكْبَرُ'],
+  ['Tasbih rukuk (3 kali)','سُبْحَانَ رَبِّيَ الْعَظِيمِ وَبِحَمْدِهِ'],
+  ['Bacaan ketika bangun dari rukuk','سَمِعَ اللَّهُ لِمَنْ حَمِدَهُ'],
+  ["Bacaan ketika berdiri tegak selepas rukuk (i'tidal)",'رَبَّنَا لَكَ الْحَمْدُ'],
+  ['Tasbih sujud (3 kali)','سُبْحَانَ رَبِّيَ الْأَعْلَىٰ وَبِحَمْدِهِ'],
+  ['Doa duduk antara dua sujud','رَبِّ اغْفِرْ لِي وَارْحَمْنِي ...'],
+  ['Selawat Ibrahimiyah','كَمَا صَلَّيْتَ عَلَىٰ إِبْرَاهِيمَ ...'],
+  ['Salam yang kedua','السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ']
+];
+
+const ADAB_OK=['Berniat ikhlas kerana Allah','Berwuduk sebelum berdoa','Menghadap kiblat','Menadah tangan','Memulakan doa dengan memuji Allah','Berselawat ke atas Nabi Muhammad ﷺ','Merendahkan suara','Berdoa dengan penuh keyakinan','Berdoa dengan tenang dan tertib','Mengaminkan selepas berdoa'];
+const ADAB_NO=['Berdoa sambil bermain','Berdoa dengan menjerit kuat','Berdoa dengan tergesa-gesa','Berdoa sambil bergurau dengan kawan','Berdoa tetapi tidak yakin Allah mendengar','Berputus asa jika doa belum dimakbulkan'];
+
+/* ---------- topics ---------- */
+const TOPICS=[
+ {id:'falaq',bidang:'Al-Quran',cv:'--quran',title:'Surah al-Falaq',ms:'m/s 7',learn:learnFalaq,bank:bankFalaq},
+ {id:'syaddah',bidang:'Tajwid',cv:'--quran',title:'Mim & Nun Syaddah',ms:'m/s 32',learn:learnSyaddah,bank:bankSyaddah},
+ {id:'suku',bidang:'Jawi',cv:'--jawi',title:'Tiga Suku Kata',ms:'m/s 38',learn:learnSuku,bank:bankSuku},
+ {id:'rangkai',bidang:'Jawi',cv:'--jawi',title:'Rangkai Kata',ms:'m/s 43',learn:learnRangkai,bank:bankRangkai},
+ {id:'malaikat',bidang:'Akidah',cv:'--akidah',title:'Malaikat & Tugasnya',ms:'m/s 69',learn:learnMalaikat,bank:bankMalaikat},
+ {id:'solat',bidang:'Ibadah',cv:'--ibadah',title:'Bacaan Wajib & Sunat dalam Solat',ms:'m/s 85',learn:learnSolat,bank:bankSolat},
+ {id:'doa',bidang:'Adab',cv:'--adab',title:'Adab Berdoa',ms:'m/s 127',learn:learnDoa,bank:bankDoa}
+];
+
+/* ----- learn pages ----- */
+function learnFalaq(){return `
+ <div class="note"><h3>Fakta penting</h3>
+  <p><span class="pill">Surah ke-113</span> <span class="pill">5 ayat</span> <span class="pill">Sebelum Surah an-Nas</span></p>
+  <p>Kita membaca Surah al-Falaq untuk memohon perlindungan daripada Allah daripada segala kejahatan.</p></div>
+ <div class="note"><h3>Ayat dan maksud ringkas</h3>
+  <p class="ar" style="text-align:center">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+  <div class="ayat">${FALAQ.map((a,i)=>`<div><small>${i+1}. ${a[1]}</small><span class="ar">${a[0]} ﴿${'١٢٣٤٥'[i]}﴾</span></div>`).join('')}</div></div>`}
+function learnSyaddah(){return `
+ <div class="note"><h3>Apa itu nun dan mim syaddah?</h3>
+  <p>Huruf <span class="ar" style="font-size:1.4em">نّ</span> dan <span class="ar" style="font-size:1.4em">مّ</span> yang ada tanda syaddah <span class="ar" style="font-size:1.4em">ـّ</span> mesti dibaca <b>dengung</b>.</p>
+  <p><span class="pill">Dengung 2 harakat</span> <span class="pill">Suara keluar dari pangkal hidung (khaisyum)</span></p></div>
+ <div class="note"><h3>Contoh nun syaddah <span class="ar" style="font-size:1em">نّ</span></h3>
+  <div class="cards">${NUN.map(w=>`<div class="c"><div class="ar">${w}</div></div>`).join('')}</div></div>
+ <div class="note"><h3>Contoh mim syaddah <span class="ar" style="font-size:1em">مّ</span></h3>
+  <div class="cards">${MIM.map(w=>`<div class="c"><div class="ar">${w}</div></div>`).join('')}</div></div>
+ <div class="note"><h3>Ingat!</h3><p>Hukum membaca al-Quran dengan bertajwid ialah <b>fardu ain</b> (wajib bagi setiap orang).</p></div>`}
+function learnSuku(){return `
+ <div class="note"><h3>Perkataan tiga suku kata</h3>
+  <p>Setiap perkataan di bawah ada <b>3 bahagian bunyi</b>. Contoh: <b>pe + ra + hu</b> = perahu.</p>
+  <div class="cards">${JAWI3.map(w=>`<div class="c"><div class="em">${w[1]}</div><div class="jw">${w[2].join('')}</div><div class="r">${w[0]}</div><div class="s jw" style="font-size:1rem">${w[2].slice().join(' + ')}</div></div>`).join('')}</div></div>
+ <div class="note"><h3>Perkataan lain dalam buku teks</h3>
+  <div class="cards">${[['pendayung','ڤندايوڠ'],['cencaru','چنچارو'],['pepatung','ڤڤاتوڠ'],['cengkerik','چڠكريق'],['belangkas','بلڠكس'],['dahaga','دهاݢ'],['bahagia','بهاݢيا'],['cempedak','چمڤدق']].map(w=>`<div class="c"><div class="jw">${w[1]}</div><div class="r">${w[0]}</div></div>`).join('')}</div></div>`}
+function learnRangkai(){return `
+ <div class="note"><h3>Apa itu rangkai kata?</h3>
+  <p>Rangkai kata ialah <b>dua perkataan yang digabungkan</b> menjadi satu maksud. Dalam tulisan Jawi, kedua-dua perkataan ditulis <b>berasingan</b> (ada jarak).</p>
+  <p class="jw" style="text-align:center">چرمين + مات = چرمين مات</p></div>
+ <div class="note"><h3>Contoh rangkai kata</h3>
+  <div class="cards">${RANGKAI.map(r=>`<div class="c"><div class="em">${r[4]}</div><div class="jw">${r[2]}</div><div class="r">${r[3]}</div></div>`).join('')}</div></div>`}
+function learnMalaikat(){return `
+ <div class="note"><h3>Siapa malaikat?</h3>
+  <p>Malaikat ialah makhluk yang diciptakan daripada <b>cahaya</b>. Malaikat tidak berjantina, mempunyai tugas yang tertentu, dan <b>sentiasa taat</b> serta patuh kepada perintah Allah.</p>
+  <p class="ar" style="text-align:center">كُلٌّ آمَنَ بِاللَّهِ وَمَلَائِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ</p>
+  <p style="text-align:center;color:var(--muted)">Surah al-Baqarah 2:285 — Semuanya beriman kepada Allah, malaikat-malaikat-Nya, kitab-kitab-Nya dan rasul-rasul-Nya.</p>
+  <p>Bilangan malaikat terlalu banyak. Ada <b>10 malaikat</b> yang wajib kita ketahui.</p></div>
+ <div class="note"><h3>10 malaikat dan tugasnya</h3><div class="tbl"><table><thead><tr><th>Malaikat</th><th>Tugas</th></tr></thead><tbody>
+  ${MALAIKAT.map(m=>`<tr><td><b>${m[0]}</b><br><span class="jw" style="font-size:1.15em">${m[1]}</span></td><td>${m[2]}</td></tr>`).join('')}
+ </tbody></table></div></div>
+ <div class="note"><h3>Tindakan kita</h3><ul><li>Rajin membaca al-Quran seperti Jibril menyampaikan wahyu.</li><li>Bersyukur dengan rezeki kerana Mikail menurunkan hujan dan rezeki.</li><li>Sentiasa berbuat baik kerana Raqib dan Atid mencatat amalan kita.</li></ul></div>`}
+function learnSolat(){return `
+ <div class="note"><h3>Bacaan wajib dalam solat <span class="pill">5 bacaan</span></h3>
+  <ol>${WAJIB.map(w=>`<li><b>${w[0]}</b><br><span class="ar" style="font-size:1.3em">${w[1]}</span></li>`).join('')}</ol>
+  <p><b>Ingat:</b> Jika tertinggal bacaan wajib, solat <b>tidak sah</b>.</p></div>
+ <div class="note"><h3>Bacaan sunat dalam solat</h3>
+  <ol>${SUNAT.map(w=>`<li><b>${w[0]}</b>${w[1]?`<br><span class="ar" style="font-size:1.3em">${w[1]}</span>`:''}</li>`).join('')}</ol>
+  <p>Perkara sunat dalam solat terbahagi kepada <b>sunat ab'ad</b> dan <b>sunat hai'at</b>.</p></div>`}
+function learnDoa(){return `
+ <div class="note"><h3>Maksud doa</h3><p>Doa bermaksud <b>permohonan hamba kepada Allah</b>.</p></div>
+ <div class="note"><h3>Dalil berdoa</h3>
+  <p class="ar" style="text-align:center">وَقَالَ رَبُّكُمُ ادْعُونِي أَسْتَجِبْ لَكُمْ</p>
+  <p style="text-align:center;color:var(--muted)">Surah Ghafir 40:60 — Tuhanmu berfirman: Berdoalah kepada-Ku, nescaya Aku perkenankan.</p></div>
+ <div class="note"><h3>Tatacara (adab) berdoa</h3><ol>${ADAB_OK.map(a=>`<li>${a}</li>`).join('')}</ol></div>
+ <div class="note"><h3>Kepentingan beradab ketika berdoa</h3><ol>
+  <li>Allah suka hamba-Nya berdoa dan Allah akan menerima doa.</li>
+  <li>Kita mengakui kita lemah dan memerlukan Allah.</li>
+  <li>Kita belajar berusaha bersungguh-sungguh dan tidak berputus asa.</li></ol></div>
+ <div class="note"><h3>Doa kebaikan dunia dan akhirat</h3>
+  <p class="ar" style="text-align:center">رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ</p>
+  <p style="text-align:center;color:var(--muted)">Surah al-Baqarah 2:201 — Ya Allah, berikanlah kami kebaikan di dunia dan di akhirat, dan peliharalah kami daripada azab neraka.</p></div>`}
+
+/* ----- question banks ----- */
+function pick3(arr,correct){return shuffle([correct,...shuffle(arr.filter(x=>x!==correct)).slice(0,2)])}
+function asMcq(q,correct,pool,extra){const o=pick3(pool,correct);return mcq(q,o,o.indexOf(correct),extra)}
+
+function bankFalaq(){
+  const ay=FALAQ.map(a=>a[0]);
+  const qs=[
+    {t:'order',q:'Susun ayat Surah al-Falaq mengikut tertib (ayat 1 hingga 5).',items:ay,font:'ar',why:'Mula dengan قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ dan akhiri dengan وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ.'},
+    asMcq('Surah al-Falaq ialah surah yang ke berapa dalam al-Quran?','113',['112','113','114','110'],{why:'Surah al-Falaq ialah surah ke-113.'}),
+    asMcq('Berapakah bilangan ayat Surah al-Falaq?','5',['4','5','6','7'],{why:'Surah al-Falaq ada 5 ayat.'}),
+    asMcq('Surah al-Falaq terletak sebelum surah apa?','Surah an-Nas',['Surah an-Nas','Surah al-Ikhlas','Surah al-Fatihah'],{why:'Surah al-Falaq terletak sebelum Surah an-Nas.'}),
+    asMcq('Mengapa kita membaca Surah al-Falaq?','Memohon perlindungan daripada Allah',['Memohon perlindungan daripada Allah','Bersyukur selepas makan','Meminta hujan turun'],{why:'Kita memohon perlindungan Allah daripada kejahatan.'}),
+    asMcq('Pilih ayat pertama Surah al-Falaq.',ay[0],ay,{font:'ar',why:'Ayat 1: قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ'}),
+    asMcq('Pilih ayat terakhir (ayat 5).',ay[4],ay,{font:'ar',why:'Ayat 5: وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ'}),
+    mcq('Sambung ayat ini:',['إِذَا وَقَبَ','إِذَا حَسَدَ','فِي الْعُقَدِ'],0,{show:'وَمِنْ شَرِّ غَاسِقٍ ...',showFont:'ar',font:'ar',why:'وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ (ayat 3)'}),
+    mcq('Sambung ayat ini:',['مَا خَلَقَ','إِذَا وَقَبَ','الْفَلَقِ'],0,{show:'مِنْ شَرِّ ...',showFont:'ar',font:'ar',why:'مِنْ شَرِّ مَا خَلَقَ (ayat 2)'}),
+    mcq('Sambung ayat ini:',['فِي الْعُقَدِ','إِذَا حَسَدَ','مَا خَلَقَ'],0,{show:'وَمِنْ شَرِّ النَّفَّاثَاتِ ...',showFont:'ar',font:'ar',why:'وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ (ayat 4)'}),
+    asMcq('Ayat ini ayat yang ke berapa?','Ayat 3',['Ayat 1','Ayat 2','Ayat 3','Ayat 5'],{show:ay[2],showFont:'ar',why:'وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ ialah ayat 3.'})
+  ];
+  return [qs[0],...shuffle(qs.slice(1))];
+}
+function bankSyaddah(){
+  const qs=[
+    asMcq('Nun dan mim bersyaddah (نّ مّ) dibaca dengan cara apa?','Dengung',['Dengung','Dibaca panjang 6 harakat','Dibaca laju tanpa bunyi'],{why:'نّ dan مّ mesti dibaca dengung.'}),
+    asMcq('Berapa harakat bacaan dengung?','2 harakat',['1 harakat','2 harakat','4 harakat','6 harakat'],{why:'Dengung dibaca 2 harakat.'}),
+    asMcq('Bunyi dengung keluar dari mana?','Pangkal hidung (khaisyum)',['Pangkal hidung (khaisyum)','Hujung lidah','Dua bibir'],{why:'Dengung ialah suara yang keluar dari pangkal hidung (khaisyum).'}),
+    asMcq('Tanda ـّ dinamakan apa?','Syaddah',['Syaddah','Sukun','Fathah'],{why:'Tanda ـّ ialah syaddah.'}),
+    asMcq('Apakah hukum membaca al-Quran dengan bertajwid?','Fardu ain',['Fardu ain','Harus','Makruh'],{why:'Membaca al-Quran dengan bertajwid hukumnya fardu ain.'})
+  ];
+  shuffle(NUN).slice(0,3).forEach(w=>{const o=shuffle([w,...shuffle(PLAIN).slice(0,2)]);qs.push(mcq('Pilih perkataan yang ada NUN syaddah (نّ).',o,o.indexOf(w),{font:'ar',why:`${w} ada nun bersyaddah, jadi dibaca dengung.`}))});
+  shuffle(MIM).slice(0,3).forEach(w=>{const o=shuffle([w,...shuffle(PLAIN).slice(0,2)]);qs.push(mcq('Pilih perkataan yang ada MIM syaddah (مّ).',o,o.indexOf(w),{font:'ar',why:`${w} ada mim bersyaddah, jadi dibaca dengung.`}))});
+  [...shuffle(NUN).slice(0,2).map(w=>[w,0]),...shuffle(MIM).slice(0,2).map(w=>[w,1])].forEach(([w,a])=>qs.push({t:'bin',q:'Huruf apa yang bersyaddah dalam perkataan ini?',show:w,showFont:'ar',labels:['نّ  Nun','مّ  Mim'],a,why:`Dalam ${w}, huruf ${a?'mim':'nun'} yang bersyaddah.`}));
+  return shuffle(qs);
+}
+function bankSuku(){
+  const qs=[];
+  shuffle(JAWI3).slice(0,5).forEach(w=>{
+    const others=shuffle(JAWI3.filter(x=>x!==w).flatMap(x=>x[2])).filter(s=>!w[2].includes(s)).slice(0,2);
+    qs.push({t:'build',q:`Bina perkataan "${w[0]}" dalam tulisan Jawi. Tekan suku kata mengikut urutan.`,show:w[1],tiles:w[2],extra:others,why:`${w[0]} = ${w[2].join(' + ')} = ${w[2].join('')}`});
+  });
+  shuffle(JAWI3).slice(0,4).forEach(w=>{const c=w[2].join('');const o=shuffle([c,...JAWI3_WRONG[w[0]]]);qs.push(mcq(`Pilih ejaan Jawi yang betul bagi "${w[0]}".`,o,o.indexOf(c),{show:w[1],font:'jw',why:`${w[0]} dieja ${c}.`}))});
+  shuffle(JAWI3).slice(0,3).forEach(w=>{const c=w[0];qs.push(asMcq('Apakah bacaan perkataan Jawi ini?',c,JAWI3.map(x=>x[0]),{show:w[2].join(''),showFont:'jw',why:`${w[2].join('')} dibaca "${c}".`}))});
+  return shuffle(qs);
+}
+function bankRangkai(){
+  const qs=[asMcq('Apakah maksud rangkai kata?','Dua perkataan digabung menjadi satu maksud',['Dua perkataan digabung menjadi satu maksud','Satu huruf sahaja','Perkataan yang dibaca dengung'],{why:'Rangkai kata ialah dua perkataan yang digabung menjadi satu maksud.'})];
+  shuffle(RANGKAI).slice(0,4).forEach(r=>{const o=shuffle([r[2],r[1]+' '+r[0],r[0]+r[1]]);qs.push(mcq('Gabungkan dua perkataan ini menjadi rangkai kata.',o,o.indexOf(r[2]),{show:`${r[0]} + ${r[1]}`,showFont:'jw',font:'jw',why:`${r[0]} + ${r[1]} = ${r[2]} (${r[3]}). Tulis berasingan, ikut urutan.`}))});
+  shuffle(RANGKAI).slice(0,3).forEach(r=>qs.push(asMcq('Apakah bacaan rangkai kata ini?',r[3],RANGKAI.map(x=>x[3]),{show:r[2],showFont:'jw',why:`${r[2]} dibaca "${r[3]}".`})));
+  shuffle(RANGKAI).slice(0,3).forEach(r=>qs.push(asMcq('Pilih rangkai kata Jawi untuk gambar ini.',r[2],RANGKAI.map(x=>x[2]),{show:r[4],font:'jw',why:`${r[4]} ialah ${r[3]} = ${r[2]}.`})));
+  return shuffle(qs);
+}
+function bankMalaikat(){
+  const qs=[
+    asMcq('Malaikat diciptakan daripada apa?','Cahaya',['Cahaya','Api','Tanah'],{why:'Malaikat diciptakan daripada cahaya.'}),
+    asMcq('Berapakah bilangan malaikat yang wajib kita ketahui?','10',['5','10','25'],{why:'Ada 10 malaikat yang wajib diketahui.'}),
+    asMcq('Sifat malaikat ialah ...','Sentiasa taat kepada Allah',['Sentiasa taat kepada Allah','Suka melawan perintah','Makan dan minum seperti manusia'],{why:'Malaikat sentiasa taat dan patuh kepada perintah Allah.'})
+  ];
+  shuffle(MALAIKAT).slice(0,5).forEach(m=>qs.push(asMcq(`Siapakah malaikat yang ${m[2]}?`,m[0],MALAIKAT.map(x=>x[0]),{why:`${m[0]} bertugas ${m[2]}.`})));
+  shuffle(MALAIKAT).slice(0,3).forEach(m=>qs.push(asMcq(`Apakah tugas malaikat ${m[0]}?`,m[2],MALAIKAT.map(x=>x[2]),{show:m[1],showFont:'jw',why:`${m[0]} bertugas ${m[2]}.`})));
+  return shuffle(qs);
+}
+function bankSolat(){
+  const items=[...shuffle(WAJIB).slice(0,4).map(w=>[w,0]),...shuffle(SUNAT).slice(0,5).map(w=>[w,1])];
+  const qs=items.map(([w,a])=>({t:'bin',q:'Bacaan ini wajib atau sunat dalam solat?',showText:w[0],show:w[1]||'',showFont:'ar',labels:['Wajib','Sunat'],a,why:`${w[0]} ialah bacaan ${a?'sunat':'wajib'}.`}));
+  qs.push(asMcq('Jika tertinggal bacaan wajib, solat menjadi ...','Tidak sah',['Tidak sah','Lebih baik','Tetap sah'],{why:'Meninggalkan bacaan wajib menyebabkan solat tidak sah.'}));
+  qs.push(mcq('Pilih tasbih ketika rukuk.',['سُبْحَانَ رَبِّيَ الْعَظِيمِ وَبِحَمْدِهِ','سُبْحَانَ رَبِّيَ الْأَعْلَىٰ وَبِحَمْدِهِ','رَبَّنَا لَكَ الْحَمْدُ'],0,{font:'ar',why:'Rukuk: سُبْحَانَ رَبِّيَ الْعَظِيمِ وَبِحَمْدِهِ (3 kali).'}));
+  qs.push(mcq('Pilih tasbih ketika sujud.',['سُبْحَانَ رَبِّيَ الْأَعْلَىٰ وَبِحَمْدِهِ','سُبْحَانَ رَبِّيَ الْعَظِيمِ وَبِحَمْدِهِ','سَمِعَ اللَّهُ لِمَنْ حَمِدَهُ'],0,{font:'ar',why:'Sujud: سُبْحَانَ رَبِّيَ الْأَعْلَىٰ وَبِحَمْدِهِ (3 kali).'}));
+  qs.push(asMcq('Bilakah kita membaca "Amin"?','Selepas membaca al-Fatihah',['Selepas membaca al-Fatihah','Sebelum takbiratul ihram','Selepas salam'],{why:'Amin dibaca selepas al-Fatihah.'}));
+  qs.push(asMcq('Lafaz takbiratul ihram ialah ...','اللَّهُ أَكْبَرُ',['اللَّهُ أَكْبَرُ','آمِين','رَبَّنَا لَكَ الْحَمْدُ'],{font:'ar',why:'Takbiratul ihram: اللَّهُ أَكْبَرُ'}));
+  return shuffle(qs);
+}
+function bankDoa(){
+  const qs=[
+    asMcq('Apakah maksud doa?','Permohonan hamba kepada Allah',['Permohonan hamba kepada Allah','Nyanyian di sekolah','Cerita nabi'],{why:'Doa ialah permohonan hamba kepada Allah.'}),
+    mcq('Pilih dalil yang menyuruh kita berdoa.',['وَقَالَ رَبُّكُمُ ادْعُونِي أَسْتَجِبْ لَكُمْ','قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ','كُلٌّ آمَنَ بِاللَّهِ وَمَلَائِكَتِهِ'],0,{font:'ar',why:'Surah Ghafir 40:60: Berdoalah kepada-Ku, nescaya Aku perkenankan.'}),
+    asMcq('Apakah maksud: ادْعُونِي أَسْتَجِبْ لَكُمْ ?','Berdoalah kepada-Ku, nescaya Aku perkenankan',['Berdoalah kepada-Ku, nescaya Aku perkenankan','Aku berlindung kepada Tuhan waktu subuh','Semuanya beriman kepada Allah'],{why:'Itu maksud Surah Ghafir ayat 60.'}),
+    asMcq('Doa dimulakan dengan ...','Memuji Allah',['Memuji Allah','Bercerita','Bergurau'],{why:'Kita mulakan doa dengan memuji Allah, kemudian berselawat.'}),
+    asMcq('Apakah yang kita lakukan selepas berdoa?','Mengaminkan doa',['Mengaminkan doa','Terus berlari','Bersiul'],{why:'Kita mengaminkan doa selepas berdoa.'})
+  ];
+  [...shuffle(ADAB_OK).slice(0,4).map(a=>[a,0]),...shuffle(ADAB_NO).slice(0,3).map(a=>[a,1])].forEach(([a,x])=>qs.push({t:'bin',q:'Adakah ini adab berdoa yang betul?',showText:a,labels:['Betul','Salah'],a:x,why:x?`Salah. Ketika berdoa, kita perlu tenang, tertib dan yakin.`:`Betul. ${a} ialah adab berdoa.`}));
+  return shuffle(qs);
+}
+
+/* ---------- state + render ---------- */
+const app=document.getElementById('app');
+let S={view:'home'};
+const topicById=id=>TOPICS.find(t=>t.id===id);
+const starHTML=n=>[1,2,3].map(i=>`<span class="${i<=n?'on':''}">★</span>`).join('');
+const totalStars=()=>TOPICS.reduce((s,t)=>s+(best[t.id]||0),0)+(best.ujian||0);
+
+function render(){
+  if(S.view==='home')return renderHome();
+  if(S.view==='topic')return renderTopic();
+  if(S.view==='play')return renderPlay();
+  if(S.view==='result')return renderResult();
+}
+function header(){return `<div class="top">${cat('happy')}<div><h1>Misi Kucing Pintar</h1><p><a href="../" style="color:inherit">← Pendidikan Islam</a> · Tahun 2 · Ulang kaji ujian PBD</p></div><div class="starbank" title="Jumlah bintang terbaik"><b>★</b> ${totalStars()} / 24</div></div>`}
+function renderHome(){
+  app.innerHTML=header()+`
+  <div class="exam-note"><strong>Ujian bertulis: Isnin, 19.10.2026, 11.00 – 12.00 tengah hari.</strong> Pilih satu topik. Baca <b>Belajar</b> dahulu, kemudian tekan <b>Main</b>. Kumpul 3 bintang untuk setiap topik!</div>
+  <div class="grid">
+   ${TOPICS.map(t=>`<button class="tile" style="--c:var(${t.cv})" data-topic="${t.id}"><span class="bidang">${t.bidang}</span><h3>${t.title}</h3><span class="ms">Buku teks ${t.ms}</span><span class="stars">${starHTML(best[t.id]||0)}</span></button>`).join('')}
+   <button class="tile big" style="--c:var(--ujian)" data-topic="ujian"><div><h3>Ujian Akhir</h3><span class="ms">20 soalan campuran daripada semua topik · ${starHTML(best.ujian||0)}</span></div><span class="go">Mula ujian</span></button>
+  </div>
+  <p class="foot">Kandungan berdasarkan Buku Teks Pendidikan Islam Tahun 2 (KSSR Semakan).</p>`;
+  app.querySelectorAll('[data-topic]').forEach(b=>b.onclick=()=>{const id=b.dataset.topic;if(id==='ujian')startGame('ujian');else{S={view:'topic',id,tab:'learn'};render();window.scrollTo(0,0)}});
+}
+function renderTopic(){
+  const t=topicById(S.id);
+  app.style.setProperty('--c',`var(${t.cv})`);
+  app.innerHTML=`<div class="bar"><button class="back" id="bk">← Peta</button><h2>${t.title}</h2><span class="pill">${t.ms}</span></div>
+  <div class="tabs" role="tablist"><button role="tab" id="tab-learn" aria-selected="${S.tab==='learn'}">Belajar</button><button role="tab" id="tab-play" aria-selected="false">Main</button></div>
+  <div>${t.learn()}</div>
+  <button class="cta" id="go">Saya sudah faham. Jom main!</button>`;
+  document.getElementById('bk').onclick=goHome;
+  document.getElementById('tab-play').onclick=()=>startGame(t.id);
+  document.getElementById('go').onclick=()=>startGame(t.id);
+}
+function goHome(){app.style.removeProperty('--c');S={view:'home'};render();window.scrollTo(0,0)}
+
+function startGame(id){
+  let qs;
+  if(id==='ujian'){
+    qs=[];TOPICS.forEach(t=>{const b=t.bank().filter(q=>q.t!=='order');shuffle(b).slice(0,3).forEach(q=>{q.topic=t.id;qs.push(q)})});
+    qs=shuffle(qs).slice(0,20);
+    app.style.setProperty('--c','var(--ujian)');
+  }else{
+    const t=topicById(id);qs=t.bank().slice(0,10);qs.forEach(q=>q.topic=id);
+    app.style.setProperty('--c',`var(${t.cv})`);
+  }
+  S={view:'play',id,qs,i:0,score:0,answered:false,picked:[],per:{}};
+  render();window.scrollTo(0,0);
+}
+function titleOf(id){return id==='ujian'?'Ujian Akhir':topicById(id).title}
+
+function renderPlay(){
+  const q=S.qs[S.i],n=S.qs.length;
+  const tTopic=topicById(q.topic);
+  let body='';
+  const showBlock=(q.show||q.showText)?`<div class="qshow">${q.showText?`<div class="qtext" style="font-size:1.3rem">${esc(q.showText)}</div>`:''}${q.show?`<div class="${q.showFont||'em'}">${esc(q.show)}</div>`:''}</div>`:'';
+  if(q.t==='mcq'){
+    body=`${showBlock}<div class="opts">${q.opts.map((o,k)=>`<button class="opt ${q.font||''}" data-k="${k}">${esc(o)}</button>`).join('')}</div>`;
+  }else if(q.t==='bin'){
+    body=`${showBlock}<div class="opts two">${q.labels.map((l,k)=>`<button class="opt" data-k="${k}">${esc(l)}</button>`).join('')}</div>`;
+  }else if(q.t==='build'){
+    if(!q._tiles)q._tiles=shuffle([...q.tiles,...q.extra]);
+    const built=S.picked.map(k=>q._tiles[k]).join('');
+    body=`${showBlock}<div class="slot">${built?`<span class="jw">${esc(built)}</span>`:'<span class="hint">Tekan suku kata di bawah</span>'}</div>
+     <div class="tiles">${q._tiles.map((s,k)=>`<button class="tilebtn jw" data-k="${k}" ${S.picked.includes(k)||S.answered?'disabled':''}>${esc(s)}</button>`).join('')}</div>
+     <div class="row"><button class="btn" id="undo" ${S.answered||!S.picked.length?'disabled':''}>Padam</button><button class="btn main" id="check" ${S.answered||S.picked.length<q.tiles.length?'disabled':''}>Semak</button></div>`;
+  }else if(q.t==='order'){
+    if(!q._items)q._items=shuffle(q.items.map((x,k)=>k));
+    body=`<div class="slot order">${S.picked.length?S.picked.map((k,j)=>`<div class="ar">${j+1}. ${esc(q.items[k])}</div>`).join(''):'<span class="hint" style="text-align:center">Tekan ayat mengikut urutan</span>'}</div>
+     <div class="tiles col">${q._items.map(k=>`<button class="tilebtn ar" data-k="${k}" ${S.picked.includes(k)||S.answered?'disabled':''}>${esc(q.items[k])}</button>`).join('')}</div>
+     <div class="row"><button class="btn" id="undo" ${S.answered||!S.picked.length?'disabled':''}>Padam</button><button class="btn main" id="check" ${S.answered||S.picked.length<q.items.length?'disabled':''}>Semak</button></div>`;
+  }
+  app.innerHTML=`<div class="bar"><button class="back" id="bk">← ${S.id==='ujian'?'Peta':'Kembali'}</button><h2>${titleOf(S.id)}</h2></div>
+  <div class="hud"><span>${S.i+1}/${n}</span><div class="prog"><i style="width:${(S.i)/n*100}%"></i></div><span>★ ${S.score}</span></div>
+  <div class="qcard"><span class="qtag" style="background:var(${tTopic.cv})">${tTopic.bidang} · ${tTopic.ms}</span><p class="qtext">${esc(q.q)}</p>${body}<div id="fb"></div></div>`;
+  document.getElementById('bk').onclick=()=>{if(S.id==='ujian')goHome();else{S={view:'topic',id:S.id,tab:'learn'};render()}};
+  if(q.t==='mcq'||q.t==='bin'){
+    app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(S.answered)return;const k=+b.dataset.k;answer(k===q.a);
+      app.querySelectorAll('.opt').forEach(x=>{x.disabled=true;const kk=+x.dataset.k;if(kk===q.a)x.classList.add('ok');else if(kk===k)x.classList.add('no')})});
+  }else{
+    app.querySelectorAll('.tilebtn').forEach(b=>b.onclick=()=>{S.picked.push(+b.dataset.k);renderPlay()});
+    const u=document.getElementById('undo');if(u)u.onclick=()=>{S.picked.pop();renderPlay()};
+    const c=document.getElementById('check');if(c)c.onclick=()=>{
+      let ok;if(q.t==='build')ok=S.picked.map(k=>q._tiles[k]).join('')===q.tiles.join('');else ok=S.picked.every((k,j)=>k===j);
+      answer(ok);
+      if(!ok&&q.t==='order'){document.querySelector('.slot').innerHTML=q.items.map((a,j)=>`<div class="ar">${j+1}. ${esc(a)}</div>`).join('')}
+      if(!ok&&q.t==='build'){document.querySelector('.slot').innerHTML=`<span class="jw">${esc(q.tiles.join(''))}</span>`}
+    };
+  }
+  if(S.answered)showFb(S.lastOk);
+}
+const PRAISE=['Syabas!','Bagus!','Hebat!','Pandai!','Tahniah!'];
+function answer(ok){
+  S.answered=true;S.lastOk=ok;
+  const q=S.qs[S.i];S.per[q.topic]=S.per[q.topic]||[0,0];S.per[q.topic][1]++;
+  if(ok){S.score++;S.per[q.topic][0]++}
+  app.querySelectorAll('.tilebtn,#undo,#check').forEach(x=>x.disabled=true);
+  showFb(ok);
+}
+function showFb(ok){
+  const q=S.qs[S.i];const last=S.i===S.qs.length-1;
+  const fb=document.getElementById('fb');
+  fb.innerHTML=`<div class="fb ${ok?'ok':'no'} pop">${cat(ok?'happy':'sad')}<div class="fbtext"><b>${ok?PRAISE[Math.floor(Math.random()*PRAISE.length)]:'Tak apa, cuba ingat ya!'}</b><p>${esc(q.why||'')}</p></div><button class="btn main next" id="nx">${last?'Lihat keputusan':'Seterusnya →'}</button></div>`;
+  const nx=document.getElementById('nx');nx.focus({preventScroll:true});
+  fb.scrollIntoView({block:'nearest',behavior:'smooth'});
+  nx.onclick=()=>{if(last){S.view='result';render();window.scrollTo(0,0)}else{S.i++;S.answered=false;S.picked=[];renderPlay();window.scrollTo(0,0)}};
+}
+function renderResult(){
+  const n=S.qs.length,pct=S.score/n;
+  const stars=pct>=.9?3:pct>=.7?2:pct>=.5?1:0;
+  saveBest(S.id,stars);
+  const msg=stars===3?'Cemerlang! Kucing sangat bangga!':stars===2?'Bagus! Sikit lagi untuk 3 bintang.':stars===1?'Boleh! Baca Belajar sekali lagi, kemudian cuba semula.':'Jom ulang kaji Belajar dahulu, kemudian cuba lagi.';
+  let breakdown='';
+  if(S.id==='ujian'){
+    breakdown=`<div class="break"><h3 style="margin-bottom:6px">Markah ikut topik</h3>${TOPICS.filter(t=>S.per[t.id]).map(t=>{const [a,b]=S.per[t.id];return `<div><span>${t.title} <small style="color:var(--muted)">(${t.ms})</small></span><span class="${a<b?'weak':''}">${a}/${b}${a<b?' · ulang kaji':''}</span></div>`}).join('')}</div>`;
+  }
+  app.innerHTML=`<div class="bar"><button class="back" id="bk">← Peta</button><h2>${titleOf(S.id)}</h2></div>
+  <div class="result pop">${cat(stars>=1?'happy':'sad')}<div class="big">${S.score}/${n}</div><div class="stars">${starHTML(stars)}</div><p style="font-weight:800;font-size:1.15rem">${msg}</p>${breakdown}
+  <div class="row"><button class="btn main" id="again">Main lagi</button>${S.id!=='ujian'?'<button class="btn" id="learn">Belajar semula</button>':''}<button class="btn" id="home">Peta topik</button></div></div>`;
+  document.getElementById('bk').onclick=goHome;document.getElementById('home').onclick=goHome;
+  document.getElementById('again').onclick=()=>startGame(S.id);
+  const l=document.getElementById('learn');if(l)l.onclick=()=>{S={view:'topic',id:S.id,tab:'learn'};render();window.scrollTo(0,0)};
+}
+
+function start(data){if(data&&data.S&&data.S.view){S=data.S;if(S.id&&S.id!=='ujian'&&topicById(S.id))app.style.setProperty('--c',`var(${topicById(S.id).cv})`);if(S.id==='ujian')app.style.setProperty('--c','var(--ujian)')}render()}
+window.claude?.hot?.snapshot?.(()=>({S}));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+
+</body>
+</html>
