@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Matematik · Safiyyah Belajar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: subject page listing its learning activities as large tappable rows. */
+:root{
+  --bg:#F2F7F5; --surface:#FFFFFF; --ink:#1D2A31; --muted:#58696F; --line:#D5E4DF; --sun:#F2B33D; --pi:#1F6E94;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif; --body:"Nunito","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0F191C; --surface:#172529; --ink:#E7F0ED; --muted:#9DB2AC; --line:#2A3F40; --sun:#F5C25B; --pi:#5FAED6; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:860px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0;text-wrap:balance}
+.crumb{display:inline-block;margin-bottom:16px;font-weight:800;color:var(--muted);text-decoration:none;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px}
+h1{font-size:clamp(2rem,7vw,3rem);font-weight:800;color:var(--pi)}
+.lead{margin:4px 0 0;color:var(--muted);font-size:1.05rem}
+.sec{margin:26px 0 10px;font-size:1.3rem;font-weight:800}
+.list{display:grid;gap:12px}
+.item{display:flex;gap:14px;align-items:center;text-decoration:none;color:inherit;background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:16px;transition:transform .15s,border-color .15s}
+.item:hover{transform:translateY(-3px);border-color:var(--pi)}
+.item .ic{width:56px;height:56px;flex:none;border-radius:16px;background:var(--pi);color:#fff;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.6rem}
+.item h3{font-size:1.3rem;font-weight:800}
+.item p{margin:2px 0 0;color:var(--muted);font-size:.95rem}
+.item .go{margin-left:auto;font-family:var(--display);font-weight:800;color:var(--pi);white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chips span{font-size:.75rem;font-weight:800;border-radius:999px;padding:1px 9px;border:1px solid var(--line);color:var(--muted)}
+a:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.foot{margin-top:28px;text-align:center;color:var(--muted);font-size:.85rem}
+@media (max-width:480px){.item{flex-wrap:wrap}.item .go{margin-left:0}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="crumb" href="../">← Semua subjek</a>
+  <h1>Matematik</h1>
+  <p class="lead">Tahun 2 · Darab dan bahagi</p>
+
+  <h2 class="sec">Main dan berlatih</h2>
+  <main class="list">
+    <a class="item" href="kira-kucing/">
+      <span class="ic">×</span>
+      <div style="min-width:0">
+        <h3>Kira Kucing</h3>
+        <p>Jawab soalan darab dan bahagi dengan papan nombor</p>
+        <div class="chips"><span>Darab</span><span>Bahagi</span><span>Campur</span><span>Pilih sifir 2 hingga 9</span></div>
+      </div>
+      <span class="go">Main →</span>
+    </a>
+    <a class="item" href="lembaran/">
+      <span class="ic">✎</span>
+      <div style="min-width:0">
+        <h3>Lembaran Latihan</h3>
+        <p>Buat lembaran baru dan cetak, dengan jawapan</p>
+        <div class="chips"><span>20 atau 40 soalan</span><span>Saiz A4</span></div>
+      </div>
+      <span class="go">Buka →</span>
+    </a>
+  </main>
+
+  <p class="foot">Dibina dengan kasih sayang untuk Safiyyah.</p>
+</div>
+</body>
+</html>
