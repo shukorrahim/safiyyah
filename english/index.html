@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@500;700;800&display=swap">
 <style>
-/* Layout: start card (final assessment or one part to revise) -> one question at a time, exam-style parts A to E -> certificate with stars and mistakes to review. */
+/* Layout: start card (full exam or one question type to practise) -> one question at a time, Section A and B like the school paper -> certificate with stars and mistakes to review. */
 :root{
   --bg:#F2F7F5; --surface:#FFFFFF; --ink:#1D2A31; --muted:#58696F; --line:#D5E4DF; --sun:#F2B33D;
   --en:#C2306B; --en-soft:#FBE4EE; --good:#278A4C; --good-bg:#E3F4E8; --bad:#C8463F; --bad-bg:#FBE7E5;
@@ -78,9 +78,9 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--sun);outline-offset
 .hint{text-align:center;color:var(--muted);font-weight:700;letter-spacing:.08em;margin:0 0 8px}
 .write{display:flex;gap:8px;margin-top:6px}
 .write.inl{justify-content:center}
-.q select{max-width:100%;font:800 1.1rem/1.2 var(--body);color:var(--en);background:var(--en-soft);border:3px solid var(--en);border-radius:12px;padding:6px 8px;margin:2px 0;vertical-align:middle;min-height:44px}
-.q select.right{border-color:var(--good);background:var(--good-bg);color:var(--good)}
-.q select.wrong{border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
+.q select,.story select{max-width:100%;font:800 1.1rem/1.2 var(--body);color:var(--en);background:var(--en-soft);border:3px solid var(--en);border-radius:12px;padding:6px 8px;margin:2px 0;vertical-align:middle;min-height:44px}
+.q select.right,.story select.right{border-color:var(--good);background:var(--good-bg);color:var(--good)}
+.q select.wrong,.story select.wrong{border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
 .write:not(.inl){flex-direction:column}
 .write select{min-height:52px;font-size:1rem}
 .picked{font-size:1.1rem;line-height:1.4;color:var(--muted)}
@@ -96,6 +96,11 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--sun);outline-offset
 .wtiles{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 .wtiles button{border:2px solid var(--en);background:var(--en-soft);border-radius:12px;padding:8px 12px;min-height:48px;font-family:var(--display);font-weight:800;font-size:1.2rem}
 .wtiles button:disabled{opacity:.25}
+.sec{margin:12px 0 6px;font-family:var(--display);font-weight:800;color:var(--en)}
+.rev.one{grid-template-columns:1fr}
+.spell{letter-spacing:.15em;white-space:nowrap}
+.house{width:min(100%,260px);height:auto}
+.daycard{display:inline-block;font-family:var(--display);font-size:1.3rem;letter-spacing:0;vertical-align:middle;border:3px solid var(--en);border-radius:12px;padding:2px 10px;margin-right:10px;background:var(--en-soft);color:var(--en)}
 .undo{display:block;margin:10px auto 0;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 16px;font-weight:800;min-height:44px}
 .scene{display:flex;justify-content:center;margin:0 0 8px}
 .scene svg{width:200px;height:auto}
@@ -144,7 +149,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--sun);outline-offset
 function cat(m){return `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M18 40 L22 10 L44 28 Z" fill="#F0A64A"/><path d="M82 40 L78 10 L56 28 Z" fill="#F0A64A"/><path d="M24 34 L25 18 L37 28 Z" fill="#F7C9D0"/><path d="M76 34 L75 18 L63 28 Z" fill="#F7C9D0"/><ellipse cx="50" cy="56" rx="36" ry="32" fill="#F5B861"/><path d="M50 26 q-4 8 0 14 q4 -6 0 -14" fill="#E08F2E"/><ellipse cx="50" cy="66" rx="17" ry="12" fill="#FFF3E2"/>${m==='sad'?'<circle cx="38" cy="49" r="4.5" fill="#3a2a22"/><circle cx="62" cy="49" r="4.5" fill="#3a2a22"/><path d="M42 66 q8 -6 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/>':'<path d="M33 49 q5 -6 10 0 M57 49 q5 -6 10 0" fill="none" stroke="#3a2a22" stroke-width="3.5" stroke-linecap="round"/><path d="M42 62 q8 9 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/><circle cx="28" cy="62" r="5" fill="#F7A8B3" opacity=".7"/><circle cx="72" cy="62" r="5" fill="#F7A8B3" opacity=".7"/>'}<path d="M46 57 h8 l-4 4 z" fill="#E86A7E"/><path d="M22 60 h-14 M22 65 h-13 M78 60 h14 M78 65 h13" stroke="#3a2a22" stroke-width="1.6" stroke-linecap="round"/></svg>`}
 
 /* ---------- storage ---------- */
-const KEY='englishWriting.v1';let store={sound:true,best:{}};
+const KEY='englishExam.v1';let store={sound:true,best:{}};
 try{store=Object.assign(store,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
 
@@ -209,237 +214,141 @@ function mc(o,right,wrongs){
   const all=shuffle([right,...w]);return Object.assign(o,{choices:all,right:all.indexOf(right)});
 }
 
-/* ---------- textbook units (Year 2, Super Minds 1 units 5 to 9); questions are written for this page ---------- */
+/* ---------- Year 2 final exam: 14 question types in the style of the school's end-of-year paper (questions are written for this page) ---------- */
 const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const he=['Ali','Adam','Daniel','Kumar'],she=['Siti','Lily','Mei Ling','Aisyah'];
-const yes='<span style="color:var(--good)">✔</span>',no='<span style="color:var(--bad)">✘</span>';
-// a yes/no question answered from a tick or a cross
-function yn(o,isYes,yesA,noA,extra){return mc(Object.assign({long:true,explain:isYes?yesA:noA},o),isYes?yesA:noA,[isYes?noA:yesA,...extra])}
-// preposition picture: a table with one thing on it, under it or next to it
-function scene(pos,thing){
-  const tbl='<rect x="40" y="70" width="120" height="10" rx="3" fill="#B07A45"/><rect x="50" y="80" width="8" height="50" fill="#8A5A2E"/><rect x="142" y="80" width="8" height="50" fill="#8A5A2E"/><line x1="0" y1="132" x2="200" y2="132" stroke="var(--line)" stroke-width="3"/>';
-  const p={on:[100,62],under:[100,124],'next to':[182,124]}[pos];
-  return `<div class="scene"><svg viewBox="0 0 200 140" role="img" aria-label="${thing[1]} ${pos} the table">${tbl}<text x="${p[0]}" y="${p[1]}" text-anchor="middle" font-size="40">${thing[0]}</text></svg></div>`;
-}
-const W=['zero','one','two','three','four','five','six'];
-
-const UNITS=[
- {name:'My Free Time',icon:'⚽',desc:'Days of the week, free-time activities, Do you…?',
-  vocab:[['📺','watch TV'],['⚽','play football'],['🚲','ride a bike'],['📖','read a book'],['🏊','swim'],['🎨','draw'],['🎮','play computer games'],['🏸','play badminton']],
-  spell:{swim:'🏊',read:'📖',bike:'🚲',ball:'⚽',draw:'🎨',game:'🎮',play:'🤸'},
-  grammar:[
-   ()=>mc({q:`I watch TV ${blank} Sundays.`,explain:'Use “on” with days: on Sundays, on Monday.',key:'1on'},'on',['in','at','under']),
-   ()=>{const i=R(0,5);return mc({q:`The day after ${DAYS[i]} is ${blank}.`,explain:DAYS.join(', ')+'.',key:'1after'+i},DAYS[i+1],shuffle(DAYS.filter((_,j)=>j!==i+1&&j!==i)))},
-   ()=>{const i=R(1,6);return mc({q:`The day before ${DAYS[i]} is ${blank}.`,explain:DAYS.join(', ')+'.',key:'1before'+i},DAYS[i-1],shuffle(DAYS.filter((_,j)=>j!==i-1&&j!==i)))},
-   ()=>mc({q:'Which two days are the weekend?',long:true,explain:'Saturday and Sunday are the weekend.',key:'1wk'},'Saturday and Sunday',['Monday and Tuesday','Friday and Monday','Wednesday and Thursday']),
-   ()=>{const [a,e]=pick([['play football','⚽'],['ride a bike','🚲'],['watch TV','📺'],['swim','🏊'],['read a book','📖']]),y=Math.random()<.5;
-     return yn({q:`Do you ${a} at the weekend? ${y?yes:no}`,pic:e,key:'1do'+a+y},y,'Yes, I do.','No, I don’t.',['Yes, I am.','No, I can’t.'])},
-   ()=>{const [v,rest,e]=pick([['ride','my bike on Saturdays','🚲'],['play','football on Mondays','⚽'],['watch','TV on Sundays','📺'],['read','a book on Fridays','📖']]);
-     return mc({q:`I ${blank} ${rest}.`,pic:e,explain:`I ${v} ${rest}.`,key:'1v'+v},v,['ride','play','watch','read'].filter(x=>x!==v))},
-  ],
-  story:{title:"Ben's Busy Week",text:"Ben is seven. He is very busy! On Mondays, he plays football. On Tuesdays, he goes swimming. On Wednesdays, he reads books in the library. On Saturdays, he rides his bike with his dad. On Sundays, he watches TV with his family.",qs:[
-   ['What does Ben do on Mondays?','He plays football.',['He goes swimming.','He watches TV.','He rides his bike.']],
-   ['When does Ben go swimming?','on Tuesdays',['on Mondays','on Fridays','on Sundays']],
-   ['Who does Ben ride his bike with?','his dad',['his mum','his sister','his teacher']],
-   ['Where does Ben read books?','in the library',['in the kitchen','at the beach','in the garden']],
-   ['What does Ben do on Sundays?','He watches TV with his family.',['He plays football.','He goes swimming.','He reads books.']]]}},
- {name:'My Diary',icon:'📔',desc:'Today, tomorrow, my week, writing about my day',
-  vocab:[['📔','diary'],['☀️','sunny'],['🌧️','rainy'],['🎂','birthday'],['🍰','cake'],['🌙','night'],['🌅','morning'],['😊','happy']],
-  spell:{diary:'📔',cake:'🍰',sunny:'☀️',happy:'😊',night:'🌙',rain:'🌧️',today:'📅'},
-  grammar:[
-   ()=>{const i=R(0,5);return mc({q:`Today is ${DAYS[i]}. Tomorrow is ${blank}.`,explain:`After ${DAYS[i]} comes ${DAYS[i+1]}.`,key:'2tom'+i},DAYS[i+1],shuffle(DAYS.filter((_,j)=>j!==i+1&&j!==i)))},
-   ()=>{const i=R(1,6);return mc({q:`Today is ${DAYS[i]}. Yesterday was ${blank}.`,explain:`Before ${DAYS[i]} comes ${DAYS[i-1]}.`,key:'2yes'+i},DAYS[i-1],shuffle(DAYS.filter((_,j)=>j!==i-1&&j!==i)))},
-   ()=>{const d=pick(DAYS);return mc({q:'Which is written correctly?',long:true,explain:'Days of the week always start with a capital letter.',key:'2cap'+d},`On ${d}, I play with my cat.`,[`on ${d.toLowerCase()}, I play with my cat.`,`On ${d.toLowerCase()}, I play with my cat.`,`On ${d}, i play with my cat.`])},
-   ()=>{const one=Math.random()<.5,who=one?pick(['My sister','My brother','Mum','Dad']):pick(['I','We','My friends']),[v,vs,rest]=pick([['read','reads','a book at night'],['help','helps','Mum in the kitchen'],['play','plays','badminton in the evening'],['write','writes','in my diary']]);
-     return mc({q:`${who} ${blank} ${rest}.`,explain:one?`One person → add “s”: ${vs}.`:`I, we, they → no “s”: ${v}.`,key:'2v'+who+v},one?vs:v,[one?v:vs,v+'ing'])},
-   ()=>{const [w,e]=pick(BANKW);return mc({q:'What is the weather like today?',pic:e,long:true,explain:`It is ${w}.`,key:'2w'+w},`It is ${w}.`,BANKW.filter(x=>x[0]!==w).map(x=>`It is ${x[0]}.`))},
-   ()=>mc({q:`Which word do we use to start a diary?`,long:true,explain:'A diary often starts with “Dear Diary,”.',key:'2dear'},'Dear Diary,',['Goodbye Diary,','Thank you,','The end.']),
-  ],
-  story:{title:"Safiyyah's Diary",text:"Dear Diary, today is Saturday. It is sunny and hot. In the morning, I help Mum in the kitchen. We make a chocolate cake. In the afternoon, I play badminton with my brother. At night, I read a story book and write in my diary. I am very happy today!",qs:[
-   ['What day is it?','Saturday',['Sunday','Monday','Friday']],
-   ['What is the weather like?','sunny and hot',['rainy','cold and windy','cloudy']],
-   ['What do Safiyyah and Mum make?','a chocolate cake',['a pizza','a sandwich','ice cream']],
-   ['Who does she play badminton with?','her brother',['her mum','her friend','her teacher']],
-   ['What does she do at night?','She reads and writes in her diary.',['She plays badminton.','She makes a cake.','She watches TV.']]]}},
- {name:'Living Spaces',icon:'🏠',desc:'Rooms and furniture, There is / There are, Is there…?',
-  vocab:[['🛏️','bed'],['🛋️','sofa'],['🪑','chair'],['🚪','door'],['🪟','window'],['🛁','bath'],['💡','lamp'],['📺','television'],['🍳','kitchen'],['🏠','house']],
-  spell:{bed:'🛏️',sofa:'🛋️',door:'🚪',lamp:'💡',bath:'🛁',house:'🏠',chair:'🪑',table:'🍽️'},
-  grammar:[
-   ()=>{const [q,a]=pick([['Where do you sleep?','in the bedroom'],['Where do you cook?','in the kitchen'],['Where do you take a bath?','in the bathroom'],['Where do you watch TV?','in the living room']]);
-     return mc({q,long:true,explain:`We do that ${a}.`,key:'3room'+a},a,['in the bedroom','in the kitchen','in the bathroom','in the living room','in the garden'].filter(x=>x!==a))},
-   ()=>{const many=Math.random()<.5,[n,s,p]=pick([['four','chair','chairs'],['two','lamp','lamps'],['three','window','windows'],['five','book','books']]);
-     return mc({q:many?`There ${blank} ${n} ${p} in the room.`:`There ${blank} a ${s} in the room.`,explain:many?'More than one → There are.':'Only one → There is.',key:'3isare'+many+s},many?'are':'is',[many?'is':'are'])},
-   ()=>{const room=shuffle([['🛏️','bed'],['🪑','chair'],['💡','lamp'],['🛋️','sofa'],['📺','television'],['🛁','bath']]),inRoom=room.slice(0,3),t=pick(room),y=inRoom.includes(t);
-     return yn({q:`Look at the room. Is there a ${t[1]}?`,pic:inRoom.map(x=>x[0]).join(''),picRow:true,key:'3isthere'+inRoom.join()+t[1]},y,'Yes, there is.','No, there isn’t.',['Yes, there are.','No, there aren’t.'])},
-   ()=>{const n=R(2,6),[e,w]=pick([['🪑','chairs'],['📚','books'],['🧸','teddy bears'],['🐱','cats']]);
-     return mc({q:`How many ${w} are there?`,pic:e.repeat(n),picRow:true,long:true,explain:`Count them: ${W[n]}.`,key:'3hm'+n+w},`There are ${W[n]} ${w}.`,[`There are ${W[n+1>6?n-1:n+1]} ${w}.`,`There is ${W[n]} ${w}.`,`There are ${W[n-1>1?n-1:n+2]} ${w}.`])},
-   ()=>{const y=Math.random()<.5;return yn({q:`Are there any books on the shelf? ${y?'📚📚':'(empty)'}`,key:'3any'+y},y,'Yes, there are.','No, there aren’t.',['Yes, there is.','No, there isn’t.'])},
-  ],
-  story:{title:"Grandma's House",text:"Grandma's house is old and big. There are five rooms. There is a big brown sofa in the living room. There are two cats under the table. In the kitchen, there is a big red fridge. Is there a garden? Yes, there is! There are lots of flowers in it.",qs:[
-   ['How many rooms are there?','five',['two','three','four']],
-   ['Where is the sofa?','in the living room',['in the kitchen','in the garden','in the bedroom']],
-   ['Where are the cats?','under the table',['on the sofa','in the garden','in the kitchen']],
-   ['What colour is the fridge?','red',['brown','white','blue']],
-   ['What is in the garden?','lots of flowers',['two cats','a big sofa','a red fridge']]]}},
- {name:'Get Dressed',icon:'👕',desc:'Clothes, this / these, He’s wearing…',
-  vocab:[['👕','T-shirt'],['👖','trousers'],['👗','dress'],['🧢','cap'],['👟','shoes'],['🧦','socks'],['🧥','jacket'],['🎩','hat'],['🩳','shorts'],['🧣','scarf']],
-  spell:{hat:'🎩',sock:'🧦',shoe:'👟',dress:'👗',coat:'🧥',skirt:'👗',shorts:'🩳',cap:'🧢'},
-  grammar:[
-   ()=>{const many=Math.random()<.5,[s,p]=pick([['hat','shoes'],['cap','socks'],['dress','trousers'],['T-shirt','shorts']]);
-     return mc({q:many?`Do you like ${blank} ${p}?`:`Do you like ${blank} ${s}?`,explain:many?'More than one → these.':'Only one → this.',key:'4this'+many+s},many?'these':'this',[many?'this':'these'])},
-   ()=>{const who=pick([['He','👦'],['She','👧']]);return mc({q:`${who[0]}’s ${blank} a blue T-shirt.`,pic:who[1]+'👕',explain:`${who[0]}’s wearing a blue T-shirt.`,key:'4wear'+who[0]},'wearing',['wear','wears','wore'])},
-   ()=>{const g=Math.random()<.5,p=g?['She','👧','she']:['He','👦','he'],items=shuffle([['🧢','cap'],['👟','shoes'],['🧥','jacket'],['🎩','hat'],['🧣','scarf']]),on=items.slice(0,2),t=pick(items),y=on.includes(t),isPl=t[1]==='shoes';
-     const yesA=`Yes, ${p[2]} is.`,noA=`No, ${p[2]} isn’t.`;
-     return yn({q:`Is ${p[2]} wearing ${isPl?'':'a '}${t[1]}?`,pic:p[1]+on.map(x=>x[0]).join(''),picRow:true,key:'4is'+p[2]+on.join()+t[1]},y,yesA,noA,[`Yes, ${p[2]} does.`,`No, ${p[2]} can’t.`])},
-   ()=>{const [a,b]=pick([['socks','feet'],['hat','head'],['gloves','hands'],['shoes','feet'],['scarf','neck']]);return mc({q:`We wear ${a} on our ${blank}.`,explain:`${a} → ${b}.`,key:'4on'+a},b,['head','feet','hands','neck'].filter(x=>x!==b))},
-   ()=>{const [s,p,w]=pick([['dress','dresses',['dresss','dressies']],['scarf','scarves',['scarfs','scarfes']],['sock','socks',['sockes','sockies']],['watch','watches',['watchs','watchies']]]);
-     return mc({q:`one ${s}, two ${blank}`,explain:`one ${s}, two ${p}.`,key:'4pl'+s},p,w)},
-  ],
-  story:{title:'Party Clothes',text:"It is Amy's birthday party. Amy is wearing a pink dress and white shoes. Her brother, Tom, is wearing a green T-shirt and blue trousers. Dad is wearing a black hat. “I like your hat, Dad!” says Amy. Dad smiles.",qs:[
-   ['Whose birthday is it?','Amy’s',['Tom’s','Dad’s','Mum’s']],
-   ['What is Amy wearing?','a pink dress',['a green T-shirt','blue trousers','a black hat']],
-   ['What colour are Amy’s shoes?','white',['pink','black','blue']],
-   ['Who is wearing a green T-shirt?','Tom',['Amy','Dad','Mum']],
-   ['What does Amy like?','Dad’s hat',['her shoes','Tom’s T-shirt','the cake']]]}},
- {name:'The Robot',icon:'🤖',desc:'My body, I can / I can’t, Can you…?',
-  vocab:[['👂','ear'],['👃','nose'],['👀','eyes'],['✋','hand'],['🦶','foot'],['👄','mouth'],['🦵','leg'],['💪','arm'],['🤖','robot']],
-  spell:{arm:'💪',leg:'🦵',head:'🙂',hand:'✋',foot:'🦶',nose:'👃',ear:'👂',eyes:'👀'},
-  grammar:[
-   ()=>{const [a,e]=pick([['swim','🏊'],['ride a bike','🚲'],['jump','🤸'],['sing','🎤'],['dance','💃']]),y=Math.random()<.5;
-     return yn({q:`Can you ${a}? ${y?yes:no}`,pic:e,key:'5can'+a+y},y,'Yes, I can.','No, I can’t.',['Yes, I do.','No, I am not.'])},
-   ()=>{const y=Math.random()<.5,[a,e]=pick([['stand on one leg','🦩'],['touch my toes','🙆'],['swim','🏊'],['climb a tree','🌳']]);
-     return mc({q:`${y?yes:no} I ${blank} ${a}.`,pic:e,explain:y?'Tick ✔ → can.':'Cross ✘ → can’t.',key:'5i'+a+y},y?'can':'can’t',[y?'can’t':'can','cans'])},
-   ()=>{const [a,ok]=pick([['Can a fish swim?',1],['Can a bird fly?',1],['Can a cat fly?',0],['Can a dog read?',0],['Can a monkey climb?',1],['Can a tortoise run fast?',0]]);
-     return mc({q:a,long:true,explain:ok?'Yes, it can.':'No, it can’t.',key:'5it'+a},ok?'Yes, it can.':'No, it can’t.',[ok?'No, it can’t.':'Yes, it can.','Yes, it is.'])},
-   ()=>{const [n,w,e]=pick([['two','eyes','👀'],['ten','fingers','🙌'],['one','nose','👃'],['two','ears','👂👂'],['ten','toes','🦶🦶'],['two','legs','🦵🦵']]);return mc({q:`Look at the picture. I have ${n} ${blank}.`,pic:e,explain:`I have ${n} ${w}.`,key:'5have'+w},w,shuffle(['eyes','fingers','nose','ears','toes','legs','mouth'].filter(x=>x!==w)))},
-   ()=>{const who=pick([...he,...she]);return mc({q:`${who} ${blank} ride a bike.`,explain:'After “can” the verb stays the same: can ride.',key:'5who'+who},'can',['cans','can to','is can'])},
-  ],
-  story:{title:'Robo the Robot',text:"This is Robo. Robo is my robot. He has a square head and two big blue eyes. He has long arms and short legs. Robo can sing and dance. He can’t swim. Every Saturday, Robo helps me clean my room!",qs:[
-   ['What shape is Robo’s head?','square',['round','long','small']],
-   ['What colour are Robo’s eyes?','blue',['green','red','black']],
-   ['Robo has short ___.','legs',['arms','eyes','ears']],
-   ['What can’t Robo do?','swim',['sing','dance','clean']],
-   ['When does Robo help clean the room?','every Saturday',['every Monday','every night','every morning']]]}},
- {name:'At the Beach',icon:'🏖️',desc:'Holidays, Let’s…, Where’s / Where are…?',
-  vocab:[['🏖️','beach'],['🌊','sea'],['🐚','shell'],['🏰','sandcastle'],['🎸','guitar'],['🍦','ice cream'],['🪁','kite'],['⛵','boat'],['🐠','fish']],
-  spell:{sea:'🌊',sand:'🏖️',shell:'🐚',boat:'⛵',fish:'🐠',kite:'🪁',sun:'☀️',beach:'🏖️'},
-  grammar:[
-   ()=>{const [v,rest]=pick([['play','the guitar'],['fly','a kite'],['build','a sandcastle'],['swim','in the sea']]);return mc({q:`Let’s ${blank} ${rest}.`,explain:`Let’s ${v} ${rest}.`,key:'6lets'+v},v,[v+'s',v+'ing','to '+v])},
-   ()=>{const pos=pick(['on','under','next to']),th=pick([['🐚','shell'],['⚽','ball'],['🎸','guitar'],['🍦','ice cream']]);
-     return mc({q:`Where’s the ${th[1]}?`,fig:scene(pos,th),long:true,explain:`It’s ${pos} the table.`,key:'6where'+pos+th[1]},`It’s ${pos} the table.`,['on','under','next to','in'].filter(x=>x!==pos).map(p=>`It’s ${p} the table.`))},
-   ()=>{const many=Math.random()<.5,[s,p]=pick([['book','books'],['shell','shells'],['kite','kites']]);
-     return mc({q:many?`${blank} the orange ${p}?`:`${blank} the blue ${s}?`,explain:many?'More than one → Where are…?':'Only one → Where’s…?',key:'6wh'+many+s},many?'Where are':'Where’s',[many?'Where’s':'Where are','What are'])},
-   ()=>{const [thing,col]=pick([['sea','blue'],['sand','yellow'],['banana','yellow'],['grass','green']]);return mc({q:`The ${thing} is ${blank}.`,explain:`The ${thing} is ${col}.`,key:'6col'+thing},col,shuffle(['yellow','green','blue','red','black','purple'].filter(c=>c!==col)))},
-   ()=>{const [a,b]=pick([['hot','cold'],['big','small'],['happy','sad'],['fast','slow'],['up','down']]);return mc({q:`The opposite of <b>${a}</b> is`,explain:`${a} ↔ ${b}`,key:'6op'+a},b,shuffle(['long','wet','loud','clean','soft']).slice(0,3))},
-  ],
-  story:{title:'A Day at the Beach',text:"On Saturday, Adam and his family go to the beach. The weather is sunny and hot. Adam builds a big sandcastle. His sister, Lily, collects shells. Father swims in the sea. Mother reads a book under a tree. At five o’clock, they eat ice cream and go home.",qs:[
-   ['When do they go to the beach?','on Saturday',['on Monday','on Friday','on Sunday']],
-   ['What is the weather like?','sunny and hot',['rainy and cold','windy','cloudy']],
-   ['What does Lily do?','She collects shells.',['She swims in the sea.','She reads a book.','She builds a sandcastle.']],
-   ['Who swims in the sea?','Father',['Mother','Adam','Lily']],
-   ['What do they eat at five o’clock?','ice cream',['bread','cake','rice']]]}},
-];
-const BANKW=[['sunny','☀️'],['rainy','🌧️'],['windy','💨'],['cloudy','☁️']];
-
-/* ---------- writing test: sentences to build and fix, and picture questions to answer in a full sentence ---------- */
-const WRITE=[
- {sent:['I play football on Mondays.','Do you ride a bike at the weekend?','I watch TV on Sundays.','She reads a book on Fridays.','We swim on Saturdays.','Ben plays badminton after school.'],
-  ans:[['⚽','What do you do on Mondays?',['I play football on Mondays.','I play football.']],['📺','What do you do on Sundays?',['I watch TV on Sundays.','I watch TV.','I watch television on Sundays.','I watch television.']],['🚲','What do you do at the weekend?',['I ride a bike at the weekend.','I ride my bike at the weekend.','I ride a bike.','I ride my bike.']]]},
- {sent:['Today is Saturday.','It is sunny today.','I help Mum in the kitchen.','We make a chocolate cake.','I write in my diary at night.','Tomorrow is Sunday.'],
-  ans:[['☀️','What is the weather like today?',['It is sunny.','It is sunny today.','It\'s sunny.','It\'s sunny today.']],['🌧️','What is the weather like today?',['It is rainy.','It is rainy today.','It\'s rainy.','It\'s rainy today.']],['🍰','What do you make with Mum?',['We make a cake.','I make a cake.','We make a cake with Mum.','I make a cake with Mum.','We make a chocolate cake.','I make a chocolate cake.']]]},
- {sent:['There is a sofa in the living room.','There are two cats under the table.','Is there a lamp in the bedroom?','I sleep in my bedroom.','My house has five rooms.','The bath is in the bathroom.'],
-  ans:[['🛏️','Where do you sleep?',['I sleep in the bedroom.','I sleep in my bedroom.']],['🪑🪑🪑','How many chairs are there?',['There are three chairs.']],['🛋️','What is in the living room?',['There is a sofa in the living room.','There is a sofa.','A sofa is in the living room.']]]},
- {sent:['She is wearing a pink dress.','Do you like this hat?','I like these shoes.','He is wearing a blue T-shirt.','My socks are white.','Put on your jacket.'],
-  ans:[['👧👗','What is she wearing?',['She is wearing a dress.','She\'s wearing a dress.']],['👦🧢','What is he wearing?',['He is wearing a cap.','He\'s wearing a cap.']],['🎩 ✔','Do you like this hat?',['Yes, I do.','Yes, I like this hat.','Yes, I like it.']]]},
- {sent:['I can stand on one leg.','Can you swim?','The robot has long arms.','I have two eyes.','She can ride a bike.','He can\'t swim.'],
-  ans:[['🏊 ✔','Can you swim?',['Yes, I can.']],['🤸 ✘','Can you jump?',['No, I can\'t.','No, I cannot.']],['👀','How many eyes do you have?',['I have two eyes.']]]},
- {sent:['Let\'s play the guitar.','Where is the blue book?','We go to the beach.','Lily collects shells.','The sea is blue.','Let\'s build a sandcastle.'],
-  ans:[['🏰','What is this?',['It is a sandcastle.','It\'s a sandcastle.','This is a sandcastle.']],['🐚','What is this?',['It is a shell.','It\'s a shell.','This is a shell.']],['🌊','What colour is the sea?',['The sea is blue.','It is blue.','It\'s blue.']]]},
-];
-// wrong spellings of a word: two letters swapped, a vowel changed, a letter doubled or dropped
-function misspell(w){
-  const out=new Set(),V={a:'e',e:'a',i:'e',o:'u',u:'o'};
-  for(let i=0;i<w.length-1;i++)if(w[i]!==w[i+1])out.add(w.slice(0,i)+w[i+1]+w[i]+w.slice(i+2));
-  for(let i=0;i<w.length;i++){if(V[w[i]])out.add(w.slice(0,i)+V[w[i]]+w.slice(i+1));out.add(w.slice(0,i+1)+w[i]+w.slice(i+1));if(w.length>3)out.add(w.slice(0,i)+w.slice(i+1))}
-  out.delete(w);return shuffle([...out]);
-}
+const NUMW=['zero','one','two','three','four','five','six','seven','eight','nine','ten'];
 // a dropdown question: the right option plus up to three different wrong ones
 function sel(o,right,wrongs){const m=mc({},right,wrongs);return Object.assign(o,{type:'select',options:m.choices,right:m.right})}
-const lowFirst=s=>s.charAt(0).toLowerCase()+s.slice(1);
-const noEnd=s=>s.replace(/[.?!]$/,'');
-// small letters for every word after the first (names, days and "I" lose their capitals)
-const lowRest=s=>s.split(' ').map((w,i)=>i?w.toLowerCase():w).join(' ');
+function tap(o,right,wrongs){const m=mc({},right,wrongs);return Object.assign(o,{type:'mc',options:m.choices,right:m.right})}
+const pl=(n,w)=>n===1?w:w+'s';
 
-/* ---------- the five parts of the writing test; each question comes from one unit ---------- */
-const PARTS={
- A:{name:'Spell it',icon:'✏️',desc:'Choose the right spelling',make:ui=>{
-   const sp=UNITS[ui].spell,w=pick(Object.keys(sp));
-   return sel({q:'Choose the right spelling.',pic:sp[w],explain:`It is spelt ${w.toUpperCase().split('').join('-')}.`,key:'A'+w},w,misspell(w))}},
- B:{name:'Fill in the blank',icon:'🔤',desc:'Choose the missing word',make:ui=>{
-   for(let g=0;g<20&&Math.random()<.6;g++){const m=pick(UNITS[ui].grammar)();const a=m.choices&&m.choices[m.right];
-     if(a&&m.q.includes('class="blank"')&&a.split(' ').length<=2&&!/[✔✘]/.test(m.q))return sel({inline:true,q:m.q,pic:m.pic,picRow:m.picRow,fig:m.fig,explain:m.explain,key:'B'+m.key},a,m.choices.filter(c=>c!==a))}
-   const sents=WRITE[ui].sent,s=pick(sents),words=s.split(' '),clean=x=>x.replace(/[.?!,]$/,'');
-   const idx=shuffle(words.map((_,i)=>i).filter(i=>i>0&&words[i].replace(/[^A-Za-z']/g,'').length>2))[0],word=clean(words[idx]),end=words[idx].slice(word.length);
-   const others=shuffle([...new Set(sents.flatMap(x=>x.split(' ').slice(1).map(clean)))].filter(x=>x!==word&&x.length>2));
-   return sel({inline:true,q:words.map((w,i)=>i===idx?`${blank}${end}`:w).join(' '),explain:s,key:'Bs'+s+idx},word,[...others.slice(0,2),...misspell(word.toLowerCase()).slice(0,2)])}},
- C:{name:'Build the sentence',icon:'🧱',desc:'Put the words in the right order',make:ui=>{
-   const s=pick(WRITE[ui].sent),w=s.split(' ');let t=shuffle(w);let g=0;while(t.join(' ')===s&&g++<10)t=shuffle(w);
-   return {type:'build',q:'Tap the words in the right order.',tiles:t,target:s,explain:s,key:'C'+s,ansText:s}}},
- D:{name:'Capitals and full stops',icon:'🔠',desc:'Choose the sentence written correctly',make:ui=>{
-   const s=pick(WRITE[ui].sent);
-   return sel({q:'Which sentence is written correctly?',explain:`${s} Start with a capital letter and end with a full stop or question mark. Names, days and “I” have capitals too.`,key:'D'+s},s,shuffle([lowFirst(s),noEnd(s),lowRest(s),s.toLowerCase(),noEnd(lowFirst(s))]))}},
- E:{name:'Answer in a sentence',icon:'📝',desc:'Look at the picture and choose the best answer',make:ui=>{
-   const all=WRITE[ui].ans,[pic,q,acc]=pick(all),a=acc[0],other=all.filter(x=>x[2][0]!==a).map(x=>x[2][0]);
-   return sel({q,pic,explain:`A good answer: ${a}`,key:'E'+q+pic},a,[pick(other),lowFirst(a),noEnd(a),...other])}},
-};
-const ORDER=['A','B','C','D','E'];
-const FINAL={A:5,B:6,C:6,D:4,E:4},UNITROUND={A:2,B:3,C:3,D:2,E:2};
-function makePart(k,n,units){
-  const qs=[],seen=new Set(),order=shuffle(units);let g=0;
-  while(qs.length<n&&g++<400){const ui=order[(qs.length+g)%order.length],q=PARTS[k].make(ui);if(seen.has(q.key))continue;seen.add(q.key);Object.assign(q,{part:k,unit:ui});qs.push(q)}
-  return qs;
+// the house for "Label the parts of the house": one room is highlighted
+const ROOMS=[['attic','📦',[70,30,80,36]],['bedroom','🛏️',[20,72,90,44]],['bathroom','🛁',[110,72,90,44]],['living room','🛋️',[20,116,90,44]],['kitchen','🍳',[110,116,90,44]],['hall','🚪',[20,160,90,40]],['dining room','🍽️',[110,160,90,40]],['cellar','🔦',[20,204,180,36]]];
+function house(hi){
+  let s='<path d="M10 72 L110 8 L210 72 Z" fill="var(--surface)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/><rect x="20" y="72" width="180" height="128" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/><line x1="0" y1="201" x2="220" y2="201" stroke="#7A5A3A" stroke-width="4"/><rect x="20" y="204" width="180" height="36" fill="#E8DCCB" stroke="var(--ink)" stroke-width="2" stroke-dasharray="4 3"/>';
+  ROOMS.forEach(([n,e,[x,y,w,h]],i)=>{s+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${i===hi?'var(--sun)':'transparent'}" stroke="var(--ink)" stroke-width="2"/><text x="${x+w/2}" y="${y+h/2+9}" text-anchor="middle" font-size="24">${e}</text>`});
+  return `<div class="fig"><svg class="house" viewBox="0 0 220 244" role="img" aria-label="A house with one room coloured yellow">${s}</svg></div>`;
 }
+
+const SECTIONS=[
+ {name:'Circle the correct answer',sec:'A',icon:'⭕',make:()=>pick(MCQ)()},
+ {name:'The next day',sec:'A',icon:'🚂',make:()=>{
+   const i=R(0,6),d=[0,1,2].map(k=>DAYS[(i+k)%7]);
+   return sel({inline:true,q:`${d[0]}, ${d[1]}, ${blank}`,explain:`After ${d[1]} comes ${d[2]}. ${DAYS.join(', ')}.`,key:'2'+i},d[2],shuffle(DAYS.filter(x=>x!==d[2]&&x!==d[1])))}},
+ {name:'Where does it come from?',sec:'A',icon:'🐑',make:()=>{
+   const [thing,v,e,mat,src,se]=pick([['gloves','are','🧤','wool','sheep','🐑'],['a scarf','is','🧣','wool','sheep','🐑'],['a handbag','is','👜','leather','cows','🐄'],['boots','are','👢','leather','cows','🐄'],['a T-shirt','is','👕','cotton','plants','🌱'],['a chair','is','🪑','wood','trees','🌳']]);
+   return Math.random()<.5
+    ?tap({q:`What ${v} ${thing} made from?`,pic:e,explain:`${thing[0].toUpperCase()+thing.slice(1)} ${v} made from ${mat}.`,key:'3m'+thing},mat,['wool','leather','cotton','wood'].filter(x=>x!==mat))
+    :tap({q:`${mat[0].toUpperCase()+mat.slice(1)} comes from…`,pic:e,emo:true,explain:`${mat[0].toUpperCase()+mat.slice(1)} comes from ${src} ${se}.`,key:'3s'+mat},se,['🐑','🐄','🌱','🌳'].filter(x=>x!==se))}},
+ {name:'Put the words in order',sec:'A',icon:'🧱',make:()=>{
+   const s=pick(['On Sundays I go swimming.','On Mondays I play football.','I ride my bike on Saturdays.','On Fridays I play the piano.','I watch TV on Tuesdays.','On Thursdays I play with my friends.','I read a book on Wednesdays.','On Saturdays I visit my grandma.']),w=s.split(' ');
+   let t=shuffle(w),g=0;while(t.join(' ')===s&&g++<10)t=shuffle(w);
+   return {type:'build',q:'Put the words in order.',tiles:t,target:s,explain:s,key:'4'+s,ansText:s}}},
+ {name:'his / her',sec:'A',icon:'👫',make:()=>{
+   const [who,e,g]=pick([['Ali','👦','his'],['Aina','👧','her'],['Mum','👩','her'],['Dad','👨','his'],['Grandpa','👴','his'],['Grandma','👵','her'],['Nur','👧','her'],['Thunder','👦','his']]);
+   const [thing,te]=pick([['cat','🐱'],['dog','🐶'],['duck','🦆'],['rabbit','🐰'],['pens','🖊️'],['milk','🥛'],['hot dog','🌭'],['kite','🪁'],['ball','⚽']]);
+   return Math.random()<.5
+    ?sel({inline:true,q:`${who} and ${blank} ${thing}.`,pic:e+te,picRow:true,explain:`Boy or man → his. Girl or woman → her. ${who} and ${g} ${thing}.`,key:'5g'+who+thing},g,[g==='his'?'her':'his','he','she'])
+    :sel({inline:true,q:`${who} and ${g} ${blank}.`,pic:e+te,picRow:true,explain:`${who} and ${g} ${thing}.`,key:'5t'+who+thing},thing,shuffle(['cat','dog','duck','rabbit','pens','milk','hot dog','kite','ball'].filter(x=>x!==thing)))}},
+ {name:"There's / There are",sec:'A',icon:'🔢',make:()=>{
+   const many=Math.random()<.5,[s,p,place]=pick([['a frog','three frogs','on the log'],['a banana','two bananas','in the lunchbox'],['a lizard','four lizards','on the wall'],['an orange','five oranges','in my bag'],['a cat','six cats','under the table'],['a book','some books','on the shelf'],['a student','twenty students','in the class']]);
+   return sel({inline:true,q:`${blank} ${many?p:s} ${place}.`,explain:many?'More than one → There are.':'Only one → There’s (There is).',key:'6'+many+s},many?'There are':'There’s',[many?'There’s':'There are'])}},
+ {name:'Missing letters',sec:'A',icon:'🌍',make:()=>{
+   const [w,e]=pick([['jungle','🌴'],['desert','🏜️'],['mountains','🏔️'],['ocean','🌊'],['rocks','🪨'],['forest','🌲'],['island','🏝️'],['river','🏞️'],['beach','🏖️'],['snow','❄️']]);
+   const idx=shuffle([...w].map((_,i)=>i).filter(i=>i>0)).slice(0,w.length>4?2:1).sort((a,b)=>a-b);
+   const shown=[...w].map((c,i)=>idx.includes(i)?'_':c).join(' '),right=idx.map(i=>w[i]).join(' , ');
+   const wrong=[];for(let s=0;s<40&&wrong.length<3;s++){const alt=idx.map(()=>pick('aeioulnrst'.split(''))).join(' , ');if(alt!==right&&!wrong.includes(alt))wrong.push(alt)}
+   return sel({q:`Fill in the missing letters: <span class="spell">${shown}</span>`,pic:e,explain:`It is spelt ${w.toUpperCase().split('').join('-')}.`,key:'7'+w+idx},right,wrong)}},
+ {name:'a / an',sec:'A',icon:'🅰️',make:()=>{
+   const [w,an]=pick([['rectangle',0],['eraser',1],['bungalow',0],['aquarium',1],['cup of coffee',0],['umbrella',1],['egg',1],['orange',1],['owl',1],['igloo',1],['banana',0],['kite',0],['elephant',1],['house',0],['ice cream',1],['pencil',0]]);
+   return sel({inline:true,q:`I have ${blank} ${w}.`,explain:`Use “an” before a, e, i, o, u sounds: ${an?'an':'a'} ${w}.`,key:'8'+w},an?'an':'a',[an?'a':'an'])}},
+ {name:'Read and fill in',sec:'B',icon:'🏖️',make:()=>{
+   const B=[['sun','☀️'],['sea','🌊'],['sandcastle','🏰'],['hat','👒'],['guitar','🎸'],['ice cream','🍦']];
+   const T=['It’s a sunny day at the beach. The (1) is hot and the (2) is blue and cool. There are lots of children on the beach. One boy is making a big (3). A little girl is wearing a pink (4). A man is playing the (5). Another girl is eating a cold (6). What a lovely day!'];
+   const k=R(0,5),r=B[k][0];
+   const text=T[0].replace(/\((\d)\)/g,(m,n)=>+n-1===k?blank:`(${n}) ____`);
+   return sel({inline:true,story:true,q:text,pic:B.map(x=>x[1]).join(''),picRow:true,before:true,explain:`(${k+1}) ${r} ${B[k][1]}`,key:'9'+k},r,shuffle(B.map(x=>x[0]).filter(x=>x!==r)))}},
+ {name:'What are they doing?',sec:'B',icon:'🎨',make:()=>{
+   const A=[['🎧','listen to music'],['🐚','look for shells'],['🏰','make a sandcastle'],['🍦','eat ice cream'],['🎨','paint a picture'],['📖','read a book'],['📷','take a photo'],['🏊','swim in the sea']];
+   const r=pick(A);return tap({q:'Look at the picture. What can you do at the beach?',pic:r[0],long:true,explain:`${r[0]} → ${r[1]}`,key:'10'+r[1]},r[1],shuffle(A.filter(x=>x!==r)).map(x=>x[1]))}},
+ {name:'Write a sentence',sec:'B',icon:'📅',make:()=>{
+   const A=[['🏊','go swimming'],['🚲','ride my bike'],['⚽','play football'],['📖','read a book'],['🎹','play the piano'],['📺','watch TV'],['👵','visit my grandma'],['🧒','play with my friends']];
+   const d=pick(DAYS),a=pick(A),o=pick(A.filter(x=>x!==a)),od=pick(DAYS.filter(x=>x!==d));
+   const right=`On ${d}s, I ${a[1]}.`;
+   return sel({q:'Choose the right sentence for the picture.',pic:`<span class="daycard">${d}</span>${a[0]}`,picRow:true,explain:right,key:'11'+d+a[1]},right,[`On ${od}s, I ${a[1]}.`,`On ${d}s, I ${o[1]}.`,`on ${d.toLowerCase()}s, I ${a[1]}`,`On ${d}, I ${a[1]}s.`])}},
+ {name:'Label the house',sec:'B',icon:'🏠',make:()=>{
+   const i=R(0,ROOMS.length-1),r=ROOMS[i][0];
+   return tap({q:'What is the yellow room?',fig:house(i),long:true,explain:`That room is the ${r} ${ROOMS[i][1]}.`,key:'12'+i},r,shuffle(ROOMS.filter((_,j)=>j!==i).map(x=>x[0])))}},
+ {name:'Count and write',sec:'B',icon:'🐱',make:()=>{
+   const [[e1,w1],[e2,w2]]=shuffle([['🐱','cat'],['🚗','car'],['🖍️','crayon'],['⚽','ball'],['🐟','fish'],['🍎','apple']]).slice(0,2);
+   const a=R(2,7),b=R(2,7),items=shuffle([...Array(a).fill(e1),...Array(b).fill(e2)]).join('');
+   const s=(x,y)=>`There are ${NUMW[x]} ${w1==='fish'?'fish':pl(x,w1)} and there are ${NUMW[y]} ${w2==='fish'?'fish':pl(y,w2)}.`;
+   return sel({q:'Count. Choose the right sentence.',pic:items,picRow:true,explain:s(a,b),key:'13'+a+b+w1+w2},s(a,b),[s(b,a),s(a+1,b),s(a,b===2?3:b-1),s(a,b).replace('There are','There is')])}},
+ {name:'Plurals',sec:'B',icon:'➕',make:()=>{
+   const [s,p,w]=pick([['street','streets',['streetes','streeties']],['fox','foxes',['foxs','foxies']],['glass','glasses',['glasss','glassies']],['sock','socks',['sockes','sockies']],['box','boxes',['boxs','boxies']],['bus','buses',['buss','busies']],['dish','dishes',['dishs','dishies']],['watch','watches',['watchs','watchies']],['baby','babies',['babys','babyes']],['lorry','lorries',['lorrys','lorryes']],['cat','cats',['cates','caties']],['brush','brushes',['brushs','brushies']]]);
+   return sel({inline:true,q:`one ${s} → two ${blank}`,explain:`one ${s}, two ${p}.`,key:'14'+s},p,w)}},
+];
+// part 1: mixed picture questions
+const MCQ=[
+ ()=>{const [e,r]=pick([['🍳','A kitchen'],['🛏️','A bedroom'],['🛁','A bathroom'],['🍽️','A dining room'],['🛋️','A living room']]);return tap({q:'What is this room?',pic:e,explain:`${e} → ${r.toLowerCase()}`,key:'1r'+r},r,['A kitchen','A bedroom','A bathroom','A dining room','A living room','A hall','A cellar'].filter(x=>x!==r))},
+ ()=>{const n=R(2,6),[e,w]=pick([['🐱','cats'],['🐶','dogs'],['🐤','chicks'],['🐟','fish']]);return tap({q:`How many ${w} are there?`,pic:e.repeat(n),picRow:true,explain:`Count them: ${NUMW[n]}.`,key:'1c'+n+w},NUMW[n][0].toUpperCase()+NUMW[n].slice(1),[n+1,n-1,n+2].map(x=>NUMW[x][0].toUpperCase()+NUMW[x].slice(1)))},
+ ()=>{const many=Math.random()<.5;return tap({q:many?`There ${blank} three bedrooms.`:`There ${blank} a big kitchen.`,pic:'🏠',explain:many?'More than one → are.':'Only one → is.',key:'1t'+many},many?'are':'is',[many?'is':'are','am'])},
+ ()=>{const [v,rest,e]=pick([['make','a sandcastle','🏰'],['fly','a kite','🪁'],['play','football','⚽'],['eat','ice cream','🍦']]);return tap({q:`Let’s ${blank} ${rest}.`,pic:e,explain:`Let’s ${v} ${rest}.`,key:'1l'+v},v,['make','fly','play','eat','take'].filter(x=>x!==v))},
+ ()=>{const [e,w]=pick([['☁️','cloudy'],['☀️','sunny'],['🌧️','rainy'],['💨','windy']]);return tap({q:'What’s the weather like?',pic:e,explain:`It’s ${w}.`,key:'1w'+w},`It’s ${w}.`,['cloudy','sunny','rainy','windy'].filter(x=>x!==w).map(x=>`It’s ${x}.`))},
+ ()=>{const [odd,same]=pick([['shoe',['hat','cat','bat']],['dog',['pen','hen','ten']],['sun',['pig','big','wig']],['cake',['bed','red','ted']],['book',['fan','man','can']]]);return tap({q:'Which word has a <b>different</b> sound?',explain:`${same.join(', ')} sound the same. ${odd} is different.`,key:'1s'+odd},odd,shuffle(same).slice(0,2))},
+ ()=>{const [s,p,w]=pick([['sandwich','sandwiches',['sandwichs','sandwhiches']],['peach','peaches',['peachs','peachies']],['tomato','tomatoes',['tomatos','tomatoies']],['cherry','cherries',['cherrys','cherryes']]]);return tap({q:`“I love having ${blank} for breakfast,” said Ahmad.`,explain:`one ${s}, many ${p}.`,key:'1p'+s},p,w)},
+ ()=>{const [a,e,r]=pick([['koalas','🐨','In Australia'],['kangaroos','🦘','In Australia'],['pandas','🐼','In China'],['orangutans','🦧','In Malaysia'],['polar bears','🐻‍❄️','In the Arctic']]);return tap({q:`Where do you find ${a}?`,pic:e,explain:`You find ${a} ${r[0].toLowerCase()+r.slice(1)}.`,key:'1a'+a},r,['In Australia','In China','In Malaysia','In the UK','In the Arctic'].filter(x=>x!==r))},
+];
+const FINAL=[4,3,3,3,3,3,3,3,3,3,3,3,3,3];
 
 /* ---------- screens ---------- */
 const app=document.getElementById('app');
 let G=null;
 const stars=n=>[1,2,3].map(i=>`<span class="${i<=n?'on':''}">★</span>`).join('');
 const starsFor=(c,n)=>c/n>=.9?3:c/n>=.7?2:c/n>=.5?1:0;
-const sum=o=>Object.values(o).reduce((a,b)=>a+b,0);
-const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 function header(sub){return `<a class="crumb" href="../">← All subjects</a><div class="top">${cat('happy')}<div><h1>English</h1><p>${sub}</p></div><button class="snd" id="snd" aria-pressed="${store.sound}">${store.sound?'🔊 Sound on':'🔇 Sound off'}</button></div>`}
 function wireSound(){const b=document.getElementById('snd');b.onclick=()=>{store.sound=!store.sound;save();b.setAttribute('aria-pressed',store.sound);b.textContent=store.sound?'🔊 Sound on':'🔇 Sound off';if(store.sound)ding()}}
+function makeSec(k,n){
+  const qs=[],seen=new Set();let g=0;
+  while(qs.length<n&&g++<400){const q=SECTIONS[k].make();if(seen.has(q.key))continue;seen.add(q.key);q.sec=k;qs.push(q)}
+  return qs;
+}
 function home(){
-  G=null;const total=sum(FINAL);
-  app.innerHTML=header('Year 2 · Super Minds')+`<div class="card hero"><h2>Writing Test</h2><p>${total} writing questions from all 6 units. Choose from the dropdown or build the sentence. No typing! Finish it and get your certificate!</p>
-   <div class="parts">${ORDER.map(k=>`<div><b>${k}</b>${PARTS[k].icon} ${PARTS[k].name} <small style="color:var(--muted)">(${FINAL[k]})</small></div>`).join('')}</div>
-   <button class="go" id="final">Start the Writing Test</button>
-   <p class="best">${store.best.final!=null?`Best score so far: ${store.best.final}/${total}`:'Remember: capital letters and full stops!'}</p></div>
-   <div class="card" style="margin-top:14px"><p class="lbl">Or practise writing for one unit (${sum(UNITROUND)} questions)</p><div class="rev">${UNITS.map((u,i)=>`<button data-u="${i}">${u.icon} Unit ${i+1}: ${u.name} <em>${stars(store.best['u'+i]||0)}</em><span>${u.desc}</span></button>`).join('')}</div></div>
+  G=null;const total=FINAL.reduce((a,b)=>a+b,0);
+  const row=k=>`<button data-s="${k}">${SECTIONS[k].icon} ${k+1}. ${SECTIONS[k].name} <em>${stars(store.best['s'+k]||0)}</em></button>`;
+  app.innerHTML=header('Year 2 · End-of-year exam')+`<div class="card hero"><h2>Final Exam</h2><p>${total} questions in Section A and Section B, just like the real paper. Tap, choose or build. No typing! Finish it and get your certificate!</p>
+   <button class="go" id="final">Start the Final Exam</button>
+   <p class="best">${store.best.final!=null?`Best score so far: ${store.best.final}/${total}`:'Read every question carefully!'}</p></div>
+   <div class="card" style="margin-top:14px"><p class="lbl">Or practise one question type (8 questions)</p>
+   <p class="sec">Section A</p><div class="rev one">${SECTIONS.map((s,k)=>s.sec==='A'?row(k):'').join('')}</div>
+   <p class="sec">Section B</p><div class="rev one">${SECTIONS.map((s,k)=>s.sec==='B'?row(k):'').join('')}</div></div>
    <p class="foot">Careful! A wrong answer goes BOOM 💥 · Good luck in your exam, Safiyyah!</p>`;
   document.getElementById('final').onclick=()=>{actx();start('final')};
-  app.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{actx();start(+b.dataset.u)});
+  app.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{actx();start(+b.dataset.s)});
   wireSound();
 }
 function start(mode){
-  const plan=mode==='final'?FINAL:UNITROUND,units=mode==='final'?UNITS.map((_,i)=>i):[mode];
-  G={mode,qs:ORDER.flatMap(k=>makePart(k,plan[k],units)),i:0,score:0,done:false,wrong:[],built:[],typed:null,byPart:{}};play();
+  const qs=mode==='final'?SECTIONS.flatMap((_,k)=>makeSec(k,FINAL[k])):makeSec(mode,8);
+  G={mode,qs,i:0,score:0,done:false,wrong:[],built:[],pick:null,bySec:{A:{c:0,n:0},B:{c:0,n:0}}};play();
 }
-const title=()=>G.mode==='final'?'Writing Test':`Unit ${G.mode+1}: ${UNITS[G.mode].name}`;
+const title=()=>G.mode==='final'?'Final Exam':`${G.mode+1}. ${SECTIONS[G.mode].name}`;
 function play(){
-  const q=G.qs[G.i],N=G.qs.length,P=PARTS[q.part];
+  const q=G.qs[G.i],N=G.qs.length,S=SECTIONS[q.sec];
   let dd='';
-  if(q.type==='select'){
-    const v=G.typed;
-    dd=`<select id="in" aria-label="Choose your answer" ${G.done?'disabled':''} class="${G.done?(G.ok?'right':'wrong'):''}"><option value="" ${v==null?'selected':''} disabled>Choose…</option>${q.options.map((o,i)=>`<option value="${i}" ${v===i?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
-  }
-  let body=`<span class="tag">Part ${q.part} · ${P.name} · Unit ${q.unit+1}</span><p class="q">${q.inline?q.q.replace(/<span class="blank">\?<\/span>/,dd):q.q}</p>`;
-  if(q.pic)body+=`<div class="pic${q.picRow||q.pic.length>3?' row':''}">${q.pic}</div>`;
+  if(q.type==='select'){const v=G.pick;dd=`<select id="in" aria-label="Choose your answer" ${G.done?'disabled':''} class="${G.done?(G.ok?'right':'wrong'):''}"><option value="" ${v==null?'selected':''} disabled>Choose…</option>${q.options.map((o,i)=>`<option value="${i}" ${v===i?'selected':''}>${esc(o)}</option>`).join('')}</select>`}
+  let body=`<span class="tag">Section ${S.sec} · ${q.sec+1}. ${S.name}</span>`;
+  const qtext=q.inline?q.q.replace('<span class="blank">?</span>',dd):q.q;
+  if(q.pic&&q.before)body+=`<div class="pic row">${q.pic}</div>`;
+  body+=q.story?`<div class="story">${qtext}</div>`:`<p class="q">${qtext}</p>`;
+  if(q.pic&&!q.before)body+=`<div class="pic${q.picRow?' row':''}">${q.pic}</div>`;
   if(q.fig)body+=q.fig;
-  if(q.type==='select'){
-    body+=`<div class="write${q.inline?' inl':''}">${q.inline?'':dd+`<div class="picked" id="picked">${G.typed!=null?'You chose: <b>'+esc(q.options[G.typed])+'</b>':''}</div>`}<button class="ok" id="ok" ${G.done||G.typed==null?'disabled':''}>Check</button></div>`;
+  if(q.type==='mc'){
+    body+=`<div class="ch${q.emo?' emo':''}${!q.emo&&(q.long||q.options.some(c=>c.length>12))?' long':''}">${q.options.map((c,i)=>`<button data-c="${i}" ${G.done?'disabled':''} class="${G.done&&i===q.right?'right':''}${G.done&&i===G.pick&&i!==q.right?' wrong':''}"><span class="k">${'ABCD'[i]}</span><span>${c}</span></button>`).join('')}</div>`;
+  }else if(q.type==='select'){
+    body+=`<div class="write${q.inline?' inl':''}">${q.inline?'':dd+`<div class="picked" id="picked">${G.pick!=null?'You chose: <b>'+esc(q.options[G.pick])+'</b>':''}</div>`}<button class="ok" id="ok" ${G.done||G.pick==null?'disabled':''}>Check</button></div>`;
   }else{
-    body+=`<div class="sentence">${G.built.length?G.built.map(j=>`<span>${esc(q.tiles[j])}</span>`).join(' '):'<em>Tap the words below…</em>'}</div>
+    body+=`<div class="sentence">${G.built.length?G.built.map(j=>esc(q.tiles[j])).join(' '):'<em>Tap the words below…</em>'}</div>
     <div class="wtiles">${q.tiles.map((c,j)=>`<button data-t="${j}" ${G.done||G.built.includes(j)?'disabled':''}>${esc(c)}</button>`).join('')}</div>
     ${G.done?'':`<button class="undo" id="undo" ${G.built.length?'':'disabled'}>⌫ Undo</button>`}`;
   }
@@ -449,9 +358,10 @@ function play(){
   wireSound();
   const inp=document.getElementById('in');
   if(inp){
-    inp.onchange=()=>{G.typed=+inp.value;document.getElementById('ok').disabled=false;const p=document.getElementById('picked');if(p)p.innerHTML='You chose: <b>'+esc(q.options[G.typed])+'</b>'};
-    document.getElementById('ok').onclick=()=>{if(!G.done&&G.typed!=null)check(G.typed===q.right)};
+    inp.onchange=()=>{G.pick=+inp.value;document.getElementById('ok').disabled=false;const p=document.getElementById('picked');if(p)p.innerHTML='You chose: <b>'+esc(q.options[G.pick])+'</b>'};
+    document.getElementById('ok').onclick=()=>{if(!G.done&&G.pick!=null)check(G.pick===q.right)};
   }
+  app.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{G.pick=+b.dataset.c;check(G.pick===q.right)});
   app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{G.built.push(+b.dataset.t);if(G.built.length===q.tiles.length)check(G.built.map(j=>q.tiles[j]).join(' ')===q.target);else play()});
   const u=document.getElementById('undo');if(u)u.onclick=()=>{G.built.pop();play()};
   document.getElementById('quit').onclick=home;
@@ -460,21 +370,19 @@ function play(){
 function answerText(q){return q.ansText||q.options[q.right]}
 function check(right){
   const q=G.qs[G.i];G.done=true;G.ok=right;
-  const bp=G.byPart[q.part]||(G.byPart[q.part]={c:0,n:0});bp.n++;
-  if(right){G.score++;bp.c++;ding()}else{G.wrong.push(q);explode()}
+  const b=G.bySec[SECTIONS[q.sec].sec];b.n++;
+  if(right){G.score++;b.c++;ding()}else{G.wrong.push(q);explode()}
   play();
 }
 const PRAISE=['Well done!','Great!','Excellent!','Clever girl!','Correct!','Super!'];
 function fb(){
   const q=G.qs[G.i],last=G.i===G.qs.length-1,el=document.getElementById('fb');
-  el.innerHTML=`<div class="fb ${G.ok?'ok':'no'} pop">${cat(G.ok?'happy':'sad')}<div class="t"><b>${G.ok?pick(PRAISE):'BOOM! '+(G.why||'The answer is: '+esc(answerText(q)))}</b>${q.explain}</div><button class="next" id="nx">${last?'See my certificate':'Next →'}</button></div>`;
+  el.innerHTML=`<div class="fb ${G.ok?'ok':'no'} pop">${cat(G.ok?'happy':'sad')}<div class="t"><b>${G.ok?pick(PRAISE):'BOOM! The answer is: '+answerText(q)}</b>${q.explain}</div><button class="next" id="nx">${last?'See my certificate':'Next →'}</button></div>`;
   const nx=document.getElementById('nx');nx.focus({preventScroll:true});
-  nx.onclick=()=>{if(last)result();else{G.i++;G.done=false;G.built=[];G.typed=null;G.why=null;play()}};
+  nx.onclick=()=>{if(last)result();else{G.i++;G.done=false;G.pick=null;G.built=[];play()}};
 }
-document.addEventListener('keydown',e=>{
-  if(!G||e.key!=='Enter')return;const nx=document.getElementById('nx');if(nx&&document.activeElement!==document.getElementById('in')){e.preventDefault();nx.click()}
-});
-function plain(h){const d=document.createElement('div');d.innerHTML=h;return d.textContent.replace(/\s+/g,' ').trim()}
+document.addEventListener('keydown',e=>{if(!G||e.key!=='Enter')return;const nx=document.getElementById('nx');if(nx){e.preventDefault();nx.click()}});
+function plain(h){const d=document.createElement('div');d.innerHTML=h;d.querySelectorAll('select').forEach(s=>s.replaceWith('___'));return d.textContent.replace(/\s+/g,' ').trim()}
 function confetti(){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   const cv=document.getElementById('confetti'),c=cv.getContext('2d');cv.width=innerWidth;cv.height=innerHeight;
@@ -485,17 +393,17 @@ function confetti(){
 function result(){
   const N=G.qs.length,s=starsFor(G.score,N),pct=Math.round(G.score/N*100);
   if(G.mode==='final'){if((store.best.final||0)<G.score)store.best.final=G.score}
-  else if((store.best['u'+G.mode]||0)<s)store.best['u'+G.mode]=s;
+  else if((store.best['s'+G.mode]||0)<s)store.best['s'+G.mode]=s;
   save();
-  const medal=pct>=90?['🥇','Gold! You are ready for the exam!']:pct>=70?['🥈','Silver! Almost there. Look at your mistakes below.']:pct>=50?['🥉','Bronze! Good try. Practise the units below.']:['💪','Keep going! Try one unit at a time.'];
-  const weak=[...new Set(G.wrong.map(q=>q.unit))].sort();
+  const medal=pct>=90?['🥇','Gold! You are ready for the exam!']:pct>=70?['🥈','Silver! Almost there. Look at your mistakes below.']:pct>=50?['🥉','Bronze! Good try. Practise the question types below.']:['💪','Keep going! Try one question type at a time.'];
+  const weak=[...new Set(G.wrong.map(q=>q.sec))].sort((a,b)=>a-b);
   app.innerHTML=header(title())+`<div class="card cert pop">
    <p class="lbl" style="color:var(--muted)">Certificate</p><div class="medal">${medal[0]}</div>
    <div class="big">${G.score}/${N}</div><div class="stars">${stars(s)}</div>
    <p style="font-weight:800;font-size:1.15rem;margin:6px 0">${medal[1]}</p>
-   ${G.mode==='final'?`<div class="bypart">${ORDER.map(k=>{const b=G.byPart[k]||{c:0,n:0};return `<div><span>${k}. ${PARTS[k].name}</span><span>${b.c}/${b.n}</span></div>`}).join('')}</div>`:''}
-   ${G.mode==='final'&&weak.length?`<p style="margin:8px 0 0"><b>Practise:</b> ${weak.map(i=>`Unit ${i+1} ${UNITS[i].name}`).join(', ')}</p>`:''}
-   ${G.wrong.length?`<div class="wrongs"><p class="lbl">Look at these again</p>${G.wrong.map(q=>`<div>${q.part==='A'?q.pic:plain(q.q)} →<span>${esc(answerText(q))}</span></div>`).join('')}</div>`:''}
+   ${G.mode==='final'?`<div class="bypart"><div><span>Section A</span><span>${G.bySec.A.c}/${G.bySec.A.n}</span></div><div><span>Section B</span><span>${G.bySec.B.c}/${G.bySec.B.n}</span></div></div>`:''}
+   ${G.mode==='final'&&weak.length?`<p style="margin:8px 0 0"><b>Practise:</b> ${weak.map(k=>`${k+1}. ${SECTIONS[k].name}`).join(', ')}</p>`:''}
+   ${G.wrong.length?`<div class="wrongs"><p class="lbl">Look at these again</p>${G.wrong.map(q=>`<div>${q.story?'Beach story':plain(q.q)} → <span>${esc(answerText(q))}</span></div>`).join('')}</div>`:''}
    <div class="row"><button class="btn main" id="again">Try again</button><button class="btn" id="menu">Back</button></div></div>`;
   wireSound();
   document.getElementById('again').onclick=()=>start(G.mode);document.getElementById('menu').onclick=home;
