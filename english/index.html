@@ -45,7 +45,9 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--sun);outline-offset
 .best{margin:8px 0 0;color:var(--muted);font-size:.9rem;text-align:center}
 .rev{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .rev button{border:2px solid var(--line);background:var(--bg);border-radius:16px;padding:10px;text-align:left;font-weight:800;min-height:56px}
-.rev button span{display:block;color:var(--muted);font-weight:600;font-size:.85rem}
+.rev em{font-style:normal;color:var(--line);letter-spacing:1px}
+.rev em .on{color:var(--sun)}
+.rev button>span{display:block;color:var(--muted);font-weight:600;font-size:.85rem}
 .hud{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:800;font-variant-numeric:tabular-nums}
 .prog{flex:1;height:12px;background:var(--line);border-radius:999px;overflow:hidden}
 .prog i{display:block;height:100%;background:var(--en);transition:width .3s}
@@ -121,7 +123,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--sun);outline-offset
 function cat(m){return `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M18 40 L22 10 L44 28 Z" fill="#F0A64A"/><path d="M82 40 L78 10 L56 28 Z" fill="#F0A64A"/><path d="M24 34 L25 18 L37 28 Z" fill="#F7C9D0"/><path d="M76 34 L75 18 L63 28 Z" fill="#F7C9D0"/><ellipse cx="50" cy="56" rx="36" ry="32" fill="#F5B861"/><path d="M50 26 q-4 8 0 14 q4 -6 0 -14" fill="#E08F2E"/><ellipse cx="50" cy="66" rx="17" ry="12" fill="#FFF3E2"/>${m==='sad'?'<circle cx="38" cy="49" r="4.5" fill="#3a2a22"/><circle cx="62" cy="49" r="4.5" fill="#3a2a22"/><path d="M42 66 q8 -6 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/>':'<path d="M33 49 q5 -6 10 0 M57 49 q5 -6 10 0" fill="none" stroke="#3a2a22" stroke-width="3.5" stroke-linecap="round"/><path d="M42 62 q8 9 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/><circle cx="28" cy="62" r="5" fill="#F7A8B3" opacity=".7"/><circle cx="72" cy="62" r="5" fill="#F7A8B3" opacity=".7"/>'}<path d="M46 57 h8 l-4 4 z" fill="#E86A7E"/><path d="M22 60 h-14 M22 65 h-13 M78 60 h14 M78 65 h13" stroke="#3a2a22" stroke-width="1.6" stroke-linecap="round"/></svg>`}
 
 /* ---------- storage ---------- */
-const KEY='englishFinal.v1';let store={sound:true,best:{}};
+const KEY='englishFinal.v2';let store={sound:true,best:{}};
 try{store=Object.assign(store,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
 
@@ -186,139 +188,198 @@ function mc(o,right,wrongs){
   const all=shuffle([right,...w]);return Object.assign(o,{choices:all,right:all.indexOf(right)});
 }
 
-/* ---------- word bank: Year 2 themes ---------- */
-const BANK={
-  school:[['📏','ruler'],['✏️','pencil'],['📚','books'],['🎒','bag'],['🖍️','crayon'],['✂️','scissors'],['📖','book'],['🏫','school']],
-  toys:[['🧸','teddy bear'],['🪁','kite'],['⚽','ball'],['🚗','car'],['🪀','yo-yo'],['🧩','puzzle'],['🎈','balloon'],['🪆','doll']],
-  animals:[['🐱','cat'],['🐶','dog'],['🐰','rabbit'],['🐢','tortoise'],['🐟','fish'],['🐦','bird'],['🐘','elephant'],['🦒','giraffe'],['🐒','monkey'],['🐄','cow'],['🐔','hen'],['🦆','duck']],
-  food:[['🍞','bread'],['🍌','banana'],['🍚','rice'],['🥛','milk'],['🥚','egg'],['🍉','watermelon'],['🍪','biscuit'],['🍎','apple'],['🥕','carrot'],['🍦','ice cream']],
-  clothes:[['👕','T-shirt'],['👖','trousers'],['👗','dress'],['🧢','cap'],['👟','shoes'],['🧦','socks'],['🧥','jacket'],['🎩','hat']],
-  weather:[['☀️','sunny'],['🌧️','rainy'],['💨','windy'],['☁️','cloudy'],['⛈️','stormy']],
-  body:[['👂','ear'],['👃','nose'],['👀','eyes'],['✋','hand'],['🦶','foot'],['👄','mouth'],['🦵','leg']],
-  home:[['🛏️','bed'],['🚪','door'],['🪑','chair'],['🛁','bath'],['🪟','window'],['📺','television'],['🛋️','sofa']],
-};
-const THEMES=Object.keys(BANK);
-const SPELL=['cat','dog','fish','bird','duck','book','bag','pen','desk','ball','kite','doll','milk','egg','rice','cake','bread','apple','sock','shoe','hat','dress','rain','sun','wind','hand','nose','foot','door','bed','chair','school','green','yellow','seven','three','happy','water'];
-const SPELL_PIC={cat:'🐱',dog:'🐶',fish:'🐟',bird:'🐦',duck:'🦆',book:'📖',bag:'🎒',pen:'🖊️',desk:'🪑',ball:'⚽',kite:'🪁',doll:'🪆',milk:'🥛',egg:'🥚',rice:'🍚',cake:'🍰',bread:'🍞',apple:'🍎',sock:'🧦',shoe:'👟',hat:'🎩',dress:'👗',rain:'🌧️',sun:'☀️',wind:'💨',hand:'✋',nose:'👃',foot:'🦶',door:'🚪',bed:'🛏️',chair:'🪑',school:'🏫',green:'🟢',yellow:'🟡',seven:'7️⃣',three:'3️⃣',happy:'😊',water:'💧'};
-
-/* ---------- reading stories (written for this page) ---------- */
-const STORIES=[
- {title:"Mia's Pet",text:"Mia has a pet rabbit. Its name is Coco. Coco is white and fluffy. It has long ears. Coco likes to eat carrots. Every morning, Mia gives Coco some water. Mia loves Coco very much.",qs:[
-  ['What is Mia’s pet?','a rabbit',['a cat','a bird','a fish']],
-  ['What colour is Coco?','white',['black','brown','orange']],
-  ['What does Coco like to eat?','carrots',['bananas','rice','fish']],
-  ['When does Mia give Coco water?','every morning',['every night','on Sunday','after school']],
-  ['Coco has long ___.','ears',['legs','tails','eyes']]]},
- {title:'A Day at the Beach',text:"On Saturday, Adam and his family go to the beach. The weather is sunny and hot. Adam builds a big sandcastle. His sister, Lily, collects shells. Father swims in the sea. Mother reads a book under a tree. At five o’clock, they eat ice cream and go home.",qs:[
-  ['When do they go to the beach?','on Saturday',['on Monday','on Friday','on Sunday']],
-  ['What is the weather like?','sunny and hot',['rainy and cold','windy','cloudy']],
-  ['What does Lily do?','She collects shells.',['She swims in the sea.','She reads a book.','She builds a sandcastle.']],
-  ['Who swims in the sea?','Father',['Mother','Adam','Lily']],
-  ['What do they eat at five o’clock?','ice cream',['bread','cake','rice']]]},
- {title:'My Classroom',text:"My name is Siti. I am in Year 2. My classroom is big and clean. There are twenty desks and twenty chairs. My teacher is Puan Aminah. She is kind. My best friend is Mei Ling. We sit together near the window. We like to read story books.",qs:[
-  ['Which year is Siti in?','Year 2',['Year 1','Year 3','Year 4']],
-  ['How many desks are there?','twenty',['ten','twelve','thirty']],
-  ['Who is Siti’s teacher?','Puan Aminah',['Mei Ling','Puan Siti','Encik Ali']],
-  ['Where do Siti and Mei Ling sit?','near the window',['near the door','at the back','under the tree']],
-  ['What do they like to do?','read story books',['play football','draw pictures','sing songs']]]},
-];
-
-/* ---------- preposition picture ---------- */
+/* ---------- textbook units (Year 2, Super Minds 1 units 5 to 9); questions are written for this page ---------- */
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const he=['Ali','Adam','Daniel','Kumar'],she=['Siti','Lily','Mei Ling','Aisyah'];
+const yes='<span style="color:var(--good)">✔</span>',no='<span style="color:var(--bad)">✘</span>';
+// a yes/no question answered from a tick or a cross
+function yn(o,isYes,yesA,noA,extra){return mc(Object.assign({long:true,explain:isYes?yesA:noA},o),isYes?yesA:noA,[isYes?noA:yesA,...extra])}
+// preposition picture: a table with one thing on it, under it or next to it
 function scene(pos,thing){
   const tbl='<rect x="40" y="70" width="120" height="10" rx="3" fill="#B07A45"/><rect x="50" y="80" width="8" height="50" fill="#8A5A2E"/><rect x="142" y="80" width="8" height="50" fill="#8A5A2E"/><line x1="0" y1="132" x2="200" y2="132" stroke="var(--line)" stroke-width="3"/>';
   const p={on:[100,62],under:[100,124],'next to':[182,124]}[pos];
-  return `<div class="scene"><svg viewBox="0 0 200 140" role="img" aria-label="A ${thing[1]} ${pos} the table">${tbl}<text x="${p[0]}" y="${p[1]}" text-anchor="middle" font-size="40">${thing[0]}</text></svg></div>`;
+  return `<div class="scene"><svg viewBox="0 0 200 140" role="img" aria-label="${thing[1]} ${pos} the table">${tbl}<text x="${p[0]}" y="${p[1]}" text-anchor="middle" font-size="40">${thing[0]}</text></svg></div>`;
 }
+const W=['zero','one','two','three','four','five','six'];
 
-/* ---------- parts of the paper ---------- */
+const UNITS=[
+ {name:'My Free Time',icon:'⚽',desc:'Days of the week, free-time activities, Do you…?',
+  vocab:[['📺','watch TV'],['⚽','play football'],['🚲','ride a bike'],['📖','read a book'],['🏊','swim'],['🎨','draw'],['🎮','play computer games'],['🏸','play badminton']],
+  spell:{swim:'🏊',read:'📖',bike:'🚲',ball:'⚽',draw:'🎨',game:'🎮',play:'🤸'},
+  grammar:[
+   ()=>mc({q:`I watch TV ${blank} Sundays.`,explain:'Use “on” with days: on Sundays, on Monday.',key:'1on'},'on',['in','at','under']),
+   ()=>{const i=R(0,5);return mc({q:`The day after ${DAYS[i]} is ${blank}.`,explain:DAYS.join(', ')+'.',key:'1after'+i},DAYS[i+1],shuffle(DAYS.filter((_,j)=>j!==i+1&&j!==i)))},
+   ()=>{const i=R(1,6);return mc({q:`The day before ${DAYS[i]} is ${blank}.`,explain:DAYS.join(', ')+'.',key:'1before'+i},DAYS[i-1],shuffle(DAYS.filter((_,j)=>j!==i-1&&j!==i)))},
+   ()=>mc({q:'Which two days are the weekend?',long:true,explain:'Saturday and Sunday are the weekend.',key:'1wk'},'Saturday and Sunday',['Monday and Tuesday','Friday and Monday','Wednesday and Thursday']),
+   ()=>{const [a,e]=pick([['play football','⚽'],['ride a bike','🚲'],['watch TV','📺'],['swim','🏊'],['read a book','📖']]),y=Math.random()<.5;
+     return yn({q:`Do you ${a} at the weekend? ${y?yes:no}`,pic:e,key:'1do'+a+y},y,'Yes, I do.','No, I don’t.',['Yes, I am.','No, I can’t.'])},
+   ()=>{const [v,rest,e]=pick([['ride','my bike on Saturdays','🚲'],['play','football on Mondays','⚽'],['watch','TV on Sundays','📺'],['read','a book on Fridays','📖']]);
+     return mc({q:`I ${blank} ${rest}.`,pic:e,explain:`I ${v} ${rest}.`,key:'1v'+v},v,['ride','play','watch','read'].filter(x=>x!==v))},
+  ],
+  story:{title:"Ben's Busy Week",text:"Ben is seven. He is very busy! On Mondays, he plays football. On Tuesdays, he goes swimming. On Wednesdays, he reads books in the library. On Saturdays, he rides his bike with his dad. On Sundays, he watches TV with his family.",qs:[
+   ['What does Ben do on Mondays?','He plays football.',['He goes swimming.','He watches TV.','He rides his bike.']],
+   ['When does Ben go swimming?','on Tuesdays',['on Mondays','on Fridays','on Sundays']],
+   ['Who does Ben ride his bike with?','his dad',['his mum','his sister','his teacher']],
+   ['Where does Ben read books?','in the library',['in the kitchen','at the beach','in the garden']],
+   ['What does Ben do on Sundays?','He watches TV with his family.',['He plays football.','He goes swimming.','He reads books.']]]}},
+ {name:'My Diary',icon:'📔',desc:'Today, tomorrow, my week, writing about my day',
+  vocab:[['📔','diary'],['☀️','sunny'],['🌧️','rainy'],['🎂','birthday'],['🍰','cake'],['🌙','night'],['🌅','morning'],['😊','happy']],
+  spell:{diary:'📔',cake:'🍰',sunny:'☀️',happy:'😊',night:'🌙',rain:'🌧️',today:'📅'},
+  grammar:[
+   ()=>{const i=R(0,5);return mc({q:`Today is ${DAYS[i]}. Tomorrow is ${blank}.`,explain:`After ${DAYS[i]} comes ${DAYS[i+1]}.`,key:'2tom'+i},DAYS[i+1],shuffle(DAYS.filter((_,j)=>j!==i+1&&j!==i)))},
+   ()=>{const i=R(1,6);return mc({q:`Today is ${DAYS[i]}. Yesterday was ${blank}.`,explain:`Before ${DAYS[i]} comes ${DAYS[i-1]}.`,key:'2yes'+i},DAYS[i-1],shuffle(DAYS.filter((_,j)=>j!==i-1&&j!==i)))},
+   ()=>{const d=pick(DAYS);return mc({q:'Which is written correctly?',long:true,explain:'Days of the week always start with a capital letter.',key:'2cap'+d},`On ${d}, I play with my cat.`,[`on ${d.toLowerCase()}, I play with my cat.`,`On ${d.toLowerCase()}, I play with my cat.`,`On ${d}, i play with my cat.`])},
+   ()=>{const one=Math.random()<.5,who=one?pick(['My sister','My brother','Mum','Dad']):pick(['I','We','My friends']),[v,vs,rest]=pick([['read','reads','a book at night'],['help','helps','Mum in the kitchen'],['play','plays','badminton in the evening'],['write','writes','in my diary']]);
+     return mc({q:`${who} ${blank} ${rest}.`,explain:one?`One person → add “s”: ${vs}.`:`I, we, they → no “s”: ${v}.`,key:'2v'+who+v},one?vs:v,[one?v:vs,v+'ing'])},
+   ()=>{const [w,e]=pick(BANKW);return mc({q:'What is the weather like today?',pic:e,long:true,explain:`It is ${w}.`,key:'2w'+w},`It is ${w}.`,BANKW.filter(x=>x[0]!==w).map(x=>`It is ${x[0]}.`))},
+   ()=>mc({q:`Which word do we use to start a diary?`,long:true,explain:'A diary often starts with “Dear Diary,”.',key:'2dear'},'Dear Diary,',['Goodbye Diary,','Thank you,','The end.']),
+  ],
+  story:{title:"Safiyyah's Diary",text:"Dear Diary, today is Saturday. It is sunny and hot. In the morning, I help Mum in the kitchen. We make a chocolate cake. In the afternoon, I play badminton with my brother. At night, I read a story book and write in my diary. I am very happy today!",qs:[
+   ['What day is it?','Saturday',['Sunday','Monday','Friday']],
+   ['What is the weather like?','sunny and hot',['rainy','cold and windy','cloudy']],
+   ['What do Safiyyah and Mum make?','a chocolate cake',['a pizza','a sandwich','ice cream']],
+   ['Who does she play badminton with?','her brother',['her mum','her friend','her teacher']],
+   ['What does she do at night?','She reads and writes in her diary.',['She plays badminton.','She makes a cake.','She watches TV.']]]}},
+ {name:'Living Spaces',icon:'🏠',desc:'Rooms and furniture, There is / There are, Is there…?',
+  vocab:[['🛏️','bed'],['🛋️','sofa'],['🪑','chair'],['🚪','door'],['🪟','window'],['🛁','bath'],['💡','lamp'],['📺','television'],['🍳','kitchen'],['🏠','house']],
+  spell:{bed:'🛏️',sofa:'🛋️',door:'🚪',lamp:'💡',bath:'🛁',house:'🏠',chair:'🪑',table:'🍽️'},
+  grammar:[
+   ()=>{const [q,a]=pick([['Where do you sleep?','in the bedroom'],['Where do you cook?','in the kitchen'],['Where do you take a bath?','in the bathroom'],['Where do you watch TV?','in the living room']]);
+     return mc({q,long:true,explain:`We do that ${a}.`,key:'3room'+a},a,['in the bedroom','in the kitchen','in the bathroom','in the living room','in the garden'].filter(x=>x!==a))},
+   ()=>{const many=Math.random()<.5,[n,s,p]=pick([['four','chair','chairs'],['two','lamp','lamps'],['three','window','windows'],['five','book','books']]);
+     return mc({q:many?`There ${blank} ${n} ${p} in the room.`:`There ${blank} a ${s} in the room.`,explain:many?'More than one → There are.':'Only one → There is.',key:'3isare'+many+s},many?'are':'is',[many?'is':'are'])},
+   ()=>{const room=shuffle([['🛏️','bed'],['🪑','chair'],['💡','lamp'],['🛋️','sofa'],['📺','television'],['🛁','bath']]),inRoom=room.slice(0,3),t=pick(room),y=inRoom.includes(t);
+     return yn({q:`Look at the room. Is there a ${t[1]}?`,pic:inRoom.map(x=>x[0]).join(''),picRow:true,key:'3isthere'+inRoom.join()+t[1]},y,'Yes, there is.','No, there isn’t.',['Yes, there are.','No, there aren’t.'])},
+   ()=>{const n=R(2,6),[e,w]=pick([['🪑','chairs'],['📚','books'],['🧸','teddy bears'],['🐱','cats']]);
+     return mc({q:`How many ${w} are there?`,pic:e.repeat(n),picRow:true,long:true,explain:`Count them: ${W[n]}.`,key:'3hm'+n+w},`There are ${W[n]} ${w}.`,[`There are ${W[n+1>6?n-1:n+1]} ${w}.`,`There is ${W[n]} ${w}.`,`There are ${W[n-1>1?n-1:n+2]} ${w}.`])},
+   ()=>{const y=Math.random()<.5;return yn({q:`Are there any books on the shelf? ${y?'📚📚':'(empty)'}`,key:'3any'+y},y,'Yes, there are.','No, there aren’t.',['Yes, there is.','No, there isn’t.'])},
+  ],
+  story:{title:"Grandma's House",text:"Grandma's house is old and big. There are five rooms. There is a big brown sofa in the living room. There are two cats under the table. In the kitchen, there is a big red fridge. Is there a garden? Yes, there is! There are lots of flowers in it.",qs:[
+   ['How many rooms are there?','five',['two','three','four']],
+   ['Where is the sofa?','in the living room',['in the kitchen','in the garden','in the bedroom']],
+   ['Where are the cats?','under the table',['on the sofa','in the garden','in the kitchen']],
+   ['What colour is the fridge?','red',['brown','white','blue']],
+   ['What is in the garden?','lots of flowers',['two cats','a big sofa','a red fridge']]]}},
+ {name:'Get Dressed',icon:'👕',desc:'Clothes, this / these, He’s wearing…',
+  vocab:[['👕','T-shirt'],['👖','trousers'],['👗','dress'],['🧢','cap'],['👟','shoes'],['🧦','socks'],['🧥','jacket'],['🎩','hat'],['🩳','shorts'],['🧣','scarf']],
+  spell:{hat:'🎩',sock:'🧦',shoe:'👟',dress:'👗',coat:'🧥',skirt:'👗',shorts:'🩳',cap:'🧢'},
+  grammar:[
+   ()=>{const many=Math.random()<.5,[s,p]=pick([['hat','shoes'],['cap','socks'],['dress','trousers'],['T-shirt','shorts']]);
+     return mc({q:many?`Do you like ${blank} ${p}?`:`Do you like ${blank} ${s}?`,explain:many?'More than one → these.':'Only one → this.',key:'4this'+many+s},many?'these':'this',[many?'this':'these'])},
+   ()=>{const who=pick([['He','👦'],['She','👧']]);return mc({q:`${who[0]}’s ${blank} a blue T-shirt.`,pic:who[1]+'👕',explain:`${who[0]}’s wearing a blue T-shirt.`,key:'4wear'+who[0]},'wearing',['wear','wears','wore'])},
+   ()=>{const g=Math.random()<.5,p=g?['She','👧','she']:['He','👦','he'],items=shuffle([['🧢','cap'],['👟','shoes'],['🧥','jacket'],['🎩','hat'],['🧣','scarf']]),on=items.slice(0,2),t=pick(items),y=on.includes(t),isPl=t[1]==='shoes';
+     const yesA=`Yes, ${p[2]} is.`,noA=`No, ${p[2]} isn’t.`;
+     return yn({q:`Is ${p[2]} wearing ${isPl?'':'a '}${t[1]}?`,pic:p[1]+on.map(x=>x[0]).join(''),picRow:true,key:'4is'+p[2]+on.join()+t[1]},y,yesA,noA,[`Yes, ${p[2]} does.`,`No, ${p[2]} can’t.`])},
+   ()=>{const [a,b]=pick([['socks','feet'],['hat','head'],['gloves','hands'],['shoes','feet'],['scarf','neck']]);return mc({q:`We wear ${a} on our ${blank}.`,explain:`${a} → ${b}.`,key:'4on'+a},b,['head','feet','hands','neck'].filter(x=>x!==b))},
+   ()=>{const [s,p,w]=pick([['dress','dresses',['dresss','dressies']],['scarf','scarves',['scarfs','scarfes']],['sock','socks',['sockes','sockies']],['watch','watches',['watchs','watchies']]]);
+     return mc({q:`one ${s}, two ${blank}`,explain:`one ${s}, two ${p}.`,key:'4pl'+s},p,w)},
+  ],
+  story:{title:'Party Clothes',text:"It is Amy's birthday party. Amy is wearing a pink dress and white shoes. Her brother, Tom, is wearing a green T-shirt and blue trousers. Dad is wearing a black hat. “I like your hat, Dad!” says Amy. Dad smiles.",qs:[
+   ['Whose birthday is it?','Amy’s',['Tom’s','Dad’s','Mum’s']],
+   ['What is Amy wearing?','a pink dress',['a green T-shirt','blue trousers','a black hat']],
+   ['What colour are Amy’s shoes?','white',['pink','black','blue']],
+   ['Who is wearing a green T-shirt?','Tom',['Amy','Dad','Mum']],
+   ['What does Amy like?','Dad’s hat',['her shoes','Tom’s T-shirt','the cake']]]}},
+ {name:'The Robot',icon:'🤖',desc:'My body, I can / I can’t, Can you…?',
+  vocab:[['👂','ear'],['👃','nose'],['👀','eyes'],['✋','hand'],['🦶','foot'],['👄','mouth'],['🦵','leg'],['💪','arm'],['🤖','robot']],
+  spell:{arm:'💪',leg:'🦵',head:'🙂',hand:'✋',foot:'🦶',nose:'👃',ear:'👂',eyes:'👀'},
+  grammar:[
+   ()=>{const [a,e]=pick([['swim','🏊'],['ride a bike','🚲'],['jump','🤸'],['sing','🎤'],['dance','💃']]),y=Math.random()<.5;
+     return yn({q:`Can you ${a}? ${y?yes:no}`,pic:e,key:'5can'+a+y},y,'Yes, I can.','No, I can’t.',['Yes, I do.','No, I am not.'])},
+   ()=>{const y=Math.random()<.5,[a,e]=pick([['stand on one leg','🦩'],['touch my toes','🙆'],['swim','🏊'],['climb a tree','🌳']]);
+     return mc({q:`${y?yes:no} I ${blank} ${a}.`,pic:e,explain:y?'Tick ✔ → can.':'Cross ✘ → can’t.',key:'5i'+a+y},y?'can':'can’t',[y?'can’t':'can','cans'])},
+   ()=>{const [a,ok]=pick([['Can a fish swim?',1],['Can a bird fly?',1],['Can a cat fly?',0],['Can a dog read?',0],['Can a monkey climb?',1],['Can a tortoise run fast?',0]]);
+     return mc({q:a,long:true,explain:ok?'Yes, it can.':'No, it can’t.',key:'5it'+a},ok?'Yes, it can.':'No, it can’t.',[ok?'No, it can’t.':'Yes, it can.','Yes, it is.'])},
+   ()=>{const [n,w,e]=pick([['two','eyes','👀'],['ten','fingers','🙌'],['one','nose','👃'],['two','ears','👂👂'],['ten','toes','🦶🦶'],['two','legs','🦵🦵']]);return mc({q:`Look at the picture. I have ${n} ${blank}.`,pic:e,explain:`I have ${n} ${w}.`,key:'5have'+w},w,shuffle(['eyes','fingers','nose','ears','toes','legs','mouth'].filter(x=>x!==w)))},
+   ()=>{const who=pick([...he,...she]);return mc({q:`${who} ${blank} ride a bike.`,explain:'After “can” the verb stays the same: can ride.',key:'5who'+who},'can',['cans','can to','is can'])},
+  ],
+  story:{title:'Robo the Robot',text:"This is Robo. Robo is my robot. He has a square head and two big blue eyes. He has long arms and short legs. Robo can sing and dance. He can’t swim. Every Saturday, Robo helps me clean my room!",qs:[
+   ['What shape is Robo’s head?','square',['round','long','small']],
+   ['What colour are Robo’s eyes?','blue',['green','red','black']],
+   ['Robo has short ___.','legs',['arms','eyes','ears']],
+   ['What can’t Robo do?','swim',['sing','dance','clean']],
+   ['When does Robo help clean the room?','every Saturday',['every Monday','every night','every morning']]]}},
+ {name:'At the Beach',icon:'🏖️',desc:'Holidays, Let’s…, Where’s / Where are…?',
+  vocab:[['🏖️','beach'],['🌊','sea'],['🐚','shell'],['🏰','sandcastle'],['🎸','guitar'],['🍦','ice cream'],['🪁','kite'],['⛵','boat'],['🐠','fish']],
+  spell:{sea:'🌊',sand:'🏖️',shell:'🐚',boat:'⛵',fish:'🐠',kite:'🪁',sun:'☀️',beach:'🏖️'},
+  grammar:[
+   ()=>{const [v,rest]=pick([['play','the guitar'],['fly','a kite'],['build','a sandcastle'],['swim','in the sea']]);return mc({q:`Let’s ${blank} ${rest}.`,explain:`Let’s ${v} ${rest}.`,key:'6lets'+v},v,[v+'s',v+'ing','to '+v])},
+   ()=>{const pos=pick(['on','under','next to']),th=pick([['🐚','shell'],['⚽','ball'],['🎸','guitar'],['🍦','ice cream']]);
+     return mc({q:`Where’s the ${th[1]}?`,fig:scene(pos,th),long:true,explain:`It’s ${pos} the table.`,key:'6where'+pos+th[1]},`It’s ${pos} the table.`,['on','under','next to','in'].filter(x=>x!==pos).map(p=>`It’s ${p} the table.`))},
+   ()=>{const many=Math.random()<.5,[s,p]=pick([['book','books'],['shell','shells'],['kite','kites']]);
+     return mc({q:many?`${blank} the orange ${p}?`:`${blank} the blue ${s}?`,explain:many?'More than one → Where are…?':'Only one → Where’s…?',key:'6wh'+many+s},many?'Where are':'Where’s',[many?'Where’s':'Where are','What are'])},
+   ()=>{const [thing,col]=pick([['sea','blue'],['sand','yellow'],['banana','yellow'],['grass','green']]);return mc({q:`The ${thing} is ${blank}.`,explain:`The ${thing} is ${col}.`,key:'6col'+thing},col,shuffle(['yellow','green','blue','red','black','purple'].filter(c=>c!==col)))},
+   ()=>{const [a,b]=pick([['hot','cold'],['big','small'],['happy','sad'],['fast','slow'],['up','down']]);return mc({q:`The opposite of <b>${a}</b> is`,explain:`${a} ↔ ${b}`,key:'6op'+a},b,shuffle(['long','wet','loud','clean','soft']).slice(0,3))},
+  ],
+  story:{title:'A Day at the Beach',text:"On Saturday, Adam and his family go to the beach. The weather is sunny and hot. Adam builds a big sandcastle. His sister, Lily, collects shells. Father swims in the sea. Mother reads a book under a tree. At five o’clock, they eat ice cream and go home.",qs:[
+   ['When do they go to the beach?','on Saturday',['on Monday','on Friday','on Sunday']],
+   ['What is the weather like?','sunny and hot',['rainy and cold','windy','cloudy']],
+   ['What does Lily do?','She collects shells.',['She swims in the sea.','She reads a book.','She builds a sandcastle.']],
+   ['Who swims in the sea?','Father',['Mother','Adam','Lily']],
+   ['What do they eat at five o’clock?','ice cream',['bread','cake','rice']]]}},
+];
+const BANKW=[['sunny','☀️'],['rainy','🌧️'],['windy','💨'],['cloudy','☁️']];
+
+/* ---------- the five parts of the paper; each question comes from one unit ---------- */
+function vocabQ(u,listen){
+  const items=shuffle(u.vocab),r=items[0],w=items.slice(1,4);
+  return listen?mc({speak:r[1],q:'Listen. Tap the right picture.',emo:true,explain:`You heard “${r[1]}”: ${r[0]}`,key:'L'+r[1],ansText:r[1]},r[0],w.map(x=>x[0]))
+              :mc({q:'What is this?',pic:r[0],long:r[1].length>10,explain:`${r[0]} → ${r[1]}`,key:'V'+r[1]},r[1],w.map(x=>x[1]));
+}
+function spellQ(u){
+  const w=pick(Object.keys(u.spell)),pic=u.spell[w];
+  if(Math.random()<.5){
+    const i=R(1,w.length-1),letter=w[i],pool=shuffle('abcdefghijklmnoprstuwy'.split('').filter(c=>c!==letter)).slice(0,3);
+    return mc({q:'Which letter is missing?',pic,word:w.split('').map((c,j)=>j===i?'?':c),explain:`It is spelt ${w.toUpperCase().split('').join('-')}.`,key:'S'+w+i},letter,pool)}
+  let t=shuffle(w.split(''));let g=0;while(t.join('')===w&&g++<10)t=shuffle(w.split(''));
+  return {tiles:t,target:w,pic,q:'Tap the letters to spell the word.',explain:`It is spelt ${w.toUpperCase().split('').join('-')}.`,key:'T'+w,ansText:w};
+}
 const PARTS={
- A:{name:'Listening',icon:'👂',n:5,desc:'Listen and choose the picture',make:()=>{
-   const th=pick(THEMES),items=shuffle(BANK[th]),r=items[0],w=items.slice(1,4);
-   return mc({speak:r[1],q:'Listen. Tap the right picture.',emo:true,explain:`You heard “${r[1]}”: ${r[0]}`,key:'L'+r[1],ansText:r[1]},r[0],w.map(x=>x[0]))}},
- B:{name:'Vocabulary',icon:'🔤',n:6,desc:'Name the picture',make:()=>{
-   const th=pick(THEMES),items=shuffle(BANK[th]),r=items[0];
-   return mc({q:'What is this?',pic:r[0],explain:`${r[0]} is a${/^[aeiou]/.test(r[1])?'n':''} ${r[1]}.`,key:'V'+r[1]},r[1],items.slice(1).map(x=>x[1]))}},
- C:{name:'Spelling',icon:'✏️',n:5,desc:'Missing letters and mixed-up words',make:()=>{
-   const w=pick(SPELL);
-   if(Math.random()<.5&&w.length>=3){
-     const i=R(1,w.length-1),letter=w[i],pool=shuffle('abcdefghijklmnoprstuwy'.split('').filter(c=>c!==letter)).slice(0,3);
-     return mc({q:'Which letter is missing?',pic:SPELL_PIC[w],word:w.split('').map((c,j)=>j===i?'?':c),explain:`It is spelt ${w.toUpperCase().split('').join('-')}.`,key:'S'+w+i},letter,pool)}
-   let t=shuffle(w.split(''));let g=0;while(t.join('')===w&&g++<10)t=shuffle(w.split(''));
-   return {tiles:t,target:w,pic:SPELL_PIC[w],q:'Tap the letters to spell the word.',explain:`It is spelt ${w.toUpperCase().split('').join('-')}.`,key:'T'+w,ansText:w}}},
- D:{name:'Grammar',icon:'📝',n:9,desc:'a/an, is/are, has/have, in/on/under …',make:()=>pick(GRAMMAR)()},
- E:{name:'Reading',icon:'📖',n:5,desc:'Read a story and answer',make:null},
+ A:{name:'Listening',icon:'👂',make:u=>vocabQ(u,true)},
+ B:{name:'Vocabulary',icon:'🔤',make:u=>vocabQ(u,false)},
+ C:{name:'Spelling',icon:'✏️',make:spellQ},
+ D:{name:'Grammar',icon:'📝',make:u=>pick(u.grammar)()},
+ E:{name:'Reading',icon:'📖',make:null},
 };
 const ORDER=['A','B','C','D','E'];
-const he=['Ali','Adam','Daniel','Kumar'],she=['Siti','Lily','Mei Ling','Aisyah'];
-const GRAMMAR=[
- ()=>{const [w,an]=pick([['apple',1],['egg',1],['orange',1],['umbrella',1],['elephant',1],['ice cream',1],['banana',0],['pencil',0],['dog',0],['kite',0],['book',0],['owl',1]]);
-   return mc({q:`I have ${blank} ${w}.`,explain:`Use “an” before a, e, i, o, u sounds: ${an?'an':'a'} ${w}.`,key:'G-an'+w},an?'an':'a',[an?'a':'an'])},
- ()=>{const many=Math.random()<.5,[n,s,p]=pick([['three','cat','cats'],['two','bird','birds'],['four','book','books'],['five','apple','apples']]);
-   return mc({q:many?`There ${blank} ${n} ${p} on the mat.`:`There ${blank} a ${s} on the mat.`,explain:many?'More than one → are.':'Only one → is.',key:'G-isare'+many+s},many?'are':'is',[many?'is':'are'])},
- ()=>{const one=Math.random()<.5,who=one?pick([...he,...she]):pick(['We','They','I','You']);
-   return mc({q:`${who} ${blank} a red bag.`,explain:one?`He, she or one name → has.`:`I, you, we, they → have.`,key:'G-has'+who},one?'has':'have',[one?'have':'has'])},
- ()=>{const pos=pick(['on','under','next to']),th=pick([['🐱','cat'],['⚽','ball'],['🎒','bag'],['🐶','dog']]);
-   return mc({q:`The ${th[1]} is ${blank} the table.`,fig:scene(pos,th),explain:`Look at the picture: the ${th[1]} is ${pos} the table.`,key:'G-pos'+pos+th[1]},pos,['on','under','next to','in'].filter(x=>x!==pos))},
- ()=>{const [s,p,w]=pick([['box','boxes',['boxs','boxies']],['bus','buses',['buss','busies']],['baby','babies',['babys','babyes']],['watch','watches',['watchs','watchies']],['dog','dogs',['doges','dogies']],['brush','brushes',['brushs','brushies']]]);
-   return mc({q:`one ${s}, two ${blank}`,explain:`one ${s}, two ${p}.`,key:'G-pl'+s},p,w)},
- ()=>{const [a,ok]=pick([['Can a fish swim?',1],['Can a bird fly?',1],['Can a cat fly?',0],['Can a dog read?',0],['Can a monkey climb?',1],['Can a tortoise run fast?',0]]);
-   return mc({q:a,long:true,explain:ok?'Yes, it can.':'No, it can’t.',key:'G-can'+a},ok?'Yes, it can.':'No, it can’t.',[ok?'No, it can’t.':'Yes, it can.','Yes, it is.'])},
- ()=>{const D=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],i=R(0,5);
-   return mc({q:`The day after ${D[i]} is ${blank}.`,explain:D.join(', ')+'.',key:'G-day'+i},D[i+1],shuffle(D.filter((_,j)=>j!==i+1&&j!==i)))},
- ()=>{const w=pick(BANK.weather);return mc({q:'What is the weather like?',pic:w[0],long:true,explain:`It is ${w[1]}.`,key:'G-w'+w[1]},`It is ${w[1]}.`,BANK.weather.filter(x=>x!==w).map(x=>`It is ${x[1]}.`))},
- ()=>{const one=Math.random()<.5,who=one?pick([...he,...she]):pick(['I','We','They']),[v,vs]=pick([['play','plays'],['read','reads'],['swim','swims'],['eat','eats']]);
-   const rest={play:'football every Sunday',read:'a book every night',swim:'in the pool on Saturday',eat:'rice for lunch'}[v];
-   return mc({q:`${who} ${blank} ${rest}.`,explain:one?`One person (he/she) → add “s”: ${vs}.`:`I, we, they → no “s”: ${v}.`,key:'G-v'+who+v},one?vs:v,[one?v:vs,v+'ing'])},
- ()=>{const [q,a]=pick([[`${blank} is your name?`,'What'],[`${blank} do you live?`,'Where'],[`${blank} is your teacher?`,'Who'],[`${blank} old are you?`,'How']]);
-   return mc({q,explain:{What:'What → a thing or a name.',Where:'Where → a place.',Who:'Who → a person.',How:'How old → age.'}[a],key:'G-wh'+a},a,['What','Where','Who','How'].filter(x=>x!==a))},
- ()=>{const n=R(2,6),it=pick([['🍎','apples'],['🐟','fish'],['🎈','balloons'],['⭐','stars'],['🐤','chicks']]),W=['','one','two','three','four','five','six'];
-   return mc({q:`How many ${it[1]} are there?`,pic:it[0].repeat(n),picRow:true,long:true,explain:`Count them: ${W[n]}.`,key:'G-hm'+n+it[1]},`There are ${W[n]} ${it[1]}.`,[`There are ${W[n+1>6?n-1:n+1]} ${it[1]}.`,`There is ${W[n]} ${it[1]}.`,`There are ${W[n-1>1?n-1:n+2]} ${it[1]}.`])},
- ()=>{const many=Math.random()<.5,[s,p]=pick([['shoe','shoes'],['pencil','pencils'],['book','books'],['sock','socks']]);
-   return mc({q:many?`${blank} are my ${p}.`:`${blank} is my ${s}.`,explain:many?'More than one → These are.':'Only one → This is.',key:'G-this'+many+s},many?'These':'This',[many?'This':'These'])},
- ()=>{const [a,b]=pick([['big','small'],['hot','cold'],['happy','sad'],['tall','short'],['fast','slow'],['open','close'],['up','down'],['old','new']]),others=['long','wet','loud','clean','soft'];
-   return mc({q:`The opposite of <b>${a}</b> is`,explain:`${a} ↔ ${b}`,key:'G-op'+a},b,shuffle(others).slice(0,3))},
- ()=>{const [good,bad]=pick([['My name is Siti.',['my name is siti.','My name is siti','my name is Siti.']],['I like to play football.',['i like to play football.','I like to play football','i like to play Football.']],['She has a cat.',['she has a cat.','She has a cat','she has a Cat.']],['Adam lives in Ipoh.',['adam lives in ipoh.','Adam lives in ipoh.','adam lives in Ipoh']]]);
-   return mc({q:'Which sentence is written correctly?',long:true,explain:'Start with a capital letter and end with a full stop. Names, places and “I” have capitals too.',key:'G-cap'+good},good,bad)},
- ()=>{const [thing,col]=pick([['banana','yellow'],['grass','green'],['sky','blue'],['milk','white'],['strawberry','red'],['orange','orange']]);
-   return mc({q:`The ${thing} is ${blank}.`,explain:`The ${thing} is ${col}.`,key:'G-col'+thing},col,shuffle(['yellow','green','blue','white','red','orange','black','purple'].filter(c=>c!==col)))},
-];
+const FINAL={A:5,B:6,C:5,D:10,E:4},UNITROUND={A:2,B:2,C:2,D:3,E:3};
+function storyQs(ui,n){const s=UNITS[ui].story;return shuffle(s.qs).slice(0,n).map(([q,r,w])=>mc({story:s,q,long:true,unit:ui,part:'E',explain:`The story says: ${r}.`,key:'E'+q},r,shuffle(w)))}
+function makePart(k,n,units){
+  if(k==='E')return storyQs(pick(units),n);
+  const qs=[],seen=new Set(),order=shuffle(units);let g=0;
+  while(qs.length<n&&g++<400){const ui=order[(qs.length+g)%order.length],q=PARTS[k].make(UNITS[ui]);if(seen.has(q.key))continue;seen.add(q.key);Object.assign(q,{part:k,unit:ui});qs.push(q)}
+  return qs;
+}
 
 /* ---------- screens ---------- */
 const app=document.getElementById('app');
 let G=null;
 const stars=n=>[1,2,3].map(i=>`<span class="${i<=n?'on':''}">★</span>`).join('');
 const starsFor=(c,n)=>c/n>=.9?3:c/n>=.7?2:c/n>=.5?1:0;
+const sum=o=>Object.values(o).reduce((a,b)=>a+b,0);
 function header(sub){return `<a class="crumb" href="../">← All subjects</a><div class="top">${cat('happy')}<div><h1>English</h1><p>${sub}</p></div><button class="snd" id="snd" aria-pressed="${store.sound}">${store.sound?'🔊 Sound on':'🔇 Sound off'}</button></div>`}
 function wireSound(){const b=document.getElementById('snd');b.onclick=()=>{store.sound=!store.sound;save();b.setAttribute('aria-pressed',store.sound);b.textContent=store.sound?'🔊 Sound on':'🔇 Sound off';if(store.sound)ding()}}
 function home(){
-  G=null;const total=ORDER.reduce((s,k)=>s+PARTS[k].n,0);
-  app.innerHTML=header('Year 2')+`<div class="card hero"><h2>Final Assessment</h2><p>${total} questions in 5 parts, just like the real exam. Finish it and get your certificate!</p>
-   <div class="parts">${ORDER.map(k=>`<div><b>${k}</b>${PARTS[k].icon} ${PARTS[k].name} <small style="color:var(--muted)">(${PARTS[k].n})</small><span class="st">${stars(store.best[k]||0)}</span></div>`).join('')}</div>
+  G=null;const total=sum(FINAL);
+  app.innerHTML=header('Year 2 · Super Minds')+`<div class="card hero"><h2>Final Assessment</h2><p>${total} questions from all 6 units, in 5 parts like the real exam. Finish it and get your certificate!</p>
+   <div class="parts">${ORDER.map(k=>`<div><b>${k}</b>${PARTS[k].icon} ${PARTS[k].name} <small style="color:var(--muted)">(${FINAL[k]})</small></div>`).join('')}</div>
    <button class="go" id="final">Start the Final Assessment</button>
    <p class="best">${store.best.final!=null?`Best score so far: ${store.best.final}/${total}`:'Tip: turn the sound up for Part A.'}</p></div>
-   <div class="card" style="margin-top:14px"><p class="lbl">Or revise one part (10 questions)</p><div class="rev">${ORDER.map(k=>`<button data-p="${k}">${PARTS[k].icon} Part ${k}: ${PARTS[k].name}<span>${PARTS[k].desc}</span></button>`).join('')}</div></div>
+   <div class="card" style="margin-top:14px"><p class="lbl">Or revise one unit (${sum(UNITROUND)} questions)</p><div class="rev">${UNITS.map((u,i)=>`<button data-u="${i}">${u.icon} Unit ${i+1}: ${u.name} <em>${stars(store.best['u'+i]||0)}</em><span>${u.desc}</span></button>`).join('')}</div></div>
    <p class="foot">Careful! A wrong answer goes BOOM 💥 · Good luck in your exam, Safiyyah!</p>`;
   document.getElementById('final').onclick=()=>{actx();start('final')};
-  app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{actx();start(b.dataset.p)});
+  app.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{actx();start(+b.dataset.u)});
   wireSound();
 }
-function makePart(k,n){
-  if(k==='E'){const st=shuffle(STORIES);const out=[];let s=0;
-    while(out.length<n){const story=st[s++%st.length];for(const [q,r,w] of shuffle(story.qs)){if(out.length>=n)break;out.push(mc({story,q,long:true,explain:`The story says: ${r}.`,key:'E'+q},r,shuffle(w)))}if(n<=5)break}
-    return out.map(q=>Object.assign(q,{part:k}))}
-  const qs=[],seen=new Set();let g=0;
-  while(qs.length<n&&g++<400){const q=PARTS[k].make();if(seen.has(q.key))continue;seen.add(q.key);q.part=k;qs.push(q)}
-  return qs;
-}
 function start(mode){
-  let qs;
-  if(mode==='final')qs=ORDER.flatMap(k=>makePart(k,PARTS[k].n));
-  else qs=mode==='E'?makePart('E',10).slice(0,10):makePart(mode,10);
+  const all=UNITS.map((_,i)=>i),plan=mode==='final'?FINAL:UNITROUND,units=mode==='final'?all:[mode];
+  const qs=ORDER.flatMap(k=>makePart(k,plan[k],units));
   G={mode,qs,i:0,score:0,done:false,wrong:[],built:[],byPart:{}};play();
 }
+const title=()=>G.mode==='final'?'Final Assessment':`Unit ${G.mode+1}: ${UNITS[G.mode].name}`;
 function play(){
   const q=G.qs[G.i],N=G.qs.length,P=PARTS[q.part];
-  let body=`<span class="tag">Part ${q.part} · ${P.name}</span>`;
+  let body=`<span class="tag">Part ${q.part} · ${P.name} · Unit ${q.unit+1}</span>`;
   if(q.story)body+=`<div class="story"><h3>${q.story.title}</h3>${q.story.text}</div>`;
   if(q.speak)body+=`<div class="say"><button id="say">🔊 Listen</button></div>`;
   body+=`<p class="q">${q.q}</p>`;
@@ -332,7 +393,7 @@ function play(){
     <div class="tiles">${q.tiles.map((c,j)=>`<button data-t="${j}" ${G.done||G.built.includes(j)?'disabled':''}>${c}</button>`).join('')}</div>
     ${G.done?'':`<button class="undo" id="undo" ${G.built.length?'':'disabled'}>⌫ Undo</button>`}`;
   }
-  app.innerHTML=header(G.mode==='final'?'Final Assessment':`Revise Part ${G.mode}: ${P.name}`)+`<div class="hud"><span>${G.i+1}/${N}</span><div class="prog"><i style="width:${G.i/N*100}%"></i></div><span>★ ${G.score}</span></div>
+  app.innerHTML=header(title())+`<div class="hud"><span>${G.i+1}/${N}</span><div class="prog"><i style="width:${G.i/N*100}%"></i></div><span>★ ${G.score}</span></div>
   <div class="card">${body}<div id="fb"></div></div>
   <div class="row" style="justify-content:center"><button class="btn" id="quit">Stop</button></div>`;
   wireSound();
@@ -373,15 +434,17 @@ function confetti(){
 }
 function result(){
   const N=G.qs.length,s=starsFor(G.score,N),pct=Math.round(G.score/N*100);
-  if(G.mode==='final'){if((store.best.final||0)<G.score)store.best.final=G.score;ORDER.forEach(k=>{const b=G.byPart[k];if(b){const st=starsFor(b.c,b.n);if((store.best[k]||0)<st)store.best[k]=st}})}
-  else if((store.best[G.mode]||0)<s)store.best[G.mode]=s;
+  if(G.mode==='final'){if((store.best.final||0)<G.score)store.best.final=G.score}
+  else if((store.best['u'+G.mode]||0)<s)store.best['u'+G.mode]=s;
   save();
-  const medal=pct>=90?['🥇','Gold! You are ready for the exam!']:pct>=70?['🥈','Silver! Almost there. Revise your mistakes below.']:pct>=50?['🥉','Bronze! Good try. Practise the parts with fewer stars.']:['💪','Keep going! Try one part at a time.'];
-  app.innerHTML=header(G.mode==='final'?'Final Assessment':`Revise Part ${G.mode}`)+`<div class="card cert pop">
+  const medal=pct>=90?['🥇','Gold! You are ready for the exam!']:pct>=70?['🥈','Silver! Almost there. Revise your mistakes below.']:pct>=50?['🥉','Bronze! Good try. Revise the units below.']:['💪','Keep going! Try one unit at a time.'];
+  const weak=[...new Set(G.wrong.map(q=>q.unit))].sort();
+  app.innerHTML=header(title())+`<div class="card cert pop">
    <p class="lbl" style="color:var(--muted)">Certificate</p><div class="medal">${medal[0]}</div>
    <div class="big">${G.score}/${N}</div><div class="stars">${stars(s)}</div>
    <p style="font-weight:800;font-size:1.15rem;margin:6px 0">${medal[1]}</p>
    ${G.mode==='final'?`<div class="bypart">${ORDER.map(k=>{const b=G.byPart[k]||{c:0,n:0};return `<div><span>Part ${k} ${PARTS[k].name}</span><span>${b.c}/${b.n}</span></div>`}).join('')}</div>`:''}
+   ${G.mode==='final'&&weak.length?`<p style="margin:8px 0 0"><b>Revise:</b> ${weak.map(i=>`Unit ${i+1} ${UNITS[i].name}`).join(', ')}</p>`:''}
    ${G.wrong.length?`<div class="wrongs"><p class="lbl">Look at these again</p>${G.wrong.map(q=>`<div>${q.speak?'🔊 “'+q.speak+'”':plain(q.q)} → <span>${plain(answerText(q))}</span></div>`).join('')}</div>`:''}
    <div class="row"><button class="btn main" id="again">Try again</button><button class="btn" id="menu">Back</button></div></div>`;
   wireSound();
