@@ -12,13 +12,13 @@
 /* Layout: a cat-guided home with one big tile per school subject; live subjects in colour, upcoming ones dashed. */
 :root{
   --bg:#F2F7F5; --surface:#FFFFFF; --ink:#1D2A31; --muted:#58696F; --line:#D5E4DF; --sun:#F2B33D;
-  --pi:#3A8F36; --mt:#1F6E94; --en:#C2306B; --bm:#D85F22; --sn:#6A4C9C;
+  --pi:#3A8F36; --mt:#1F6E94; --en:#C2306B; --bm:#D85F22; --sn:#6A4C9C; --ba:#0F7C7A;
   --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif; --body:"Nunito","Segoe UI",system-ui,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root{
   --bg:#0F191C; --surface:#172529; --ink:#E7F0ED; --muted:#9DB2AC; --line:#2A3F40; --sun:#F5C25B;
-  --pi:#78C873; --mt:#5FAED6; --en:#EE6C9C; --bm:#F28D58; --sn:#A98BDB; color-scheme:dark}}
+  --pi:#78C873; --mt:#5FAED6; --en:#EE6C9C; --bm:#F28D58; --sn:#A98BDB; --ba:#4FC3BC; color-scheme:dark}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 .wrap{max-width:860px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -64,6 +64,7 @@ a.sub:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
     <a class="sub" href="pendidikan-islam/" style="--c:var(--pi)"><span class="ic">ع</span><span class="tag">Buka</span><h2>Pendidikan Islam</h2><p>Al-Quran, Jawi, Akidah, Ibadah, Adab</p></a>
     <a class="sub" href="matematik/" style="--c:var(--mt)"><span class="ic">÷</span><span class="tag">Buka</span><h2>Matematik</h2><p>Year 2 in English: numbers, + − × ÷, fractions, decimals</p></a>
     <a class="sub" href="english/" style="--c:var(--en)"><span class="ic">Aa</span><span class="tag">Buka</span><h2>English</h2><p>Year 2 final assessment</p></a>
+    <a class="sub" href="bahasa-arab/" style="--c:var(--ba)"><span class="ic">ع</span><span class="tag">Buka</span><h2>Bahasa Arab</h2><p>Ujian Akhir (UASA) Tahun 2</p></a>
     <a class="sub" href="bahasa-melayu/" style="--c:var(--bm)"><span class="ic">Bm</span><span class="tag">Buka</span><h2>Bahasa Melayu</h2><p>Bina ayat berdasarkan gambar</p></a>
     <div class="sub soon" style="--c:var(--sn)"><span class="ic">✿</span><span class="tag">Akan datang</span><h2>Sains</h2><p>Alam di sekeliling kita</p></div>
   </main>

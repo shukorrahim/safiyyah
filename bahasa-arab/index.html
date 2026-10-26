@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Bahasa Arab · Safiyyah Belajar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Noto+Naskh+Arabic:wght@500;700&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: start card (full UASA-style paper or one section to practise) -> one question at a time, sections أ to ح, tap answers only -> certificate with stars and mistakes to review. */
+:root{
+  --bg:#F2F7F5; --surface:#FFFFFF; --ink:#1D2A31; --muted:#58696F; --line:#D5E4DF; --sun:#F2B33D;
+  --en:#0F7C7A; --en-soft:#DDF1EF; --good:#278A4C; --good-bg:#E3F4E8; --bad:#C8463F; --bad-bg:#FBE7E5;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif; --body:"Nunito","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0F191C; --surface:#172529; --ink:#E7F0ED; --muted:#9DB2AC; --line:#2A3F40; --sun:#F5C25B;
+  --en:#4FC3BC; --en-soft:#11302E; --good:#5CCB83; --good-bg:#173525; --bad:#F07E77; --bad-bg:#3A1F1E; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);-webkit-text-size-adjust:100%;overflow-x:hidden}
+.wrap{max-width:640px;margin:0 auto;padding-block:20px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.crumb{display:inline-block;margin-bottom:14px;font-weight:800;color:var(--muted);text-decoration:none;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.top svg{width:60px;height:60px;flex:none}
+.top h1{font-size:clamp(1.6rem,6vw,2.2rem);font-weight:800;color:var(--en)}
+.top p{margin:0;color:var(--muted);font-size:.95rem}
+.snd{margin-left:auto;flex:none;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-weight:800;font-size:.9rem}
+.card{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:18px}
+.lbl{font-family:var(--display);font-weight:800;font-size:1.15rem;margin:0 0 8px}
+.hero{text-align:center;background:linear-gradient(135deg,var(--en-soft),var(--surface));}
+.hero h2{font-size:clamp(1.6rem,7vw,2.3rem);font-weight:800;color:var(--en)}
+.hero p{margin:6px 0 0}
+.parts{display:grid;gap:8px;margin:14px 0 4px;text-align:left}
+.parts div{display:flex;gap:10px;align-items:center;font-weight:700}
+.parts b{flex:none;width:30px;height:30px;border-radius:50%;background:var(--en);color:#fff;display:grid;place-items:center;font-family:var(--display)}
+.parts .st{margin-left:auto;color:var(--line);letter-spacing:1px}
+.parts .st .on{color:var(--sun)}
+.go{display:block;width:100%;margin-top:14px;border:0;background:var(--en);color:#fff;border-radius:16px;padding:14px;font-family:var(--display);font-weight:800;font-size:1.35rem}
+.best{margin:8px 0 0;color:var(--muted);font-size:.9rem;text-align:center}
+.rev{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.rev button{border:2px solid var(--line);background:var(--bg);border-radius:16px;padding:10px;text-align:left;font-weight:800;min-height:56px}
+.rev em{font-style:normal;color:var(--line);letter-spacing:1px}
+.rev em .on{color:var(--sun)}
+.rev button>span{display:block;color:var(--muted);font-weight:600;font-size:.85rem}
+.hud{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:800;font-variant-numeric:tabular-nums}
+.prog{flex:1;height:12px;background:var(--line);border-radius:999px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--en);transition:width .3s}
+.tag{display:inline-block;font-size:.75rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--en);background:var(--en-soft);border-radius:999px;padding:2px 10px;margin-bottom:8px}
+.q{font-family:var(--display);font-weight:800;font-size:clamp(1.25rem,5.2vw,1.6rem);line-height:1.25;margin:0 0 10px}
+.blank{display:inline-block;min-width:2.6em;border-bottom:4px solid var(--en);color:var(--en);text-align:center}
+.pic{font-size:clamp(4rem,22vw,6rem);line-height:1.1;text-align:center;margin:4px 0 8px}
+.pic.row{font-size:clamp(2.2rem,11vw,3rem);letter-spacing:4px}
+.story{background:var(--en-soft);border-radius:16px;padding:12px 14px;margin:0 0 12px;font-size:1.05rem;line-height:1.6}
+.story h3{font-size:1.2rem;color:var(--en);margin-bottom:4px}
+.say{display:flex;justify-content:center;margin:6px 0 12px}
+.say button{border:0;background:var(--en);color:#fff;border-radius:999px;padding:14px 26px;font-family:var(--display);font-weight:800;font-size:1.3rem}
+.ch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:6px}
+.ch.long{grid-template-columns:1fr}
+.ch button{display:flex;align-items:center;gap:10px;text-align:left;min-height:56px;border:2px solid var(--line);background:var(--bg);border-radius:16px;padding:8px 12px;font-family:var(--display);font-weight:800;font-size:1.25rem;overflow-wrap:anywhere}
+.ch.emo button{justify-content:center;font-size:2.6rem;min-height:84px}
+.ch button .k{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--en);color:#fff;font-size:.95rem;font-family:var(--display)}
+.ch.emo button{position:relative}
+.ch.emo button .k{position:absolute;top:6px;left:6px;width:24px;height:24px;font-size:.8rem}
+.ch button.right{background:var(--good-bg);border-color:var(--good)}
+.ch button.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.ch button:disabled{cursor:default}
+.word{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:8px 0 14px}
+.word span{width:44px;height:52px;border-bottom:4px solid var(--en);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.8rem;text-transform:lowercase}
+.tiles{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.tiles button{width:52px;height:56px;border:2px solid var(--en);background:var(--en-soft);border-radius:14px;font-family:var(--display);font-weight:800;font-size:1.7rem}
+.tiles button:disabled{opacity:.25}
+.hint{text-align:center;color:var(--muted);font-weight:700;letter-spacing:.08em;margin:0 0 8px}
+.write{display:flex;gap:8px;margin-top:6px}
+.write.inl{justify-content:center}
+.q select{max-width:100%;font:800 1.1rem/1.2 var(--body);color:var(--en);background:var(--en-soft);border:3px solid var(--en);border-radius:12px;padding:6px 8px;margin:2px 0;vertical-align:middle;min-height:44px}
+.q select.right{border-color:var(--good);background:var(--good-bg);color:var(--good)}
+.q select.wrong{border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
+.write:not(.inl){flex-direction:column}
+.write select{min-height:52px;font-size:1rem}
+.picked{font-size:1.1rem;line-height:1.4;color:var(--muted)}
+.picked b{color:var(--ink);font-family:var(--display);font-size:1.2rem}
+.write input,.write select{flex:1;min-width:0;font:800 1.35rem/1.2 var(--body);color:var(--ink);background:var(--bg);border:3px solid var(--en);border-radius:14px;padding:10px 12px}
+.write #in:focus{outline:3px solid var(--sun);outline-offset:1px}
+.write #in.right{border-color:var(--good);background:var(--good-bg)}
+.write #in.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.write .ok{flex:none;border:0;background:var(--en);color:#fff;border-radius:14px;padding:0 16px;font-family:var(--display);font-weight:800;font-size:1.15rem;min-height:52px}
+.write .ok:disabled{opacity:.4}
+.sentence{min-height:56px;border:3px dashed var(--en);border-radius:14px;padding:10px 12px;margin:4px 0 12px;font-family:var(--display);font-weight:800;font-size:1.3rem;line-height:1.4}
+.sentence em{color:var(--muted);font-weight:600;font-family:var(--body);font-size:1rem}
+.wtiles{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.wtiles button{border:2px solid var(--en);background:var(--en-soft);border-radius:12px;padding:8px 12px;min-height:48px;font-family:var(--display);font-weight:800;font-size:1.2rem}
+.wtiles button:disabled{opacity:.25}
+.undo{display:block;margin:10px auto 0;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 16px;font-weight:800;min-height:44px}
+.scene{display:flex;justify-content:center;margin:0 0 8px}
+.scene svg{width:200px;height:auto}
+.fb{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px;border-radius:16px;padding:12px 14px;border:2px solid var(--line)}
+.fb svg{width:50px;height:50px;flex:none}
+.fb.ok{background:var(--good-bg);border-color:var(--good)}
+.fb.no{background:var(--bad-bg);border-color:var(--bad)}
+.fb b{font-family:var(--display);font-size:1.25rem;display:block}
+.fb .t{flex:1 1 160px;min-width:0}
+.fb .next{flex:1 0 100%;border:0;background:var(--en);color:#fff;border-radius:999px;padding:10px;font-weight:800;font-size:1.05rem}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 18px;font-weight:800}
+.btn.main{background:var(--en);border-color:var(--en);color:#fff}
+.cert{text-align:center;border:4px double var(--sun)}
+.cert svg{width:96px;height:96px}
+.cert .medal{font-size:4rem;line-height:1}
+.big{font-family:var(--display);font-size:3rem;font-weight:800;color:var(--en);font-variant-numeric:tabular-nums}
+.stars{font-size:2.4rem;letter-spacing:6px;color:var(--line)}
+.stars .on{color:var(--sun)}
+.bypart{display:grid;gap:4px;margin:10px auto;max-width:320px;text-align:left;font-weight:700}
+.bypart div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:2px 0}
+.wrongs{text-align:left;margin-top:12px}
+.wrongs div{border-bottom:1px dashed var(--line);padding:6px 2px;font-weight:700}
+.wrongs div span{color:var(--good);font-weight:800}
+.cert .row{justify-content:center}
+.foot{margin-top:24px;text-align:center;color:var(--muted);font-size:.85rem}
+#boom{position:fixed;inset:0;z-index:60;pointer-events:none;display:none;place-items:center;background:radial-gradient(circle,rgba(255,236,150,.95) 0,rgba(255,140,40,.85) 28%,rgba(200,40,20,.55) 52%,rgba(0,0,0,0) 75%)}
+#boom.go{display:grid;animation:flash .9s ease-out forwards}
+#boom svg{width:min(80vw,420px);height:auto;animation:burst .9s ease-out forwards}
+@keyframes flash{0%{opacity:0}8%{opacity:1}70%{opacity:.85}100%{opacity:0}}
+@keyframes burst{0%{transform:scale(.2) rotate(-8deg)}25%{transform:scale(1.15) rotate(3deg)}100%{transform:scale(1.3) rotate(0)}}
+.shake{animation:shake .5s linear}
+@keyframes shake{0%,100%{transform:translate(0,0)}10%{transform:translate(-12px,6px)}20%{transform:translate(11px,-8px)}30%{transform:translate(-9px,-5px)}40%{transform:translate(8px,7px)}50%{transform:translate(-6px,4px)}60%{transform:translate(5px,-4px)}70%{transform:translate(-3px,3px)}80%{transform:translate(2px,-2px)}}
+@keyframes pop{0%{transform:scale(.92)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
+.pop{animation:pop .3s ease}
+#confetti{position:fixed;inset:0;z-index:55;pointer-events:none}
+@media (pointer:coarse){.btn,.snd,.crumb{min-height:44px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}#boom.go{opacity:.9}}
+.ar{font-family:"Noto Naskh Arabic","Amiri","Traditional Arabic",serif;font-weight:700;unicode-bidi:isolate}
+.bigar{font-size:clamp(2.2rem,11vw,3.2rem);line-height:1.9;text-align:center;margin:0 0 8px;color:var(--ink)}
+.bigar .blank{min-width:2em}
+.ch button .ar{flex:1;text-align:center;font-size:1.7rem;line-height:1.8}
+.ch.long button .ar{font-size:1.5rem}
+.segs{display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.segs b{display:inline-grid;place-items:center;min-width:44px;height:52px;border:2px solid var(--en);border-radius:10px;background:var(--surface);font-weight:700;font-size:1.6rem;line-height:1;padding:0 6px}
+.add{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+.add .pile{max-width:150px;font-size:1.6rem;line-height:1.2;text-align:center;border:2px dashed var(--en);border-radius:14px;padding:6px}
+.add b{font-size:2rem}
+.sentence.ar{font-size:1.8rem;line-height:1.8;text-align:right}
+.wtiles button.ar{font-size:1.5rem;line-height:1.6}
+.parts b.ar{font-size:1.1rem}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div id="boom" aria-hidden="true"><svg viewBox="0 0 200 200"><path d="M100 4 L118 62 L172 26 L142 80 L196 92 L144 112 L178 164 L120 136 L104 196 L86 138 L30 172 L60 116 L4 104 L58 84 L24 32 L82 62 Z" fill="#FFD23F" stroke="#E2401C" stroke-width="6" stroke-linejoin="round"/><text x="100" y="114" text-anchor="middle" font-family="Baloo 2,Trebuchet MS,sans-serif" font-weight="800" font-size="40" fill="#C2181B">BOOM!</text></svg></div>
+<script>
+function cat(m){return `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M18 40 L22 10 L44 28 Z" fill="#F0A64A"/><path d="M82 40 L78 10 L56 28 Z" fill="#F0A64A"/><path d="M24 34 L25 18 L37 28 Z" fill="#F7C9D0"/><path d="M76 34 L75 18 L63 28 Z" fill="#F7C9D0"/><ellipse cx="50" cy="56" rx="36" ry="32" fill="#F5B861"/><path d="M50 26 q-4 8 0 14 q4 -6 0 -14" fill="#E08F2E"/><ellipse cx="50" cy="66" rx="17" ry="12" fill="#FFF3E2"/>${m==='sad'?'<circle cx="38" cy="49" r="4.5" fill="#3a2a22"/><circle cx="62" cy="49" r="4.5" fill="#3a2a22"/><path d="M42 66 q8 -6 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/>':'<path d="M33 49 q5 -6 10 0 M57 49 q5 -6 10 0" fill="none" stroke="#3a2a22" stroke-width="3.5" stroke-linecap="round"/><path d="M42 62 q8 9 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/><circle cx="28" cy="62" r="5" fill="#F7A8B3" opacity=".7"/><circle cx="72" cy="62" r="5" fill="#F7A8B3" opacity=".7"/>'}<path d="M46 57 h8 l-4 4 z" fill="#E86A7E"/><path d="M22 60 h-14 M22 65 h-13 M78 60 h14 M78 65 h13" stroke="#3a2a22" stroke-width="1.6" stroke-linecap="round"/></svg>`}
+
+/* ---------- storage ---------- */
+const KEY='arabUasa.v1';let store={sound:true,best:{}};
+try{store=Object.assign(store,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
+
+/* ---------- sounds (Web Audio, no files) and speech ---------- */
+let ax=null;
+function actx(){
+  try{
+    if(navigator.audioSession)navigator.audioSession.type='playback'; // iPad: play even in silent mode
+    if(!ax){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ax=new AC()}
+    if(ax.state==='suspended')ax.resume();
+    return ax;
+  }catch(e){return null}
+}
+function tone(notes){const c=store.sound&&actx();if(!c)return;const t=c.currentTime+.02;
+  notes.forEach(([f,d,len])=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t+d);g.gain.exponentialRampToValueAtTime(.35,t+d+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d+(len||.45));o.connect(g);g.connect(c.destination);o.start(t+d);o.stop(t+d+(len||.45)+.05)})}
+const ding=()=>tone([[880,0],[1320,.12]]);
+const fanfare=()=>tone([[523,0,.3],[659,.15,.3],[784,.3,.3],[1047,.45,.8]]);
+// a falling whistle, then a loud blast: noise through a closing low-pass, a deep thump, and distortion for grit
+function boomSound(){
+  const c=store.sound&&actx();if(!c)return 0;
+  const t=c.currentTime+.02,b=t+.36;
+  const comp=c.createDynamicsCompressor();comp.threshold.value=-8;comp.knee.value=0;comp.ratio.value=12;comp.attack.value=.002;comp.release.value=.25;
+  const dist=c.createWaveShaper(),curve=new Float32Array(1024);for(let i=0;i<1024;i++){const x=i/511.5-1;curve[i]=Math.tanh(3*x)}dist.curve=curve;
+  const out=c.createGain();out.gain.value=1;dist.connect(comp);comp.connect(out);out.connect(c.destination);
+  const w=c.createOscillator(),wg=c.createGain();w.type='sine';w.frequency.setValueAtTime(1900,t);w.frequency.exponentialRampToValueAtTime(450,b);
+  wg.gain.setValueAtTime(.0001,t);wg.gain.exponentialRampToValueAtTime(.3,t+.05);wg.gain.setValueAtTime(.3,b-.04);wg.gain.exponentialRampToValueAtTime(.0001,b);
+  w.connect(wg);wg.connect(comp);w.start(t);w.stop(b+.05);
+  const len=Math.floor(c.sampleRate*2.4),buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
+  const n=c.createBufferSource();n.buffer=buf;
+  const lp=c.createBiquadFilter();lp.type='lowpass';lp.Q.value=.8;lp.frequency.setValueAtTime(5000,b);lp.frequency.exponentialRampToValueAtTime(90,b+1.8);
+  const ng=c.createGain();ng.gain.setValueAtTime(.0001,b);ng.gain.exponentialRampToValueAtTime(2,b+.008);ng.gain.exponentialRampToValueAtTime(.0001,b+2.2);
+  n.connect(lp);lp.connect(ng);ng.connect(dist);n.start(b);n.stop(b+2.4);
+  const o=c.createOscillator(),og=c.createGain();o.type='sine';o.frequency.setValueAtTime(150,b);o.frequency.exponentialRampToValueAtTime(28,b+.9);
+  og.gain.setValueAtTime(.0001,b);og.gain.exponentialRampToValueAtTime(2.5,b+.01);og.gain.exponentialRampToValueAtTime(.0001,b+1.3);
+  o.connect(og);og.connect(dist);o.start(b);o.stop(b+1.4);
+  return 360;
+}
+function explode(){
+  const delay=boomSound();
+  setTimeout(()=>{
+    const el=document.getElementById('boom');el.classList.remove('go');void el.offsetWidth;el.classList.add('go');
+    app.classList.remove('shake');void app.offsetWidth;app.classList.add('shake');
+    try{navigator.vibrate&&navigator.vibrate([350,80,200])}catch(e){}
+  },delay);
+}
+let voice=null;
+function pickVoice(){try{const v=speechSynthesis.getVoices();voice=v.find(x=>/en-GB/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}catch(e){}}
+if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+function speak(text){
+  if(!('speechSynthesis' in window))return false;
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-GB';if(voice)u.voice=voice;u.rate=.8;speechSynthesis.speak(u);return true}catch(e){return false}
+}
+
+/* ---------- helpers ---------- */
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const blank='<span class="blank">?</span>';
+function mc(o,right,wrongs){
+  const seen=new Set([right]),w=[];for(const x of wrongs){if(!seen.has(x)){seen.add(x);w.push(x)}if(w.length===3)break}
+  const all=shuffle([right,...w]);return Object.assign(o,{choices:all,right:all.indexOf(right)});
+}
+
+/* ---------- Bahasa Arab Tahun 2: word lists (questions are written for this page in the style of the UASA paper) ---------- */
+const ar=s=>`<span class="ar" lang="ar" dir="rtl">${s}</span>`;
+const HADHA='هَذَا',HADHIHI='هَذِهِ';
+// [picture, word, gender m/f (null = plural)]
+const FAM=[['👨','أَبٌ','m'],['👩','أُمٌّ','f'],['👦','أَخٌ','m'],['👧','أُخْتٌ','f'],['👴','جَدٌّ','m'],['👵','جَدَّةٌ','f']];
+const BODY=[['👁️','عَيْنٌ','f'],['👃','أَنْفٌ','m'],['👂','أُذُنٌ','f'],['👄','فَمٌ','m'],['✋','يَدٌ','f'],['🦵','رِجْلٌ','f'],['👅','لِسَانٌ','m'],['🦷','أَسْنَانٌ',null],['💇','شَعْرٌ','m']];
+const SCHOOL=[['✏️','قَلَمٌ','m'],['📕','كِتَابٌ','m'],['📒','دَفْتَرٌ','m'],['📏','مِسْطَرَةٌ','f'],['🎒','حَقِيبَةٌ','f'],['📄','وَرَقَةٌ','f'],['🖍️','قَلَمُ تَلْوِينٍ','m'],['🪑','كُرْسِيٌّ','m'],[null,'مِمْحَاةٌ','f'],[null,'مِبْرَاةٌ','f']];
+const GROUPS=[['keluarga',FAM],['anggota badan',BODY],['alat tulis',SCHOOL]];
+const MALAY={'أَبٌ':'bapa','أُمٌّ':'ibu','أَخٌ':'abang / adik lelaki','أُخْتٌ':'kakak / adik perempuan','جَدٌّ':'datuk','جَدَّةٌ':'nenek','عَيْنٌ':'mata','أَنْفٌ':'hidung','أُذُنٌ':'telinga','فَمٌ':'mulut','يَدٌ':'tangan','رِجْلٌ':'kaki','لِسَانٌ':'lidah','أَسْنَانٌ':'gigi','شَعْرٌ':'rambut','قَلَمٌ':'pen / pensel','كِتَابٌ':'buku','دَفْتَرٌ':'buku tulis','مِسْطَرَةٌ':'pembaris','حَقِيبَةٌ':'beg','وَرَقَةٌ':'kertas','قَلَمُ تَلْوِينٍ':'pensel warna','كُرْسِيٌّ':'kerusi','مِمْحَاةٌ':'pemadam','مِبْرَاةٌ':'pengasah'};
+// pairs of words that start with the same letter but a different baris
+const FIRST=[[['بَ','بَيْتٌ'],['بِ','بِنْتٌ']],[['كِ','كِتَابٌ'],['كُ','كُرْسِيٌّ']],[['قَ','قَلَمٌ'],['قِ','قِطٌّ']],[['مُ','مُعَلِّمٌ'],['مَ','مَدْرَسَةٌ']],[['دَ','دَفْتَرٌ'],['دُ','دُبٌّ']],[['شَ','شَعْرٌ'],['شُ','شُبَّاكٌ']],[['جَ','جَدٌّ'],['جِ','جِسْمٌ']],[['أُ','أُمٌّ'],['أَ','أَبٌ']],[['سَ','سَمَكٌ'],['سِ','سِتَارٌ']],[['فُ','فُلُوسٌ'],['فِ','فِيلٌ']],[['وَ','وَرَقَةٌ'],['وُ','وُرُودٌ']],[['طِ','طِفْلٌ'],['طَ','طَاوِلَةٌ']]];
+// words split into letters with their baris
+const SPLIT=[['قَ','لَ','مٌ'],['بَ','يْ','تٌ'],['وَ','جْ','هٌ'],['طِ','فْ','لٌ'],['كَ','لْ','بٌ'],['شَ','عْ','رٌ'],['أَ','نْ','فٌ'],['بَ','ا','بٌ'],['كِ','تَ','ا','بٌ'],['دَ','فْ','تَ','رٌ'],['رَ','سَّ','ا','مٌ'],['ضَ','ا','بِ','طٌ'],['سَ','مَ','كٌ'],['قَ','مَ','رٌ']];
+// long-vowel syllables and a word that has each one
+const MAD=[['بَا','بَابٌ'],['نُو','نُورٌ'],['فِي','فِيلٌ'],['سُو','سُوقٌ'],['تَا','كِتَابٌ'],['رِي','سَرِيرٌ'],['مُو','مُوزٌ'],['لَا','هِلَالٌ'],['دِي','حَدِيقَةٌ'],['تُو','تُوتٌ'],['كُو','كُوبٌ'],['طَا','طَاوِلَةٌ']];
+const AR_NUM=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+const NUM_WORD={11:'أَحَدَ عَشَرَ',12:'اِثْنَا عَشَرَ',13:'ثَلَاثَةَ عَشَرَ',14:'أَرْبَعَةَ عَشَرَ',15:'خَمْسَةَ عَشَرَ',16:'سِتَّةَ عَشَرَ',17:'سَبْعَةَ عَشَرَ',18:'ثَمَانِيَةَ عَشَرَ',19:'تِسْعَةَ عَشَرَ',20:'عِشْرُونَ'};
+const PHRASES=['هَذَا قَلَمٌ','هَذِهِ مِسْطَرَةٌ','مَا اسْمُكِ؟','عِنْدِي كِتَابٌ','أَنَا تِلْمِيذَةٌ','هَذَا أَبِي','هَذِهِ أُمِّي','عِنْدِي قَلَمٌ جَدِيدٌ','هَذَا كِتَابٌ جَمِيلٌ','أَنَا أُحِبُّ أُمِّي','الكِتَابُ عَلَى الطَّاوِلَةِ'];
+const COPY=['أُخْتٌ','كَتِفٌ','مِمْحَاةٌ','مُعَلِّمٌ','حَقِيبَةٌ','مَدْرَسَةٌ','تِلْمِيذَةٌ','دَفْتَرٌ'];
+
+// change one short vowel (fatha, damma, kasra) to another, to make a look-alike wrong answer
+const V=['َ','ُ','ِ'];
+function mutate(s,seed){
+  const idx=[...s].map((c,i)=>V.includes(c)?i:-1).filter(i=>i>=0);if(!idx.length)return null;
+  const chars=[...s],i=idx[seed%idx.length],now=V.indexOf(chars[i]);chars[i]=V[(now+1+(seed>>3)%2)%3];return chars.join('');
+}
+const boxes=segs=>`<span class="segs" dir="rtl">${segs.map(x=>`<b lang="ar">${x}</b>`).join('')}</span>`;
+// ball on or under a table, for عَلَى / تَحْتَ
+function scene(pos){
+  const tbl='<rect x="40" y="70" width="120" height="10" rx="3" fill="#B07A45"/><rect x="50" y="80" width="8" height="50" fill="#8A5A2E"/><rect x="142" y="80" width="8" height="50" fill="#8A5A2E"/><line x1="0" y1="132" x2="200" y2="132" stroke="var(--line)" stroke-width="3"/>';
+  const p=pos==='on'?[100,62]:[100,124];
+  return `<div class="scene"><svg viewBox="0 0 200 140" role="img" aria-label="Bola ${pos==='on'?'di atas':'di bawah'} meja">${tbl}<text x="${p[0]}" y="${p[1]}" text-anchor="middle" font-size="40">⚽</text></svg></div>`;
+}
+
+/* ---------- the eight sections of the paper ---------- */
+const PARTS={
+ 'أ':{name:'Padankan gambar',icon:'🖼️',make:()=>{
+   const [gname,list]=pick(GROUPS),items=shuffle(list.filter(x=>x[0])),r=items[0],w=items.slice(1,4);
+   return Math.random()<.5
+     ?mc({q:'Pilih perkataan yang betul untuk gambar ini.',pic:r[0],arc:true,explain:`${ar(r[1])} = ${MALAY[r[1]]}`,key:'A'+r[1]},r[1],w.map(x=>x[1]))
+     :mc({q:'Pilih gambar yang betul.',big:r[1],emo:true,explain:`${ar(r[1])} = ${MALAY[r[1]]} ${r[0]}`,key:'Ap'+r[1]},r[0],w.map(x=>x[0]))}},
+ 'ب':{name:'Huruf berbaris',icon:'🔤',make:()=>{
+   const pair=pick(FIRST),k=R(0,1),[l,w]=pair[k],other=pair[1-k][1];
+   return mc({q:'Pilih perkataan yang bermula dengan huruf berbaris ini.',big:l,arc:true,explain:`${ar(w)} bermula dengan ${ar(l)}. ${ar(other)} bermula dengan ${ar(pair[1-k][0])}.`,key:'B'+l},w,[other])}},
+ 'ج':{name:'Ceraikan huruf',icon:'✂️',make:()=>{
+   const segs=pick(SPLIT),word=segs.join(''),right=boxes(segs),wrong=[];
+   for(let s=0;s<40&&wrong.length<3;s++){const i=s%segs.length,m=mutate(segs[i],s);if(!m)continue;const alt=segs.slice();alt[i]=m;const b=boxes(alt);if(b!==right&&!wrong.includes(b))wrong.push(b)}
+   return mc({q:'Ceraikan perkataan ini kepada huruf-hurufnya.',big:word,long:true,explain:`${ar(word)} = ${right}`,key:'C'+word},right,wrong)}},
+ 'د':{name:'هَذَا / هَذِهِ',icon:'👉',make:()=>{
+   const [gname,list]=pick(GROUPS),r=pick(list.filter(x=>x[2]));
+   return mc({q:`Pilih ${ar(HADHA)} atau ${ar(HADHIHI)}.`,pic:r[0]||'',big:`${'<span class="blank">?</span>'} ${r[1]}`,arc:true,explain:r[2]==='m'?`${ar(r[1])} ialah muzakkar (lelaki) → ${ar(HADHA)}`:`${ar(r[1])} ialah muannath (perempuan${/ةٌ$|ةٌ/.test(r[1])?', berakhir dengan ة':''}) → ${ar(HADHIHI)}`,key:'D'+r[1]},r[2]==='m'?HADHA:HADHIHI,[r[2]==='m'?HADHIHI:HADHA])}},
+ 'هـ':{name:'Bacaan panjang',icon:'〰️',make:()=>{
+   const [syl,word]=pick(MAD),others=shuffle(MAD.map(x=>x[1]).filter(w=>w!==word&&!w.includes(syl)));
+   return mc({q:'Pilih perkataan yang ada bacaan panjang ini.',big:syl,arc:true,explain:`${ar(word)} ada ${ar(syl)}.`,key:'E'+syl},word,others)}},
+ 'و':{name:'Nombor ١١–٢٠',icon:'🔢',make:()=>{
+   if(Math.random()<.35){const n=R(11,20);return mc({q:'Nombor apakah ini?',big:NUM_WORD[n],arc:true,explain:`${ar(NUM_WORD[n])} = ${AR_NUM(n)} (${n})`,key:'Fw'+n},AR_NUM(n),shuffle([11,12,13,14,15,16,17,18,19,20].filter(x=>x!==n)).map(AR_NUM))}
+   const a=R(5,10),b=R(Math.max(1,11-a),Math.min(10,20-a)),s=a+b,it=pick(['🍬','🍪','🧁','🍩','🍭','⭐']);
+   return mc({q:'Kira dan tambah. Berapakah jumlahnya?',fig:`<div class="add"><span class="pile">${it.repeat(a)}</span><b>+</b><span class="pile">${it.repeat(b)}</span></div>`,arc:true,explain:`${AR_NUM(a)} + ${AR_NUM(b)} = ${AR_NUM(s)} (${a} + ${b} = ${s})`,key:'F'+a+'+'+b},AR_NUM(s),[AR_NUM(s+1>20?s-2:s+1),AR_NUM(s-1),AR_NUM(s+2>20?s-3:s+2)])}},
+ 'ز':{name:'Lengkapkan ayat',icon:'📝',make:()=>pick(SENT)()},
+ 'ح':{name:'Salin & bina ayat',icon:'🧱',make:()=>{
+   if(Math.random()<.5){const w=pick(COPY),wrong=[];for(let s=0;s<30&&wrong.length<3;s++){const m=mutate(w,s);if(m&&m!==w&&!wrong.includes(m))wrong.push(m)}
+     return mc({q:'Pilih perkataan yang SAMA seperti ini. Lihat baris dengan teliti!',big:w,arc:true,explain:`Yang sama: ${ar(w)}`,key:'Hc'+w},w,wrong)}
+   const p=pick(PHRASES),words=p.split(' ');let t=shuffle(words),g=0;while(t.join(' ')===p&&g++<10)t=shuffle(words);
+   return {tiles:t,target:p,q:'Susun perkataan menjadi ayat (mula dari kanan).',explain:`${ar(p)}`,key:'Hb'+p,ansText:p}}},
+};
+const SENT=[
+ ()=>{const g=Math.random()<.5;return mc({q:'Lengkapkan ayat.',pic:g?'👧':'👦',big:`أَنَا <span class="blank">?</span>`,arc:true,explain:g?`Murid perempuan → ${ar('تِلْمِيذَةٌ')}`:`Murid lelaki → ${ar('تِلْمِيذٌ')}`,key:'G1'+g},g?'تِلْمِيذَةٌ':'تِلْمِيذٌ',[g?'تِلْمِيذٌ':'تِلْمِيذَةٌ'])},
+ ()=>{const g=Math.random()<.5;return mc({q:'Lengkapkan soalan.',pic:g?'👧':'👦',big:`مَنْ <span class="blank">?</span> ؟`,arc:true,explain:g?`Perempuan → ${ar(HADHIHI)}`:`Lelaki → ${ar(HADHA)}`,key:'G2'+g},g?HADHIHI:HADHA,[g?HADHA:HADHIHI])},
+ ()=>{const list=pick([SCHOOL,BODY]).filter(x=>x[0]),it=shuffle(list),r=it[0];return mc({q:'Lihat gambar. Lengkapkan ayat.',pic:r[0],big:`عِنْدِي <span class="blank">?</span>`,arc:true,explain:`${ar('عِنْدِي '+r[1])} = Saya ada ${MALAY[r[1]]}.`,key:'G3'+r[1]},r[1],[it[1][1]])},
+ ()=>{const n=pick([7,8]);return mc({q:'Lengkapkan ayat.',pic:AR_NUM(n),big:`عُمْرِي <span class="blank">?</span> سَنَوَاتٍ`,arc:true,explain:`${AR_NUM(n)} → ${ar(n===8?'ثَمَانِي':'سَبْعُ')}. Umur saya ${n} tahun.`,key:'G4'+n},n===8?'ثَمَانِي':'سَبْعُ',[n===8?'سَبْعُ':'ثَمَانِي'])},
+ ()=>{const on=Math.random()<.5;return mc({q:'Lihat gambar. Lengkapkan ayat.',fig:scene(on?'on':'under'),big:`الكُرَةُ <span class="blank">?</span> الطَّاوِلَةِ`,arc:true,explain:on?`${ar('عَلَى')} = di atas`:`${ar('تَحْتَ')} = di bawah`,key:'G5'+on},on?'عَلَى':'تَحْتَ',[on?'تَحْتَ':'عَلَى','فِي'])},
+ ()=>{const [q,a]=pick([['كَيْفَ حَالُكِ؟','بِخَيْرٍ، وَالْحَمْدُ لِلَّهِ'],['مَا اسْمُكِ؟','اِسْمِي صَفِيَّةُ'],['كَمْ عُمْرُكِ؟','عُمْرِي ثَمَانِي سَنَوَاتٍ']]);
+   return mc({q:'Pilih jawapan yang betul.',big:q,arc:true,long:true,explain:`${ar(q)} → ${ar(a)}`,key:'G6'+q},a,['بِخَيْرٍ، وَالْحَمْدُ لِلَّهِ','اِسْمِي صَفِيَّةُ','عُمْرِي ثَمَانِي سَنَوَاتٍ'].filter(x=>x!==a))},
+];
+const ORDER=['أ','ب','ج','د','هـ','و','ز','ح'];
+const FINAL=4; // questions per section in the full paper
+function makePart(k,n){
+  const qs=[],seen=new Set();let g=0;
+  while(qs.length<n&&g++<400){const q=PARTS[k].make();if(seen.has(q.key))continue;seen.add(q.key);q.part=k;qs.push(q)}
+  return qs;
+}
+
+/* ---------- screens ---------- */
+const app=document.getElementById('app');
+let G=null;
+const stars=n=>[1,2,3].map(i=>`<span class="${i<=n?'on':''}">★</span>`).join('');
+const starsFor=(c,n)=>c/n>=.9?3:c/n>=.7?2:c/n>=.5?1:0;
+function header(sub){return `<a class="crumb" href="../">← Semua subjek</a><div class="top">${cat('happy')}<div><h1>Bahasa Arab</h1><p>${sub}</p></div><button class="snd" id="snd" aria-pressed="${store.sound}">${store.sound?'🔊 Bunyi: Hidup':'🔇 Bunyi: Mati'}</button></div>`}
+function wireSound(){const b=document.getElementById('snd');b.onclick=()=>{store.sound=!store.sound;save();b.setAttribute('aria-pressed',store.sound);b.textContent=store.sound?'🔊 Bunyi: Hidup':'🔇 Bunyi: Mati';if(store.sound)ding()}}
+const partName=k=>`${ar(k)} ${PARTS[k].name}`;
+function home(){
+  G=null;const total=ORDER.length*FINAL;
+  app.innerHTML=header('Tahun 2')+`<div class="card hero"><h2>Ujian Akhir (UASA)</h2><p>${total} soalan dalam 8 bahagian, macam kertas sebenar. Tekan jawapan sahaja, tiada menaip. Habiskan dan dapatkan sijil!</p>
+   <div class="parts">${ORDER.map(k=>`<div><b class="ar">${k}</b>${PARTS[k].icon} ${PARTS[k].name.includes('هَذَا')?ar(PARTS[k].name):PARTS[k].name}<span class="st">${stars(store.best[k]||0)}</span></div>`).join('')}</div>
+   <button class="go" id="final">Mula Ujian</button>
+   <p class="best">${store.best.final!=null?`Markah terbaik: ${store.best.final}/${total}`:'Baca baris (harakat) dengan teliti!'}</p></div>
+   <div class="card" style="margin-top:14px"><p class="lbl">Atau latih satu bahagian (8 soalan)</p><div class="rev">${ORDER.map(k=>`<button data-p="${k}">${PARTS[k].icon} Bahagian ${ar(k)}<span>${PARTS[k].name.includes('هَذَا')?ar(PARTS[k].name):PARTS[k].name}</span></button>`).join('')}</div></div>
+   <p class="foot">Hati-hati! Jawapan salah akan BOOM 💥 · Semoga berjaya, Safiyyah!</p>`;
+  document.getElementById('final').onclick=()=>{actx();start('final')};
+  app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{actx();start(b.dataset.p)});
+  wireSound();
+}
+function start(mode){
+  const qs=mode==='final'?ORDER.flatMap(k=>makePart(k,FINAL)):makePart(mode,8);
+  G={mode,qs,i:0,score:0,done:false,wrong:[],built:[],byPart:{}};play();
+}
+const title=()=>G.mode==='final'?'Ujian Akhir (UASA)':`Bahagian ${G.mode}`;
+function play(){
+  const q=G.qs[G.i],N=G.qs.length;
+  let body=`<span class="tag">Bahagian ${ar(q.part)} · ${PARTS[q.part].name.includes('هَذَا')?ar(PARTS[q.part].name):PARTS[q.part].name}</span><p class="q">${q.q}</p>`;
+  if(q.pic)body+=`<div class="pic">${q.pic}</div>`;
+  if(q.fig)body+=q.fig;
+  if(q.big)body+=`<div class="bigar ar" lang="ar" dir="rtl">${q.big}</div>`;
+  if(q.choices){
+    const cls=q.emo?' emo':(q.long||q.choices.some(c=>c.length>18))?' long':'';
+    body+=`<div class="ch${cls}">${q.choices.map((c,i)=>`<button data-c="${i}" ${G.done?'disabled':''} class="${G.done&&i===q.right?'right':''}${G.done&&i===G.pick&&i!==q.right?' wrong':''}"><span class="k">${'ABCD'[i]}</span><span class="${q.arc?'ar':''}" ${q.arc?'lang="ar" dir="rtl"':''}>${c}</span></button>`).join('')}</div>`;
+  }else{
+    body+=`<div class="sentence ar" lang="ar" dir="rtl">${G.built.length?G.built.map(j=>q.tiles[j]).join(' '):'<em lang="ms" dir="ltr">Tekan perkataan di bawah…</em>'}</div>
+    <div class="wtiles" dir="rtl">${q.tiles.map((c,j)=>`<button class="ar" lang="ar" data-t="${j}" ${G.done||G.built.includes(j)?'disabled':''}>${c}</button>`).join('')}</div>
+    ${G.done?'':`<button class="undo" id="undo" ${G.built.length?'':'disabled'}>⌫ Undur</button>`}`;
+  }
+  app.innerHTML=header(title())+`<div class="hud"><span>${G.i+1}/${N}</span><div class="prog"><i style="width:${G.i/N*100}%"></i></div><span>★ ${G.score}</span></div>
+  <div class="card">${body}<div id="fb"></div></div>
+  <div class="row" style="justify-content:center"><button class="btn" id="quit">Berhenti</button></div>`;
+  wireSound();
+  app.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{G.pick=+b.dataset.c;check(G.pick===q.right)});
+  app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{G.built.push(+b.dataset.t);if(G.built.length===q.tiles.length)check(G.built.map(j=>q.tiles[j]).join(' ')===q.target);else play()});
+  const u=document.getElementById('undo');if(u)u.onclick=()=>{G.built.pop();play()};
+  document.getElementById('quit').onclick=home;
+  if(G.done)fb();
+}
+function answerText(q){return q.ansText||q.choices[q.right]}
+function check(right){
+  const q=G.qs[G.i];G.done=true;G.ok=right;
+  const bp=G.byPart[q.part]||(G.byPart[q.part]={c:0,n:0});bp.n++;
+  if(right){G.score++;bp.c++;ding()}else{G.wrong.push(q);explode()}
+  play();
+}
+const PRAISE=['Bagus!','Syabas!','Hebat!','Pandai!','Betul!','Mumtaz! (مُمْتَازٌ)'];
+function fb(){
+  const q=G.qs[G.i],last=G.i===G.qs.length-1,el=document.getElementById('fb');
+  const ans=q.emo?answerText(q):ar(answerText(q));
+  el.innerHTML=`<div class="fb ${G.ok?'ok':'no'} pop">${cat(G.ok?'happy':'sad')}<div class="t"><b>${G.ok?pick(PRAISE):'BOOM! Jawapan: '+ans}</b>${q.explain}</div><button class="next" id="nx">${last?'Lihat sijil saya':'Seterusnya →'}</button></div>`;
+  const nx=document.getElementById('nx');nx.focus({preventScroll:true});
+  nx.onclick=()=>{if(last)result();else{G.i++;G.done=false;G.pick=null;G.built=[];play()}};
+}
+document.addEventListener('keydown',e=>{
+  if(!G||e.key!=='Enter')return;const nx=document.getElementById('nx');if(nx){e.preventDefault();nx.click()}
+});
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const cv=document.getElementById('confetti'),c=cv.getContext('2d');cv.width=innerWidth;cv.height=innerHeight;
+  const cols=['#0F7C7A','#F2B33D','#1F6E94','#3A8F36','#D85F22','#C2306B'];
+  const ps=Array.from({length:160},()=>({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.5,vx:(Math.random()-.5)*3,vy:2+Math.random()*3,r:Math.random()*6.28,s:6+Math.random()*6,c:pick(cols)}));
+  let f=0;(function tick(){c.clearRect(0,0,cv.width,cv.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=.1;c.save();c.translate(p.x,p.y);c.rotate(p.r);c.fillStyle=p.c;c.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);c.restore()});if(++f<240)requestAnimationFrame(tick);else c.clearRect(0,0,cv.width,cv.height)})();
+}
+function result(){
+  const N=G.qs.length,s=starsFor(G.score,N),pct=Math.round(G.score/N*100);
+  if(G.mode==='final'){if((store.best.final||0)<G.score)store.best.final=G.score;ORDER.forEach(k=>{const b=G.byPart[k];if(b){const st=starsFor(b.c,b.n);if((store.best[k]||0)<st)store.best[k]=st}})}
+  else if((store.best[G.mode]||0)<s)store.best[G.mode]=s;
+  save();
+  const medal=pct>=90?['🥇','Emas! Kamu sudah bersedia untuk peperiksaan!']:pct>=70?['🥈','Perak! Hampir sempurna. Ulang kaji kesilapan di bawah.']:pct>=50?['🥉','Gangsa! Cuba lagi bahagian yang kurang bintang.']:['💪','Teruskan berlatih! Cuba satu bahagian dahulu.'];
+  app.innerHTML=header(title())+`<div class="card cert pop">
+   <p class="lbl" style="color:var(--muted)">Sijil</p><div class="medal">${medal[0]}</div>
+   <div class="big">${G.score}/${N}</div><div class="stars">${stars(s)}</div>
+   <p style="font-weight:800;font-size:1.15rem;margin:6px 0">${medal[1]}</p>
+   ${G.mode==='final'?`<div class="bypart">${ORDER.map(k=>{const b=G.byPart[k]||{c:0,n:0};return `<div><span>${partName(k)}</span><span>${b.c}/${b.n}</span></div>`}).join('')}</div>`:''}
+   ${G.wrong.length?`<div class="wrongs"><p class="lbl">Ulang kaji soalan ini</p>${G.wrong.map(q=>`<div>${q.big?ar(q.big):q.pic||''} → <span>${q.emo?answerText(q):ar(answerText(q))}</span></div>`).join('')}</div>`:''}
+   <div class="row"><button class="btn main" id="again">Cuba lagi</button><button class="btn" id="menu">Kembali</button></div></div>`;
+  wireSound();
+  document.getElementById('again').onclick=()=>start(G.mode);document.getElementById('menu').onclick=home;
+  if(pct>=70){fanfare();confetti()}
+}
+home();
+</script>
+<script src="../music.js"></script>
+</body>
+</html>
