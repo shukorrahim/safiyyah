@@ -75,6 +75,27 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--sun);outline-offset
 .tiles{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
 .tiles button{width:52px;height:56px;border:2px solid var(--en);background:var(--en-soft);border-radius:14px;font-family:var(--display);font-weight:800;font-size:1.7rem}
 .tiles button:disabled{opacity:.25}
+.hint{text-align:center;color:var(--muted);font-weight:700;letter-spacing:.08em;margin:0 0 8px}
+.write{display:flex;gap:8px;margin-top:6px}
+.write.inl{justify-content:center}
+.q select{max-width:100%;font:800 1.1rem/1.2 var(--body);color:var(--en);background:var(--en-soft);border:3px solid var(--en);border-radius:12px;padding:6px 8px;margin:2px 0;vertical-align:middle;min-height:44px}
+.q select.right{border-color:var(--good);background:var(--good-bg);color:var(--good)}
+.q select.wrong{border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
+.write:not(.inl){flex-direction:column}
+.write select{min-height:52px;font-size:1rem}
+.picked{font-size:1.1rem;line-height:1.4;color:var(--muted)}
+.picked b{color:var(--ink);font-family:var(--display);font-size:1.2rem}
+.write input,.write select{flex:1;min-width:0;font:800 1.35rem/1.2 var(--body);color:var(--ink);background:var(--bg);border:3px solid var(--en);border-radius:14px;padding:10px 12px}
+.write #in:focus{outline:3px solid var(--sun);outline-offset:1px}
+.write #in.right{border-color:var(--good);background:var(--good-bg)}
+.write #in.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.write .ok{flex:none;border:0;background:var(--en);color:#fff;border-radius:14px;padding:0 16px;font-family:var(--display);font-weight:800;font-size:1.15rem;min-height:52px}
+.write .ok:disabled{opacity:.4}
+.sentence{min-height:56px;border:3px dashed var(--en);border-radius:14px;padding:10px 12px;margin:4px 0 12px;font-family:var(--display);font-weight:800;font-size:1.3rem;line-height:1.4}
+.sentence em{color:var(--muted);font-weight:600;font-family:var(--body);font-size:1rem}
+.wtiles{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.wtiles button{border:2px solid var(--en);background:var(--en-soft);border-radius:12px;padding:8px 12px;min-height:48px;font-family:var(--display);font-weight:800;font-size:1.2rem}
+.wtiles button:disabled{opacity:.25}
 .undo{display:block;margin:10px auto 0;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 16px;font-weight:800;min-height:44px}
 .scene{display:flex;justify-content:center;margin:0 0 8px}
 .scene svg{width:200px;height:auto}
@@ -123,7 +144,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--sun);outline-offset
 function cat(m){return `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M18 40 L22 10 L44 28 Z" fill="#F0A64A"/><path d="M82 40 L78 10 L56 28 Z" fill="#F0A64A"/><path d="M24 34 L25 18 L37 28 Z" fill="#F7C9D0"/><path d="M76 34 L75 18 L63 28 Z" fill="#F7C9D0"/><ellipse cx="50" cy="56" rx="36" ry="32" fill="#F5B861"/><path d="M50 26 q-4 8 0 14 q4 -6 0 -14" fill="#E08F2E"/><ellipse cx="50" cy="66" rx="17" ry="12" fill="#FFF3E2"/>${m==='sad'?'<circle cx="38" cy="49" r="4.5" fill="#3a2a22"/><circle cx="62" cy="49" r="4.5" fill="#3a2a22"/><path d="M42 66 q8 -6 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/>':'<path d="M33 49 q5 -6 10 0 M57 49 q5 -6 10 0" fill="none" stroke="#3a2a22" stroke-width="3.5" stroke-linecap="round"/><path d="M42 62 q8 9 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/><circle cx="28" cy="62" r="5" fill="#F7A8B3" opacity=".7"/><circle cx="72" cy="62" r="5" fill="#F7A8B3" opacity=".7"/>'}<path d="M46 57 h8 l-4 4 z" fill="#E86A7E"/><path d="M22 60 h-14 M22 65 h-13 M78 60 h14 M78 65 h13" stroke="#3a2a22" stroke-width="1.6" stroke-linecap="round"/></svg>`}
 
 /* ---------- storage ---------- */
-const KEY='englishFinal.v2';let store={sound:true,best:{}};
+const KEY='englishWriting.v1';let store={sound:true,best:{}};
 try{store=Object.assign(store,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
 
@@ -320,34 +341,62 @@ const UNITS=[
 ];
 const BANKW=[['sunny','☀️'],['rainy','🌧️'],['windy','💨'],['cloudy','☁️']];
 
-/* ---------- the five parts of the paper; each question comes from one unit ---------- */
-function vocabQ(u,listen){
-  const items=shuffle(u.vocab),r=items[0],w=items.slice(1,4);
-  return listen?mc({speak:r[1],q:'Listen. Tap the right picture.',emo:true,explain:`You heard “${r[1]}”: ${r[0]}`,key:'L'+r[1],ansText:r[1]},r[0],w.map(x=>x[0]))
-              :mc({q:'What is this?',pic:r[0],long:r[1].length>10,explain:`${r[0]} → ${r[1]}`,key:'V'+r[1]},r[1],w.map(x=>x[1]));
+/* ---------- writing test: sentences to build and fix, and picture questions to answer in a full sentence ---------- */
+const WRITE=[
+ {sent:['I play football on Mondays.','Do you ride a bike at the weekend?','I watch TV on Sundays.','She reads a book on Fridays.','We swim on Saturdays.','Ben plays badminton after school.'],
+  ans:[['⚽','What do you do on Mondays?',['I play football on Mondays.','I play football.']],['📺','What do you do on Sundays?',['I watch TV on Sundays.','I watch TV.','I watch television on Sundays.','I watch television.']],['🚲','What do you do at the weekend?',['I ride a bike at the weekend.','I ride my bike at the weekend.','I ride a bike.','I ride my bike.']]]},
+ {sent:['Today is Saturday.','It is sunny today.','I help Mum in the kitchen.','We make a chocolate cake.','I write in my diary at night.','Tomorrow is Sunday.'],
+  ans:[['☀️','What is the weather like today?',['It is sunny.','It is sunny today.','It\'s sunny.','It\'s sunny today.']],['🌧️','What is the weather like today?',['It is rainy.','It is rainy today.','It\'s rainy.','It\'s rainy today.']],['🍰','What do you make with Mum?',['We make a cake.','I make a cake.','We make a cake with Mum.','I make a cake with Mum.','We make a chocolate cake.','I make a chocolate cake.']]]},
+ {sent:['There is a sofa in the living room.','There are two cats under the table.','Is there a lamp in the bedroom?','I sleep in my bedroom.','My house has five rooms.','The bath is in the bathroom.'],
+  ans:[['🛏️','Where do you sleep?',['I sleep in the bedroom.','I sleep in my bedroom.']],['🪑🪑🪑','How many chairs are there?',['There are three chairs.']],['🛋️','What is in the living room?',['There is a sofa in the living room.','There is a sofa.','A sofa is in the living room.']]]},
+ {sent:['She is wearing a pink dress.','Do you like this hat?','I like these shoes.','He is wearing a blue T-shirt.','My socks are white.','Put on your jacket.'],
+  ans:[['👧👗','What is she wearing?',['She is wearing a dress.','She\'s wearing a dress.']],['👦🧢','What is he wearing?',['He is wearing a cap.','He\'s wearing a cap.']],['🎩 ✔','Do you like this hat?',['Yes, I do.','Yes, I like this hat.','Yes, I like it.']]]},
+ {sent:['I can stand on one leg.','Can you swim?','The robot has long arms.','I have two eyes.','She can ride a bike.','He can\'t swim.'],
+  ans:[['🏊 ✔','Can you swim?',['Yes, I can.']],['🤸 ✘','Can you jump?',['No, I can\'t.','No, I cannot.']],['👀','How many eyes do you have?',['I have two eyes.']]]},
+ {sent:['Let\'s play the guitar.','Where is the blue book?','We go to the beach.','Lily collects shells.','The sea is blue.','Let\'s build a sandcastle.'],
+  ans:[['🏰','What is this?',['It is a sandcastle.','It\'s a sandcastle.','This is a sandcastle.']],['🐚','What is this?',['It is a shell.','It\'s a shell.','This is a shell.']],['🌊','What colour is the sea?',['The sea is blue.','It is blue.','It\'s blue.']]]},
+];
+// wrong spellings of a word: two letters swapped, a vowel changed, a letter doubled or dropped
+function misspell(w){
+  const out=new Set(),V={a:'e',e:'a',i:'e',o:'u',u:'o'};
+  for(let i=0;i<w.length-1;i++)if(w[i]!==w[i+1])out.add(w.slice(0,i)+w[i+1]+w[i]+w.slice(i+2));
+  for(let i=0;i<w.length;i++){if(V[w[i]])out.add(w.slice(0,i)+V[w[i]]+w.slice(i+1));out.add(w.slice(0,i+1)+w[i]+w.slice(i+1));if(w.length>3)out.add(w.slice(0,i)+w.slice(i+1))}
+  out.delete(w);return shuffle([...out]);
 }
-function spellQ(u){
-  const w=pick(Object.keys(u.spell)),pic=u.spell[w];
-  if(Math.random()<.5){
-    const i=R(1,w.length-1),letter=w[i],pool=shuffle('abcdefghijklmnoprstuwy'.split('').filter(c=>c!==letter)).slice(0,3);
-    return mc({q:'Which letter is missing?',pic,word:w.split('').map((c,j)=>j===i?'?':c),explain:`It is spelt ${w.toUpperCase().split('').join('-')}.`,key:'S'+w+i},letter,pool)}
-  let t=shuffle(w.split(''));let g=0;while(t.join('')===w&&g++<10)t=shuffle(w.split(''));
-  return {tiles:t,target:w,pic,q:'Tap the letters to spell the word.',explain:`It is spelt ${w.toUpperCase().split('').join('-')}.`,key:'T'+w,ansText:w};
-}
+// a dropdown question: the right option plus up to three different wrong ones
+function sel(o,right,wrongs){const m=mc({},right,wrongs);return Object.assign(o,{type:'select',options:m.choices,right:m.right})}
+const lowFirst=s=>s.charAt(0).toLowerCase()+s.slice(1);
+const noEnd=s=>s.replace(/[.?!]$/,'');
+// small letters for every word after the first (names, days and "I" lose their capitals)
+const lowRest=s=>s.split(' ').map((w,i)=>i?w.toLowerCase():w).join(' ');
+
+/* ---------- the five parts of the writing test; each question comes from one unit ---------- */
 const PARTS={
- A:{name:'Listening',icon:'👂',make:u=>vocabQ(u,true)},
- B:{name:'Vocabulary',icon:'🔤',make:u=>vocabQ(u,false)},
- C:{name:'Spelling',icon:'✏️',make:spellQ},
- D:{name:'Grammar',icon:'📝',make:u=>pick(u.grammar)()},
- E:{name:'Reading',icon:'📖',make:null},
+ A:{name:'Spell it',icon:'✏️',desc:'Choose the right spelling',make:ui=>{
+   const sp=UNITS[ui].spell,w=pick(Object.keys(sp));
+   return sel({q:'Choose the right spelling.',pic:sp[w],explain:`It is spelt ${w.toUpperCase().split('').join('-')}.`,key:'A'+w},w,misspell(w))}},
+ B:{name:'Fill in the blank',icon:'🔤',desc:'Choose the missing word',make:ui=>{
+   for(let g=0;g<20&&Math.random()<.6;g++){const m=pick(UNITS[ui].grammar)();const a=m.choices&&m.choices[m.right];
+     if(a&&m.q.includes('class="blank"')&&a.split(' ').length<=2&&!/[✔✘]/.test(m.q))return sel({inline:true,q:m.q,pic:m.pic,picRow:m.picRow,fig:m.fig,explain:m.explain,key:'B'+m.key},a,m.choices.filter(c=>c!==a))}
+   const sents=WRITE[ui].sent,s=pick(sents),words=s.split(' '),clean=x=>x.replace(/[.?!,]$/,'');
+   const idx=shuffle(words.map((_,i)=>i).filter(i=>i>0&&words[i].replace(/[^A-Za-z']/g,'').length>2))[0],word=clean(words[idx]),end=words[idx].slice(word.length);
+   const others=shuffle([...new Set(sents.flatMap(x=>x.split(' ').slice(1).map(clean)))].filter(x=>x!==word&&x.length>2));
+   return sel({inline:true,q:words.map((w,i)=>i===idx?`${blank}${end}`:w).join(' '),explain:s,key:'Bs'+s+idx},word,[...others.slice(0,2),...misspell(word.toLowerCase()).slice(0,2)])}},
+ C:{name:'Build the sentence',icon:'🧱',desc:'Put the words in the right order',make:ui=>{
+   const s=pick(WRITE[ui].sent),w=s.split(' ');let t=shuffle(w);let g=0;while(t.join(' ')===s&&g++<10)t=shuffle(w);
+   return {type:'build',q:'Tap the words in the right order.',tiles:t,target:s,explain:s,key:'C'+s,ansText:s}}},
+ D:{name:'Capitals and full stops',icon:'🔠',desc:'Choose the sentence written correctly',make:ui=>{
+   const s=pick(WRITE[ui].sent);
+   return sel({q:'Which sentence is written correctly?',explain:`${s} Start with a capital letter and end with a full stop or question mark. Names, days and “I” have capitals too.`,key:'D'+s},s,shuffle([lowFirst(s),noEnd(s),lowRest(s),s.toLowerCase(),noEnd(lowFirst(s))]))}},
+ E:{name:'Answer in a sentence',icon:'📝',desc:'Look at the picture and choose the best answer',make:ui=>{
+   const all=WRITE[ui].ans,[pic,q,acc]=pick(all),a=acc[0],other=all.filter(x=>x[2][0]!==a).map(x=>x[2][0]);
+   return sel({q,pic,explain:`A good answer: ${a}`,key:'E'+q+pic},a,[pick(other),lowFirst(a),noEnd(a),...other])}},
 };
 const ORDER=['A','B','C','D','E'];
-const FINAL={A:5,B:6,C:5,D:10,E:4},UNITROUND={A:2,B:2,C:2,D:3,E:3};
-function storyQs(ui,n){const s=UNITS[ui].story;return shuffle(s.qs).slice(0,n).map(([q,r,w])=>mc({story:s,q,long:true,unit:ui,part:'E',explain:`The story says: ${r}.`,key:'E'+q},r,shuffle(w)))}
+const FINAL={A:5,B:6,C:6,D:4,E:4},UNITROUND={A:2,B:3,C:3,D:2,E:2};
 function makePart(k,n,units){
-  if(k==='E')return storyQs(pick(units),n);
   const qs=[],seen=new Set(),order=shuffle(units);let g=0;
-  while(qs.length<n&&g++<400){const ui=order[(qs.length+g)%order.length],q=PARTS[k].make(UNITS[ui]);if(seen.has(q.key))continue;seen.add(q.key);Object.assign(q,{part:k,unit:ui});qs.push(q)}
+  while(qs.length<n&&g++<400){const ui=order[(qs.length+g)%order.length],q=PARTS[k].make(ui);if(seen.has(q.key))continue;seen.add(q.key);Object.assign(q,{part:k,unit:ui});qs.push(q)}
   return qs;
 }
 
@@ -357,54 +406,58 @@ let G=null;
 const stars=n=>[1,2,3].map(i=>`<span class="${i<=n?'on':''}">★</span>`).join('');
 const starsFor=(c,n)=>c/n>=.9?3:c/n>=.7?2:c/n>=.5?1:0;
 const sum=o=>Object.values(o).reduce((a,b)=>a+b,0);
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 function header(sub){return `<a class="crumb" href="../">← All subjects</a><div class="top">${cat('happy')}<div><h1>English</h1><p>${sub}</p></div><button class="snd" id="snd" aria-pressed="${store.sound}">${store.sound?'🔊 Sound on':'🔇 Sound off'}</button></div>`}
 function wireSound(){const b=document.getElementById('snd');b.onclick=()=>{store.sound=!store.sound;save();b.setAttribute('aria-pressed',store.sound);b.textContent=store.sound?'🔊 Sound on':'🔇 Sound off';if(store.sound)ding()}}
 function home(){
   G=null;const total=sum(FINAL);
-  app.innerHTML=header('Year 2 · Super Minds')+`<div class="card hero"><h2>Final Assessment</h2><p>${total} questions from all 6 units, in 5 parts like the real exam. Finish it and get your certificate!</p>
+  app.innerHTML=header('Year 2 · Super Minds')+`<div class="card hero"><h2>Writing Test</h2><p>${total} writing questions from all 6 units. Choose from the dropdown or build the sentence. No typing! Finish it and get your certificate!</p>
    <div class="parts">${ORDER.map(k=>`<div><b>${k}</b>${PARTS[k].icon} ${PARTS[k].name} <small style="color:var(--muted)">(${FINAL[k]})</small></div>`).join('')}</div>
-   <button class="go" id="final">Start the Final Assessment</button>
-   <p class="best">${store.best.final!=null?`Best score so far: ${store.best.final}/${total}`:'Tip: turn the sound up for Part A.'}</p></div>
-   <div class="card" style="margin-top:14px"><p class="lbl">Or revise one unit (${sum(UNITROUND)} questions)</p><div class="rev">${UNITS.map((u,i)=>`<button data-u="${i}">${u.icon} Unit ${i+1}: ${u.name} <em>${stars(store.best['u'+i]||0)}</em><span>${u.desc}</span></button>`).join('')}</div></div>
+   <button class="go" id="final">Start the Writing Test</button>
+   <p class="best">${store.best.final!=null?`Best score so far: ${store.best.final}/${total}`:'Remember: capital letters and full stops!'}</p></div>
+   <div class="card" style="margin-top:14px"><p class="lbl">Or practise writing for one unit (${sum(UNITROUND)} questions)</p><div class="rev">${UNITS.map((u,i)=>`<button data-u="${i}">${u.icon} Unit ${i+1}: ${u.name} <em>${stars(store.best['u'+i]||0)}</em><span>${u.desc}</span></button>`).join('')}</div></div>
    <p class="foot">Careful! A wrong answer goes BOOM 💥 · Good luck in your exam, Safiyyah!</p>`;
   document.getElementById('final').onclick=()=>{actx();start('final')};
   app.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{actx();start(+b.dataset.u)});
   wireSound();
 }
 function start(mode){
-  const all=UNITS.map((_,i)=>i),plan=mode==='final'?FINAL:UNITROUND,units=mode==='final'?all:[mode];
-  const qs=ORDER.flatMap(k=>makePart(k,plan[k],units));
-  G={mode,qs,i:0,score:0,done:false,wrong:[],built:[],byPart:{}};play();
+  const plan=mode==='final'?FINAL:UNITROUND,units=mode==='final'?UNITS.map((_,i)=>i):[mode];
+  G={mode,qs:ORDER.flatMap(k=>makePart(k,plan[k],units)),i:0,score:0,done:false,wrong:[],built:[],typed:null,byPart:{}};play();
 }
-const title=()=>G.mode==='final'?'Final Assessment':`Unit ${G.mode+1}: ${UNITS[G.mode].name}`;
+const title=()=>G.mode==='final'?'Writing Test':`Unit ${G.mode+1}: ${UNITS[G.mode].name}`;
 function play(){
   const q=G.qs[G.i],N=G.qs.length,P=PARTS[q.part];
-  let body=`<span class="tag">Part ${q.part} · ${P.name} · Unit ${q.unit+1}</span>`;
-  if(q.story)body+=`<div class="story"><h3>${q.story.title}</h3>${q.story.text}</div>`;
-  if(q.speak)body+=`<div class="say"><button id="say">🔊 Listen</button></div>`;
-  body+=`<p class="q">${q.q}</p>`;
-  if(q.pic)body+=`<div class="pic${q.picRow?' row':''}">${q.pic}</div>`;
+  let dd='';
+  if(q.type==='select'){
+    const v=G.typed;
+    dd=`<select id="in" aria-label="Choose your answer" ${G.done?'disabled':''} class="${G.done?(G.ok?'right':'wrong'):''}"><option value="" ${v==null?'selected':''} disabled>Choose…</option>${q.options.map((o,i)=>`<option value="${i}" ${v===i?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  }
+  let body=`<span class="tag">Part ${q.part} · ${P.name} · Unit ${q.unit+1}</span><p class="q">${q.inline?q.q.replace(/<span class="blank">\?<\/span>/,dd):q.q}</p>`;
+  if(q.pic)body+=`<div class="pic${q.picRow||q.pic.length>3?' row':''}">${q.pic}</div>`;
   if(q.fig)body+=q.fig;
-  if(q.word)body+=`<div class="word">${q.word.map(c=>`<span>${c==='?'&&G.done?q.choices[q.right]:c}</span>`).join('')}</div>`;
-  if(q.choices){
-    body+=`<div class="ch${q.emo?' emo':''}${!q.emo&&(q.long||q.choices.some(c=>c.length>12))?' long':''}">${q.choices.map((c,i)=>`<button data-c="${i}" ${G.done?'disabled':''} class="${G.done&&i===q.right?'right':''}${G.done&&i===G.pick&&i!==q.right?' wrong':''}" aria-label="${q.emo?'Picture '+'ABCD'[i]:c}"><span class="k">${'ABCD'[i]}</span><span>${c}</span></button>`).join('')}</div>`;
-  }else if(q.tiles){
-    body+=`<div class="word">${q.target.split('').map((_,j)=>`<span>${G.built[j]!=null?q.tiles[G.built[j]]:''}</span>`).join('')}</div>
-    <div class="tiles">${q.tiles.map((c,j)=>`<button data-t="${j}" ${G.done||G.built.includes(j)?'disabled':''}>${c}</button>`).join('')}</div>
+  if(q.type==='select'){
+    body+=`<div class="write${q.inline?' inl':''}">${q.inline?'':dd+`<div class="picked" id="picked">${G.typed!=null?'You chose: <b>'+esc(q.options[G.typed])+'</b>':''}</div>`}<button class="ok" id="ok" ${G.done||G.typed==null?'disabled':''}>Check</button></div>`;
+  }else{
+    body+=`<div class="sentence">${G.built.length?G.built.map(j=>`<span>${esc(q.tiles[j])}</span>`).join(' '):'<em>Tap the words below…</em>'}</div>
+    <div class="wtiles">${q.tiles.map((c,j)=>`<button data-t="${j}" ${G.done||G.built.includes(j)?'disabled':''}>${esc(c)}</button>`).join('')}</div>
     ${G.done?'':`<button class="undo" id="undo" ${G.built.length?'':'disabled'}>⌫ Undo</button>`}`;
   }
   app.innerHTML=header(title())+`<div class="hud"><span>${G.i+1}/${N}</span><div class="prog"><i style="width:${G.i/N*100}%"></i></div><span>★ ${G.score}</span></div>
   <div class="card">${body}<div id="fb"></div></div>
   <div class="row" style="justify-content:center"><button class="btn" id="quit">Stop</button></div>`;
   wireSound();
-  const s=document.getElementById('say');if(s){s.onclick=()=>{if(!speak(q.speak))s.textContent='🔇 No voice here: the word is “'+q.speak+'”'};if(!G.done&&G.spoke!==G.i){G.spoke=G.i;setTimeout(()=>s.click(),300)}}
-  app.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{G.pick=+b.dataset.c;check(G.pick===q.right)});
-  app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{G.built.push(+b.dataset.t);if(G.built.length===q.target.length)check(G.built.map(j=>q.tiles[j]).join('')===q.target);else play()});
+  const inp=document.getElementById('in');
+  if(inp){
+    inp.onchange=()=>{G.typed=+inp.value;document.getElementById('ok').disabled=false;const p=document.getElementById('picked');if(p)p.innerHTML='You chose: <b>'+esc(q.options[G.typed])+'</b>'};
+    document.getElementById('ok').onclick=()=>{if(!G.done&&G.typed!=null)check(G.typed===q.right)};
+  }
+  app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{G.built.push(+b.dataset.t);if(G.built.length===q.tiles.length)check(G.built.map(j=>q.tiles[j]).join(' ')===q.target);else play()});
   const u=document.getElementById('undo');if(u)u.onclick=()=>{G.built.pop();play()};
   document.getElementById('quit').onclick=home;
   if(G.done)fb();
 }
-function answerText(q){return q.ansText||(q.choices?q.choices[q.right]:q.target)}
+function answerText(q){return q.ansText||q.options[q.right]}
 function check(right){
   const q=G.qs[G.i];G.done=true;G.ok=right;
   const bp=G.byPart[q.part]||(G.byPart[q.part]={c:0,n:0});bp.n++;
@@ -414,15 +467,12 @@ function check(right){
 const PRAISE=['Well done!','Great!','Excellent!','Clever girl!','Correct!','Super!'];
 function fb(){
   const q=G.qs[G.i],last=G.i===G.qs.length-1,el=document.getElementById('fb');
-  el.innerHTML=`<div class="fb ${G.ok?'ok':'no'} pop">${cat(G.ok?'happy':'sad')}<div class="t"><b>${G.ok?pick(PRAISE):'BOOM! The answer is: '+answerText(q)}</b>${q.explain}</div><button class="next" id="nx">${last?'See my certificate':'Next →'}</button></div>`;
+  el.innerHTML=`<div class="fb ${G.ok?'ok':'no'} pop">${cat(G.ok?'happy':'sad')}<div class="t"><b>${G.ok?pick(PRAISE):'BOOM! '+(G.why||'The answer is: '+esc(answerText(q)))}</b>${q.explain}</div><button class="next" id="nx">${last?'See my certificate':'Next →'}</button></div>`;
   const nx=document.getElementById('nx');nx.focus({preventScroll:true});
-  nx.onclick=()=>{if(last)result();else{G.i++;G.done=false;G.pick=null;G.built=[];play()}};
+  nx.onclick=()=>{if(last)result();else{G.i++;G.done=false;G.built=[];G.typed=null;G.why=null;play()}};
 }
 document.addEventListener('keydown',e=>{
-  if(!G||!document.getElementById('fb'))return;const q=G.qs[G.i];
-  if(e.key==='Enter'){const nx=document.getElementById('nx');if(nx){e.preventDefault();nx.click()}return}
-  if(G.done||!q.choices)return;
-  const i='abcd'.indexOf(e.key.toLowerCase());if(i>=0&&i<q.choices.length){G.pick=i;check(i===q.right)}
+  if(!G||e.key!=='Enter')return;const nx=document.getElementById('nx');if(nx&&document.activeElement!==document.getElementById('in')){e.preventDefault();nx.click()}
 });
 function plain(h){const d=document.createElement('div');d.innerHTML=h;return d.textContent.replace(/\s+/g,' ').trim()}
 function confetti(){
@@ -437,15 +487,15 @@ function result(){
   if(G.mode==='final'){if((store.best.final||0)<G.score)store.best.final=G.score}
   else if((store.best['u'+G.mode]||0)<s)store.best['u'+G.mode]=s;
   save();
-  const medal=pct>=90?['🥇','Gold! You are ready for the exam!']:pct>=70?['🥈','Silver! Almost there. Revise your mistakes below.']:pct>=50?['🥉','Bronze! Good try. Revise the units below.']:['💪','Keep going! Try one unit at a time.'];
+  const medal=pct>=90?['🥇','Gold! You are ready for the exam!']:pct>=70?['🥈','Silver! Almost there. Look at your mistakes below.']:pct>=50?['🥉','Bronze! Good try. Practise the units below.']:['💪','Keep going! Try one unit at a time.'];
   const weak=[...new Set(G.wrong.map(q=>q.unit))].sort();
   app.innerHTML=header(title())+`<div class="card cert pop">
    <p class="lbl" style="color:var(--muted)">Certificate</p><div class="medal">${medal[0]}</div>
    <div class="big">${G.score}/${N}</div><div class="stars">${stars(s)}</div>
    <p style="font-weight:800;font-size:1.15rem;margin:6px 0">${medal[1]}</p>
-   ${G.mode==='final'?`<div class="bypart">${ORDER.map(k=>{const b=G.byPart[k]||{c:0,n:0};return `<div><span>Part ${k} ${PARTS[k].name}</span><span>${b.c}/${b.n}</span></div>`}).join('')}</div>`:''}
-   ${G.mode==='final'&&weak.length?`<p style="margin:8px 0 0"><b>Revise:</b> ${weak.map(i=>`Unit ${i+1} ${UNITS[i].name}`).join(', ')}</p>`:''}
-   ${G.wrong.length?`<div class="wrongs"><p class="lbl">Look at these again</p>${G.wrong.map(q=>`<div>${q.speak?'🔊 “'+q.speak+'”':plain(q.q)} → <span>${plain(answerText(q))}</span></div>`).join('')}</div>`:''}
+   ${G.mode==='final'?`<div class="bypart">${ORDER.map(k=>{const b=G.byPart[k]||{c:0,n:0};return `<div><span>${k}. ${PARTS[k].name}</span><span>${b.c}/${b.n}</span></div>`}).join('')}</div>`:''}
+   ${G.mode==='final'&&weak.length?`<p style="margin:8px 0 0"><b>Practise:</b> ${weak.map(i=>`Unit ${i+1} ${UNITS[i].name}`).join(', ')}</p>`:''}
+   ${G.wrong.length?`<div class="wrongs"><p class="lbl">Look at these again</p>${G.wrong.map(q=>`<div>${q.part==='A'?q.pic:plain(q.q)} →<span>${esc(answerText(q))}</span></div>`).join('')}</div>`:''}
    <div class="row"><button class="btn main" id="again">Try again</button><button class="btn" id="menu">Back</button></div></div>`;
   wireSound();
   document.getElementById('again').onclick=()=>start(G.mode);document.getElementById('menu').onclick=home;
