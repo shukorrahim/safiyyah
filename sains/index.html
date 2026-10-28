@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Sains · Safiyyah Belajar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: home with two cards (interactive notes by topic, then the test) -> note pages with tap cards, sorting games and step animations -> one question at a time -> certificate and every answer for revision. */
+:root{
+  --bg:#F2F7F5; --surface:#FFFFFF; --ink:#1D2A31; --muted:#58696F; --line:#D5E4DF; --sun:#F2B33D;
+  --en:#6A4C9C; --en-soft:#ECE5F6; --good:#278A4C; --good-bg:#E3F4E8; --bad:#C8463F; --bad-bg:#FBE7E5;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif; --body:"Nunito","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0F191C; --surface:#172529; --ink:#E7F0ED; --muted:#9DB2AC; --line:#2A3F40; --sun:#F5C25B;
+  --en:#A98BDB; --en-soft:#261C36; --good:#5CCB83; --good-bg:#173525; --bad:#F07E77; --bad-bg:#3A1F1E; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);-webkit-text-size-adjust:100%;overflow-x:hidden}
+.wrap{max-width:640px;margin:0 auto;padding-block:20px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.crumb{display:inline-block;margin-bottom:14px;font-weight:800;color:var(--muted);text-decoration:none;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.top svg{width:60px;height:60px;flex:none}
+.top h1{font-size:clamp(1.6rem,6vw,2.2rem);font-weight:800;color:var(--en)}
+.top p{margin:0;color:var(--muted);font-size:.95rem}
+.snd{margin-left:auto;flex:none;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-weight:800;font-size:.9rem}
+.card{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:18px}
+.lbl{font-family:var(--display);font-weight:800;font-size:1.15rem;margin:0 0 8px}
+.hero{text-align:center;background:linear-gradient(135deg,var(--en-soft),var(--surface));}
+.hero h2{font-size:clamp(1.6rem,7vw,2.3rem);font-weight:800;color:var(--en)}
+.hero p{margin:6px 0 0}
+.parts{display:grid;gap:8px;margin:14px 0 4px;text-align:left}
+.parts div{display:flex;gap:10px;align-items:center;font-weight:700}
+.parts b{flex:none;width:30px;height:30px;border-radius:50%;background:var(--en);color:#fff;display:grid;place-items:center;font-family:var(--display)}
+.parts .st{margin-left:auto;color:var(--line);letter-spacing:1px}
+.parts .st .on{color:var(--sun)}
+.go{display:block;width:100%;margin-top:14px;border:0;background:var(--en);color:#fff;border-radius:16px;padding:14px;font-family:var(--display);font-weight:800;font-size:1.35rem}
+.best{margin:8px 0 0;color:var(--muted);font-size:.9rem;text-align:center}
+.rev{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.rev button{border:2px solid var(--line);background:var(--bg);border-radius:16px;padding:10px;text-align:left;font-weight:800;min-height:56px}
+.rev em{font-style:normal;color:var(--line);letter-spacing:1px}
+.rev em .on{color:var(--sun)}
+.rev button>span{display:block;color:var(--muted);font-weight:600;font-size:.85rem}
+.hud{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:800;font-variant-numeric:tabular-nums}
+.prog{flex:1;height:12px;background:var(--line);border-radius:999px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--en);transition:width .3s}
+.tag{display:inline-block;font-size:.75rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--en);background:var(--en-soft);border-radius:999px;padding:2px 10px;margin-bottom:8px}
+.q{font-family:var(--display);font-weight:800;font-size:clamp(1.25rem,5.2vw,1.6rem);line-height:1.25;margin:0 0 10px}
+.blank{display:inline-block;min-width:2.6em;border-bottom:4px solid var(--en);color:var(--en);text-align:center}
+.pic{font-size:clamp(4rem,22vw,6rem);line-height:1.1;text-align:center;margin:4px 0 8px}
+.pic.row{font-size:clamp(2.2rem,11vw,3rem);letter-spacing:4px}
+.story{background:var(--en-soft);border-radius:16px;padding:12px 14px;margin:0 0 12px;font-size:1.05rem;line-height:1.6}
+.story h3{font-size:1.2rem;color:var(--en);margin-bottom:4px}
+.say{display:flex;justify-content:center;margin:6px 0 12px}
+.say button{border:0;background:var(--en);color:#fff;border-radius:999px;padding:14px 26px;font-family:var(--display);font-weight:800;font-size:1.3rem}
+.ch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:6px}
+.ch.long{grid-template-columns:1fr}
+.ch button{display:flex;align-items:center;gap:10px;text-align:left;min-height:56px;border:2px solid var(--line);background:var(--bg);border-radius:16px;padding:8px 12px;font-family:var(--display);font-weight:800;font-size:1.25rem;overflow-wrap:anywhere}
+.ch.emo button{justify-content:center;font-size:2.6rem;min-height:84px}
+.ch button .k{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--en);color:#fff;font-size:.95rem;font-family:var(--display)}
+.ch.emo button{position:relative}
+.ch.emo button .k{position:absolute;top:6px;left:6px;width:24px;height:24px;font-size:.8rem}
+.ch button.right{background:var(--good-bg);border-color:var(--good)}
+.ch button.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.ch button:disabled{cursor:default}
+.word{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:8px 0 14px}
+.word span{width:44px;height:52px;border-bottom:4px solid var(--en);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.8rem;text-transform:lowercase}
+.tiles{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.tiles button{width:52px;height:56px;border:2px solid var(--en);background:var(--en-soft);border-radius:14px;font-family:var(--display);font-weight:800;font-size:1.7rem}
+.tiles button:disabled{opacity:.25}
+.hint{text-align:center;color:var(--muted);font-weight:700;letter-spacing:.08em;margin:0 0 8px}
+.write{display:flex;gap:8px;margin-top:6px}
+.write.inl{justify-content:center}
+.q select,.story select{max-width:100%;font:800 1.1rem/1.2 var(--body);color:var(--en);background:var(--en-soft);border:3px solid var(--en);border-radius:12px;padding:6px 8px;margin:2px 0;vertical-align:middle;min-height:44px}
+.q select.right,.story select.right{border-color:var(--good);background:var(--good-bg);color:var(--good)}
+.q select.wrong,.story select.wrong{border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
+.write:not(.inl){flex-direction:column}
+.write select{min-height:52px;font-size:1rem}
+.picked{font-size:1.1rem;line-height:1.4;color:var(--muted)}
+.picked b{color:var(--ink);font-family:var(--display);font-size:1.2rem}
+.write input,.write select{flex:1;min-width:0;font:800 1.35rem/1.2 var(--body);color:var(--ink);background:var(--bg);border:3px solid var(--en);border-radius:14px;padding:10px 12px}
+.write #in:focus{outline:3px solid var(--sun);outline-offset:1px}
+.write #in.right{border-color:var(--good);background:var(--good-bg)}
+.write #in.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.write .ok{flex:none;border:0;background:var(--en);color:#fff;border-radius:14px;padding:0 16px;font-family:var(--display);font-weight:800;font-size:1.15rem;min-height:52px}
+.write .ok:disabled{opacity:.4}
+.sentence{min-height:56px;border:3px dashed var(--en);border-radius:14px;padding:10px 12px;margin:4px 0 12px;font-family:var(--display);font-weight:800;font-size:1.3rem;line-height:1.4}
+.sentence em{color:var(--muted);font-weight:600;font-family:var(--body);font-size:1rem}
+.wtiles{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.wtiles button{border:2px solid var(--en);background:var(--en-soft);border-radius:12px;padding:8px 12px;min-height:48px;font-family:var(--display);font-weight:800;font-size:1.2rem}
+.wtiles button:disabled{opacity:.25}
+.sec{margin:12px 0 6px;font-family:var(--display);font-weight:800;color:var(--en)}
+.rev.one{grid-template-columns:1fr}
+.spell{letter-spacing:.15em;white-space:nowrap}
+.house{width:min(100%,260px);height:auto}
+.daycard{display:inline-block;font-family:var(--display);font-size:1.3rem;letter-spacing:0;vertical-align:middle;border:3px solid var(--en);border-radius:12px;padding:2px 10px;margin-right:10px;background:var(--en-soft);color:var(--en)}
+.undo{display:block;margin:10px auto 0;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 16px;font-weight:800;min-height:44px}
+.scene{display:flex;justify-content:center;margin:0 0 8px}
+.scene svg{width:200px;height:auto}
+.fb{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px;border-radius:16px;padding:12px 14px;border:2px solid var(--line)}
+.fb svg{width:50px;height:50px;flex:none}
+.fb.ok{background:var(--good-bg);border-color:var(--good)}
+.fb.no{background:var(--bad-bg);border-color:var(--bad)}
+.fb b{font-family:var(--display);font-size:1.25rem;display:block}
+.fb .t{flex:1 1 160px;min-width:0}
+.fb .next{flex:1 0 100%;border:0;background:var(--en);color:#fff;border-radius:999px;padding:10px;font-weight:800;font-size:1.05rem}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 18px;font-weight:800}
+.btn.main{background:var(--en);border-color:var(--en);color:#fff}
+.cert{text-align:center;border:4px double var(--sun)}
+.cert svg{width:96px;height:96px}
+.cert .medal{font-size:4rem;line-height:1}
+.big{font-family:var(--display);font-size:3rem;font-weight:800;color:var(--en);font-variant-numeric:tabular-nums}
+.stars{font-size:2.4rem;letter-spacing:6px;color:var(--line)}
+.stars .on{color:var(--sun)}
+.bypart{display:grid;gap:4px;margin:10px auto;max-width:320px;text-align:left;font-weight:700}
+.bypart div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:2px 0}
+.wrongs{text-align:left;margin-top:12px}
+.wrongs div{border-bottom:1px dashed var(--line);padding:6px 2px;font-weight:700}
+.wrongs div span{color:var(--good);font-weight:800}
+.cert .row{justify-content:center}
+.foot{margin-top:24px;text-align:center;color:var(--muted);font-size:.85rem}
+#boom{position:fixed;inset:0;z-index:60;pointer-events:none;display:none;place-items:center;background:radial-gradient(circle,rgba(255,236,150,.95) 0,rgba(255,140,40,.85) 28%,rgba(200,40,20,.55) 52%,rgba(0,0,0,0) 75%)}
+#boom.go{display:grid;animation:flash .9s ease-out forwards}
+#boom svg{width:min(80vw,420px);height:auto;animation:burst .9s ease-out forwards}
+@keyframes flash{0%{opacity:0}8%{opacity:1}70%{opacity:.85}100%{opacity:0}}
+@keyframes burst{0%{transform:scale(.2) rotate(-8deg)}25%{transform:scale(1.15) rotate(3deg)}100%{transform:scale(1.3) rotate(0)}}
+.shake{animation:shake .5s linear}
+@keyframes shake{0%,100%{transform:translate(0,0)}10%{transform:translate(-12px,6px)}20%{transform:translate(11px,-8px)}30%{transform:translate(-9px,-5px)}40%{transform:translate(8px,7px)}50%{transform:translate(-6px,4px)}60%{transform:translate(5px,-4px)}70%{transform:translate(-3px,3px)}80%{transform:translate(2px,-2px)}}
+@keyframes pop{0%{transform:scale(.92)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
+.pop{animation:pop .3s ease}
+#confetti{position:fixed;inset:0;z-index:55;pointer-events:none}
+@media (pointer:coarse){.btn,.snd,.crumb{min-height:44px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}#boom.go{opacity:.9}}
+.topics{display:grid;gap:8px;margin-top:14px;text-align:left}
+.topics button{display:flex;align-items:center;gap:12px;border:2px solid var(--line);background:var(--surface);border-radius:16px;padding:8px 12px;min-height:60px}
+.topics .ti{font-size:1.9rem;flex:none;width:44px;text-align:center}
+.topics b{display:block;font-family:var(--display);font-size:1.15rem}
+.topics em{font-style:normal;color:var(--line);letter-spacing:1px;font-size:.9rem}
+.topics em .on{color:var(--sun)}
+.topics .rd{margin-left:auto;color:var(--good);font-weight:800;font-size:1.3rem}
+.note h2{font-size:clamp(1.6rem,7vw,2.1rem);color:var(--en);margin-bottom:8px}
+.np{margin:8px 0;font-size:1.08rem}
+.nh{font-size:1.3rem;color:var(--en);margin:20px 0 8px;padding-top:12px;border-top:2px dashed var(--line)}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:8px 0}
+.facts div{background:var(--en-soft);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px}
+.facts .fe{font-size:2rem;line-height:1.1}
+.facts b{font-family:var(--display);font-size:1.1rem}
+.facts span:last-child{font-size:.95rem;color:var(--muted)}
+.flips{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin:8px 0}
+.flip{border:2px solid var(--en);background:var(--surface);border-radius:16px;padding:12px;text-align:left;min-height:90px;display:flex;flex-direction:column;gap:6px}
+.flip .ff{font-family:var(--display);font-weight:800;font-size:1.15rem;line-height:1.25}
+.flip .fk{display:none;font-size:1.02rem;background:var(--good-bg);border-radius:10px;padding:6px 8px}
+.flip small{color:var(--muted);font-weight:700}
+.flip.open{border-color:var(--good)}
+.flip.open .fk{display:block;animation:pop .3s ease}
+.flip.open small{display:none}
+.steps{display:flex;align-items:center;justify-content:center;gap:3px;margin:8px 0}
+.steps .st{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:6px;display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 1 100px;min-width:62px;transition:opacity .4s}
+.steps .st span:not(.em){font-size:.9rem;text-align:center;line-height:1.2}
+.steps .em{font-size:2.2rem;line-height:1.2}
+.steps.grow .st:nth-of-type(1) .em{font-size:1.6rem}.steps.grow .st:nth-of-type(2) .em{font-size:2.1rem}.steps.grow .st:nth-of-type(3) .em{font-size:2.6rem}.steps.grow .st:nth-of-type(4) .em{font-size:3.1rem}
+.steps i{font-style:normal;color:var(--en);font-weight:800;transition:opacity .4s}
+.steps .dim{opacity:.12}
+.pl{width:64px;height:auto;color:var(--ink)}
+.fr{width:70px;height:auto}
+.playb{display:block;margin:6px auto 0;border:2px solid var(--en);background:var(--en-soft);color:var(--en);border-radius:999px;padding:8px 18px;font-weight:800;min-height:44px}
+.sortw{border:2px dashed var(--en);border-radius:18px;padding:12px;margin:12px 0}
+.sortw .sh{font-family:var(--display);font-weight:800;font-size:1.15rem;margin:0 0 8px}
+.sortw .cur{text-align:center;display:flex;flex-direction:column;align-items:center;min-height:120px;justify-content:center}
+.sortw .cur .e{font-size:3.4rem;line-height:1.1}
+.sortw .cur b{font-family:var(--display);font-size:1.3rem}
+.sortw .cur small{color:var(--muted);font-weight:700}
+.sortw .done{font-family:var(--display);font-weight:800;font-size:1.4rem;color:var(--good)}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.bins button{border:3px solid var(--en);background:var(--en-soft);border-radius:16px;padding:10px 6px;min-height:84px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bins b{font-family:var(--display);font-size:1.1rem;line-height:1.15}
+.bins .got{font-size:1.3rem;letter-spacing:2px;overflow-wrap:anywhere}
+.sortw .msg,.wid .msg{text-align:center;font-weight:700;min-height:1.5em;margin:8px 0 0}
+.wid{border:2px dashed var(--en);border-radius:18px;padding:12px;margin:10px 0;text-align:center}
+.fig{width:100%;height:auto;display:block;margin:0 auto}
+.row.c{justify-content:center}
+.btn:disabled{opacity:.4}
+.sl{display:flex;flex-direction:column;gap:4px;font-weight:700;color:var(--muted);margin-top:8px}
+.sl input{width:100%;accent-color:var(--en);min-height:36px}
+.stage{position:relative;height:170px;border-radius:14px;background:#1E2A33;overflow:hidden}
+.stage .torch{position:absolute;left:2%;top:50%;transform:translateY(-50%) scaleX(-1) rotate(45deg);font-size:2.2rem}
+.stage .beam{position:absolute;left:10%;right:8%;top:0;bottom:0;background:linear-gradient(90deg,rgba(255,236,150,.7),rgba(255,236,150,.35));clip-path:polygon(0 42%,100% 0,100% 100%,0 58%);opacity:0;transition:opacity .3s}
+.stage.on .beam{opacity:1}
+.stage .obj{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:32px;z-index:2}
+.stage .wall{position:absolute;right:0;top:0;bottom:0;width:30%;background:#C9CED1;display:grid;place-items:center;overflow:hidden}
+.stage.on .wall{background:#FFF4C8}
+.stage .shd{filter:brightness(0);opacity:.85;line-height:1;transition:font-size .15s}
+.stage:not(.on) .shd{opacity:0}
+.figw{display:flex;justify-content:center;margin:0 0 8px}
+.cyc{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.cyc div{border:2px solid var(--line);border-radius:12px;padding:4px 6px;display:flex;flex-direction:column;align-items:center;background:var(--surface)}
+.cyc b{font-family:var(--display);font-size:1.3rem;line-height:1}
+.cyc .fr{width:60px}
+.shwfig{display:flex;gap:14px;align-items:center;justify-content:center;font-size:3.4rem;background:#FFF4C8;border-radius:14px;padding:6px 18px}
+.shwfig .dark{filter:brightness(0);opacity:.85}
+.nav{justify-content:center}
+.review ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.review li{display:flex;gap:10px;align-items:flex-start;border:2px solid var(--line);border-radius:14px;padding:8px 10px}
+.review li.ok{border-color:var(--good);background:var(--good-bg)}
+.review li.no{border-color:var(--bad);background:var(--bad-bg)}
+.review .mk{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;background:var(--good)}
+.review li.no .mk{background:var(--bad)}
+.review li div{min-width:0}
+.review small{color:var(--muted);font-weight:700}
+.review p{margin:2px 0;overflow-wrap:anywhere}
+.review b.r{color:var(--good)}
+.review .ex{font-size:.92rem;color:var(--muted)}
+@media print{body{background:#fff}.crumb,.snd,.cert,.music-btn,#boom,#confetti,.row{display:none!important}.review li{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div id="boom" aria-hidden="true"><svg viewBox="0 0 200 200"><path d="M100 4 L118 62 L172 26 L142 80 L196 92 L144 112 L178 164 L120 136 L104 196 L86 138 L30 172 L60 116 L4 104 L58 84 L24 32 L82 62 Z" fill="#FFD23F" stroke="#E2401C" stroke-width="6" stroke-linejoin="round"/><text x="100" y="114" text-anchor="middle" font-family="Baloo 2,Trebuchet MS,sans-serif" font-weight="800" font-size="40" fill="#C2181B">BOOM!</text></svg></div>
+<script>
+function cat(m){return `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M18 40 L22 10 L44 28 Z" fill="#F0A64A"/><path d="M82 40 L78 10 L56 28 Z" fill="#F0A64A"/><path d="M24 34 L25 18 L37 28 Z" fill="#F7C9D0"/><path d="M76 34 L75 18 L63 28 Z" fill="#F7C9D0"/><ellipse cx="50" cy="56" rx="36" ry="32" fill="#F5B861"/><path d="M50 26 q-4 8 0 14 q4 -6 0 -14" fill="#E08F2E"/><ellipse cx="50" cy="66" rx="17" ry="12" fill="#FFF3E2"/>${m==='sad'?'<circle cx="38" cy="49" r="4.5" fill="#3a2a22"/><circle cx="62" cy="49" r="4.5" fill="#3a2a22"/><path d="M42 66 q8 -6 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/>':'<path d="M33 49 q5 -6 10 0 M57 49 q5 -6 10 0" fill="none" stroke="#3a2a22" stroke-width="3.5" stroke-linecap="round"/><path d="M42 62 q8 9 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/><circle cx="28" cy="62" r="5" fill="#F7A8B3" opacity=".7"/><circle cx="72" cy="62" r="5" fill="#F7A8B3" opacity=".7"/>'}<path d="M46 57 h8 l-4 4 z" fill="#E86A7E"/><path d="M22 60 h-14 M22 65 h-13 M78 60 h14 M78 65 h13" stroke="#3a2a22" stroke-width="1.6" stroke-linecap="round"/></svg>`}
+
+/* ---------- storage ---------- */
+const KEY='sainsNota.v1';let store={sound:true,best:{}};
+try{store=Object.assign(store,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
+
+/* ---------- sounds (Web Audio, no files) and speech ---------- */
+let ax=null;
+function actx(){
+  try{
+    if(navigator.audioSession)navigator.audioSession.type='playback'; // iPad: play even in silent mode
+    if(!ax){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ax=new AC()}
+    if(ax.state==='suspended')ax.resume();
+    return ax;
+  }catch(e){return null}
+}
+function tone(notes){const c=store.sound&&actx();if(!c)return;const t=c.currentTime+.02;
+  notes.forEach(([f,d,len])=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t+d);g.gain.exponentialRampToValueAtTime(.35,t+d+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d+(len||.45));o.connect(g);g.connect(c.destination);o.start(t+d);o.stop(t+d+(len||.45)+.05)})}
+const ding=()=>tone([[880,0],[1320,.12]]);
+const fanfare=()=>tone([[523,0,.3],[659,.15,.3],[784,.3,.3],[1047,.45,.8]]);
+// a falling whistle, then a loud blast: noise through a closing low-pass, a deep thump, and distortion for grit
+function boomSound(){
+  const c=store.sound&&actx();if(!c)return 0;
+  const t=c.currentTime+.02,b=t+.36;
+  const comp=c.createDynamicsCompressor();comp.threshold.value=-8;comp.knee.value=0;comp.ratio.value=12;comp.attack.value=.002;comp.release.value=.25;
+  const dist=c.createWaveShaper(),curve=new Float32Array(1024);for(let i=0;i<1024;i++){const x=i/511.5-1;curve[i]=Math.tanh(3*x)}dist.curve=curve;
+  const out=c.createGain();out.gain.value=1;dist.connect(comp);comp.connect(out);out.connect(c.destination);
+  const w=c.createOscillator(),wg=c.createGain();w.type='sine';w.frequency.setValueAtTime(1900,t);w.frequency.exponentialRampToValueAtTime(450,b);
+  wg.gain.setValueAtTime(.0001,t);wg.gain.exponentialRampToValueAtTime(.3,t+.05);wg.gain.setValueAtTime(.3,b-.04);wg.gain.exponentialRampToValueAtTime(.0001,b);
+  w.connect(wg);wg.connect(comp);w.start(t);w.stop(b+.05);
+  const len=Math.floor(c.sampleRate*2.4),buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
+  const n=c.createBufferSource();n.buffer=buf;
+  const lp=c.createBiquadFilter();lp.type='lowpass';lp.Q.value=.8;lp.frequency.setValueAtTime(5000,b);lp.frequency.exponentialRampToValueAtTime(90,b+1.8);
+  const ng=c.createGain();ng.gain.setValueAtTime(.0001,b);ng.gain.exponentialRampToValueAtTime(2,b+.008);ng.gain.exponentialRampToValueAtTime(.0001,b+2.2);
+  n.connect(lp);lp.connect(ng);ng.connect(dist);n.start(b);n.stop(b+2.4);
+  const o=c.createOscillator(),og=c.createGain();o.type='sine';o.frequency.setValueAtTime(150,b);o.frequency.exponentialRampToValueAtTime(28,b+.9);
+  og.gain.setValueAtTime(.0001,b);og.gain.exponentialRampToValueAtTime(2.5,b+.01);og.gain.exponentialRampToValueAtTime(.0001,b+1.3);
+  o.connect(og);og.connect(dist);o.start(b);o.stop(b+1.4);
+  return 360;
+}
+function explode(){
+  const delay=boomSound();
+  setTimeout(()=>{
+    const el=document.getElementById('boom');el.classList.remove('go');void el.offsetWidth;el.classList.add('go');
+    app.classList.remove('shake');void app.offsetWidth;app.classList.add('shake');
+    try{navigator.vibrate&&navigator.vibrate([350,80,200])}catch(e){}
+  },delay);
+}
+let voice=null;
+function pickVoice(){try{const v=speechSynthesis.getVoices();voice=v.find(x=>/en-GB/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}catch(e){}}
+if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+function speak(text){
+  if(!('speechSynthesis' in window))return false;
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-GB';if(voice)u.voice=voice;u.rate=.8;speechSynthesis.speak(u);return true}catch(e){return false}
+}
+
+/* ---------- helpers ---------- */
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const blank='<span class="blank">?</span>';
+function mc(o,right,wrongs){
+  const seen=new Set([right]),w=[];for(const x of wrongs){if(!seen.has(x)){seen.add(x);w.push(x)}if(w.length===3)break}
+  const all=shuffle([right,...w]);return Object.assign(o,{choices:all,right:all.indexOf(right)});
+}
+
+/* ---------- Sains: interactive notes and a quiz, from the two "Nota Ringkas Sains" posters (Tahun 2 and Tahun 3) ---------- */
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const buzz=()=>tone([[196,0,.35]]);
+
+// a book measured with k of n paper clips
+function clips(n,k){
+  const w=n*26;let c='';
+  for(let i=0;i<k;i++){const x=12+i*26;c+=`<rect x="${x}" y="58" width="24" height="12" rx="6" fill="none" stroke="#7A8A90" stroke-width="2.5"/><rect x="${x+5}" y="61" width="15" height="6" rx="3" fill="none" stroke="#7A8A90" stroke-width="2"/>`}
+  return `<svg class="fig" viewBox="0 0 ${w+24} 80" style="max-width:${(w+24)*1.3}px" role="img" aria-label="Buku diukur dengan ${k} klip kertas"><rect x="12" y="8" width="${w}" height="40" rx="4" fill="#F2B33D" stroke="#B9822A" stroke-width="2"/><text x="${12+w/2}" y="34" text-anchor="middle" font-size="15" font-weight="800" fill="#5a3d10">Buku Latihan</text>${c}</svg>`;
+}
+// a plant growing straight from the ground, beside a ruler marked 0 to 20 cm
+function ruler(h){
+  const G=252,S=11,top=G-h*S;let t='';
+  for(let c=0;c<=20;c++){const y=G-c*S;t+=`<line x1="132" y1="${y}" x2="${132+(c%5?7:13)}" y2="${y}" stroke="#5a4a20" stroke-width="1.5"/>`;t+=`<text x="${c<10?160:162}" y="${y+3.5}" text-anchor="end" font-size="10" font-weight="700" fill="#3a2f12">${c}</text>`}
+  const leaves=[];for(let i=1;i<=Math.max(1,Math.floor(h/3));i++){const y=G-i*h*S/(Math.floor(h/3)+1);leaves.push(`<ellipse cx="${i%2?52:76}" cy="${y}" rx="13" ry="6" fill="#3E9B45" transform="rotate(${i%2?-25:25} ${i%2?52:76} ${y})"/>`)}
+  return `<svg class="fig" viewBox="0 0 175 270" style="max-width:240px" role="img" aria-label="Pokok setinggi ${h} cm di sebelah pembaris"><rect x="0" y="${G}" width="175" height="18" fill="#8B5A2B"/><rect x="130" y="${G-20*S-6}" width="36" height="${20*S+12}" rx="3" fill="#F7E08A" stroke="#B99A2A" stroke-width="2"/>${t}<line x1="64" y1="${G}" x2="64" y2="${top}" stroke="#2F7D35" stroke-width="5" stroke-linecap="round"/>${leaves.join('')}<ellipse cx="64" cy="${top+7}" rx="6" ry="7" fill="#5DBB63"/><line x1="64" y1="${top}" x2="130" y2="${top}" stroke="#C8463F" stroke-width="2" stroke-dasharray="5 4"/></svg>`;
+}
+// young plant: stem height h (px), n leaves
+function plant(h,n,label){
+  let l='';for(let i=0;i<n;i++){const y=100-h+8+i*(h-12)/Math.max(1,n),L=i%2===0;l+=`<ellipse cx="${L?30:50}" cy="${y}" rx="${9+n}" ry="5" fill="#3E9B45" transform="rotate(${L?-25:25} ${L?30:50} ${y})"/>`}
+  return `<svg viewBox="0 0 80 132" class="pl" aria-hidden="true"><rect x="0" y="100" width="80" height="14" fill="#8B5A2B"/><line x1="40" y1="100" x2="40" y2="${100-h}" stroke="#2F7D35" stroke-width="${2+n/2}" stroke-linecap="round"/>${l}${label?`<text x="40" y="128" text-anchor="middle" font-size="12" font-weight="800" fill="currentColor">${label}</text>`:''}</svg>`;
+}
+// frog life cycle pictures: 0 eggs, 1 tadpole, 2 young frog with tail, 3 frog
+function frog(i){
+  const p=[
+    '<g fill="#E3EEF3" stroke="#7A9AA8" stroke-width="1.5">'+[[22,22],[36,18],[50,24],[28,36],[44,36],[58,38],[36,48]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="7"/><circle cx="${x}" cy="${y}" r="2.6" fill="#1D2A31" stroke="none"/>`).join('')+'</g>',
+    '<ellipse cx="28" cy="32" rx="13" ry="10" fill="#2E3A40"/><circle cx="23" cy="29" r="2" fill="#fff"/><path d="M40 32 q8 -9 14 0 q6 9 14 0" fill="none" stroke="#2E3A40" stroke-width="4" stroke-linecap="round"/>',
+    '<path d="M44 34 q10 -8 16 0 q5 7 12 2" fill="none" stroke="#3E8E3E" stroke-width="3.5" stroke-linecap="round"/><ellipse cx="32" cy="34" rx="15" ry="11" fill="#5DBB63"/><circle cx="25" cy="27" r="4" fill="#fff"/><circle cx="25" cy="27" r="2" fill="#1D2A31"/><path d="M22 44 l-6 8 M40 44 l6 8" stroke="#3E8E3E" stroke-width="3.5" stroke-linecap="round"/>',
+    '<ellipse cx="40" cy="36" rx="22" ry="14" fill="#4FAF55"/><circle cx="30" cy="22" r="7" fill="#4FAF55"/><circle cx="50" cy="22" r="7" fill="#4FAF55"/><circle cx="30" cy="21" r="3.5" fill="#fff"/><circle cx="50" cy="21" r="3.5" fill="#fff"/><circle cx="30" cy="21" r="1.8" fill="#1D2A31"/><circle cx="50" cy="21" r="1.8" fill="#1D2A31"/><path d="M33 40 q7 5 14 0" fill="none" stroke="#1D5E22" stroke-width="2"/><path d="M20 46 l-10 8 M60 46 l10 8" stroke="#3E8E3E" stroke-width="4" stroke-linecap="round"/>'
+  ][i];
+  return `<svg viewBox="0 0 80 60" class="fr" aria-hidden="true">${p}</svg>`;
+}
+const FROG=['Telur','Berudu','Katak muda','Katak dewasa'];
+// germination: 0 seed, 1 root out, 2 shoot above soil, 3 first leaves
+function germ(s){
+  return `<svg viewBox="0 0 80 110" class="pl" aria-hidden="true"><rect x="0" y="50" width="80" height="60" fill="#8B5A2B"/>${s>=1?'<path d="M40 76 q-3 12 0 22 M40 86 l-8 8 M40 90 l8 7" stroke="#F3E7C9" stroke-width="2.5" fill="none" stroke-linecap="round"/>':''}${s>=2?`<path d="M40 70 L40 ${s>=3?22:36}" stroke="#4FAF55" stroke-width="4" stroke-linecap="round"/>`:''}${s>=3?'<ellipse cx="30" cy="22" rx="11" ry="5" fill="#4FAF55" transform="rotate(-20 30 22)"/><ellipse cx="50" cy="22" rx="11" ry="5" fill="#4FAF55" transform="rotate(20 50 22)"/>':''}<ellipse cx="40" cy="74" rx="13" ry="9" fill="#E9C77B" stroke="#A9823A" stroke-width="2"/></svg>`;
+}
+
+/* ---------- the notes: one topic per poster area ---------- */
+const TOPICS=[
+ {name:'Kemahiran Saintifik',icon:'🔍',blocks:[
+   {t:'p',h:'Ahli sains menggunakan <b>kemahiran saintifik</b> untuk mengkaji alam. Tekan setiap kad untuk melihat maksudnya.'},
+   {t:'flip',items:[['🔍 Memerhati','Menggunakan <b>deria</b> untuk mengumpul maklumat tentang objek.'],['🗂️ Mengelas','Mengasingkan dan mengumpulkan objek ikut <b>ciri yang sama</b>.'],['📏 Mengukur','Menggunakan alat atau unit untuk mendapat <b>nombor</b>. Contoh: tinggi pokok = 15 cm.'],['🗣️ Berkomunikasi','Menyampaikan maklumat secara <b>lakaran, lisan atau carta</b>.']]},
+   {t:'h',h:'Langkah mengelas'},
+   {t:'steps',items:[['<span class="em">👀</span>','1. Perhati ciri objek.'],['<span class="em">✋</span>','2. Asingkan mengikut persamaan.'],['<span class="em">🗂️</span>','3. Kumpulkan dalam kumpulan.']]},
+   {t:'sort',h:'Cuba kelaskan! Haiwan ini berkaki dua atau berkaki empat?',bins:['Berkaki dua','Berkaki empat'],items:[['🦆','Itik',0],['🦅','Helang',0],['🐔','Ayam',0],['🐦','Burung',0],['🐄','Lembu',1],['🐰','Arnab',1],['🐱','Kucing',1],['🐐','Kambing',1]]},
+   {t:'h',h:'Tiga cara berkomunikasi'},
+   {t:'facts',items:[['✏️','Lakaran','Contoh: melukis daun.'],['🗣️','Lisan','Contoh: bercakap atau bertutur.'],['📊','Carta','Contoh: carta menunjukkan maklumat (haiwan berkaki dua dan berkaki empat).']]},
+   {t:'h',h:'Mengukur dengan unit tidak piawai'},
+   {t:'p',h:'Panjang objek boleh diukur dengan <b>klip kertas, pensel, tapak tangan atau jengkal</b>. Letakkan unit <b>berderet tanpa jarak</b>.'},
+   {t:'clips'},
+   {t:'h',h:'Mengukur dengan pembaris'},
+   {t:'ruler'},
+ ]},
+ {name:'Bilik Sains',icon:'🧪',blocks:[
+   {t:'h',h:'Tanggungjawab di bilik sains'},
+   {t:'facts',items:[['📢','Laporkan kepada guru','jika peralatan rosak atau tidak selamat.'],['🚫','Jangan buang','peralatan sains.'],['🧽','Bersihkan dan simpan','di tempat asal selepas digunakan.']]},
+   {t:'h',h:'Menyimpan radas sains'},
+   {t:'facts',items:[['🧪','Tabung uji','disimpan di <b>rak tabung uji</b>.'],['⬆️','Susun tegak','dengan kemas.'],['💥','Elakkan','daripada jatuh atau pecah.']]},
+   {t:'flip',items:[['🧰 Apakah kemahiran manipulatif?','Cara <b>menggunakan, mengendali, membersih dan menyimpan</b> peralatan sains dengan betul.'],['🖼️ Murid menyusun alat ke dalam kotak selepas digunakan. Kemahiran apa?','<b>Menyimpan peralatan sains</b> (kemahiran manipulatif). Simpan dengan kemas selepas digunakan.'],['🪱 Habis memerhati cacing tanah. Apa perlu buat?','<b>Lepaskan semula ke habitat asalnya.</b> Jangan dibuang dan jangan dibiarkan sehingga mati. Kita perlu menjaga haiwan.']]},
+   {t:'sort',h:'Boleh atau tidak boleh dibawa masuk ke bilik sains?',bins:['✔ Boleh','✘ Tidak boleh'],items:[['🖍️','Pensel warna',0],['🖊️','Pen',0],['📒','Buku nota',0],['🎒','Beg sekolah',1],['🍔','Makanan',1],['⚽','Bola',1],['📏','Pembaris besar (tidak sesuai)',1]]},
+ ]},
+ {name:'Organ Deria',icon:'👃',blocks:[
+   {t:'p',h:'Kita menggunakan <b>organ deria</b> untuk menerima maklumat daripada persekitaran. Manusia ada <b>5</b> organ deria.'},
+   {t:'facts',items:[['👁️','Mata','deria lihat'],['👂','Telinga','deria dengar'],['👃','Hidung','deria bau'],['👅','Lidah','deria rasa'],['✋','Kulit','deria sentuh']]},
+   {t:'h',h:'Deria apa? Tekan untuk lihat'},
+   {t:'flip',items:[['🌹 Bunga mawar berbau wangi.','👃 <b>Hidung</b> (deria bau)'],['Durian terasa manis.','👅 <b>Lidah</b> (deria rasa)'],['🚗 Hon kereta berbunyi kuat.','👂 <b>Telinga</b> (deria dengar)'],['🌳 Melihat pokok di sekeliling.','👁️ <b>Mata</b> (deria lihat)'],['🧊 Ais terasa sejuk.','✋ <b>Kulit</b> (deria sentuh)'],['☕ Secawan kopi. Deria apa yang terlibat?','👃 <b>Bau</b> (menghidu bau kopi) dan 👅 <b>rasa</b> (merasa kopi).']]},
+ ]},
+ {name:'Manusia',icon:'👶',blocks:[
+   {t:'h',h:'Ciri yang diwarisi'},
+   {t:'p',h:'Kita mewarisi ciri-ciri tertentu daripada <b>ibu, bapa atau keturunan</b>.'},
+   {t:'facts',items:[['💇','Jenis rambut','lurus, kerinting'],['🎨','Warna rambut','hitam, perang'],['🖐️','Warna kulit','cerah, sawo matang, gelap'],['🧍','Bentuk badan','kurus, sederhana, berisi'],['💪','Panjang anggota badan','panjang atau pendek']]},
+   {t:'p',h:'Kepandaian seperti <b>membaca, menulis, bermain muzik dan bersukan</b> datang daripada pembelajaran dan latihan. Ia <b>tidak diwarisi</b>.'},
+   {t:'sort',h:'Diwarisi atau tidak diwarisi?',bins:['Diwarisi','Tidak diwarisi'],items:[['💇','Rambut kerinting',0],['🖐️','Warna kulit',0],['🎨','Warna rambut',0],['🧍','Bentuk badan',0],['📖','Pandai membaca',1],['✍️','Pandai menulis',1],['🎸','Bermain muzik',1],['⚽','Bersukan',1]]},
+   {t:'h',h:'Tumbesaran manusia'},
+   {t:'steps',grow:true,items:[['<span class="em">👶</span>','<b>Bayi</b> (merangkak)'],['<span class="em">🧒</span>','<b>Kanak-kanak</b> (berjalan)'],['<span class="em">🧑‍🎓</span>','<b>Remaja</b>'],['<span class="em">🧑‍💼</span>','<b>Dewasa</b>']]},
+   {t:'facts',items:[['📈','Bertambah','tinggi badan, berat badan, saiz badan'],['✋','Tidak berubah','bilangan jari tangan dan anggota badan']]},
+ ]},
+ {name:'Haiwan',icon:'🐸',blocks:[
+   {t:'sort',h:'Bertelur atau melahirkan anak?',bins:['🥚 Bertelur','🍼 Melahirkan anak'],items:[['🐍','Ular',0],['🐔','Ayam',0],['🐢','Penyu',0],['🦆','Itik',0],['🐘','Gajah',1],['🦒','Zirafah',1],['🐱','Kucing',1],['🐄','Lembu',1]]},
+   {t:'h',h:'Haiwan yang bertelur dengan banyak'},
+   {t:'facts',items:[['🐟','Ikan',''],['🐸','Katak','(berudu)'],['🦟','Nyamuk','']]},
+   {t:'h',h:'Tumbesaran katak'},
+   {t:'steps',items:FROG.map((n,i)=>[frog(i),`<b>${n}</b>`])},
+   {t:'p',h:'Dalam soalan, gambar mungkin berlabel huruf (contoh Y, W, Z, X). Susun ikut kitaran: <b>telur → berudu → katak muda → katak</b>.'},
+   {t:'h',h:'Induk dan anak haiwan'},
+   {t:'flip',items:[['🐐 Anak kambing','<b>Sama</b> bentuk dengan induknya ✔'],['🐱 Anak kucing','<b>Sama</b> bentuk dengan induknya ✔'],['🦋 Anak rama-rama','<b>Ulat</b>: tidak sama dengan induknya ✘'],['🐸 Anak katak','<b>Berudu</b>: tidak sama dengan induknya ✘'],['🦟 Anak nyamuk','<b>Jentik-jentik</b>: tidak sama dengan induknya ✘']]},
+ ]},
+ {name:'Tumbuhan',icon:'🌱',blocks:[
+   {t:'h',h:'Keperluan tumbuhan'},
+   {t:'facts',items:[['💧','Air','untuk membuat makanan dan membesar'],['🌬️','Udara','untuk proses pernafasan'],['☀️','Cahaya matahari','untuk membuat makanan'],['🟤','Nutrien','daripada tanah untuk membesar dengan sihat']]},
+   {t:'h',h:'Biji benih bercambah'},
+   {t:'steps',items:[[germ(0),'Biji benih'],[germ(1),'<b>Akar</b> tumbuh dahulu'],[germ(2),'Batang tumbuh ke atas'],[germ(3),'Daun keluar']]},
+   {t:'flip',items:[['🌰 Syarat biji benih bercambah?','💧 <b>Air</b>, 🌬️ <b>udara</b> dan 🌡️ <b>suhu yang sesuai</b>.']]},
+   {t:'h',h:'Tumbesaran anak pokok'},
+   {t:'steps',items:[[plant(26,2,''),'Minggu pertama'],[plant(46,4,''),'Minggu kedua'],[plant(72,6,''),'Minggu ketiga']]},
+   {t:'facts',items:[['🌿','Saiz batang','semakin besar'],['🍃','Bilangan daun','semakin bertambah'],['📏','Anak pokok','menjadi lebih tinggi'],['🌳','Semua tumbuhan','akan membesar']]},
+   {t:'h',h:'Kegunaan tumbuhan'},
+   {t:'flip',items:[['🌾 Padi','<b>Sumber makanan</b> (beras → nasi 🍚)'],['🪵 Kayu','Membuat <b>perabot</b> (meja, kerusi)'],['🌺 Bunga','<b>Hiasan</b>']]},
+ ]},
+ {name:'Cahaya & Bayang-bayang',icon:'🔦',blocks:[
+   {t:'p',h:'<b>Bayang-bayang</b> terbentuk apabila objek <b>menghalang cahaya</b>. Bentuknya sama dengan bentuk objek. Cuba sendiri!'},
+   {t:'shadow'},
+   {t:'sort',h:'Sumber cahaya atau bukan?',bins:['💡 Sumber cahaya','Bukan'],items:[['☀️','Matahari',0],['🕯️','Lilin',0],['🔦','Lampu suluh',0],['🔥','Obor',0],['🌙','Bulan (memantulkan cahaya matahari)',1],['🪞','Cermin',1],['🥄','Sudu',1],['📖','Buku',1]]},
+   {t:'flip',items:[['🌑 Bilik gelap gelita. Untuk melihat, kita perlukan?','🔦 <b>Lampu suluh</b>. Tanpa cahaya, kita tidak dapat melihat.']]},
+ ]},
+];
+
+/* ---------- quiz: one section per topic ---------- */
+const Q=(q,a,w,ex,o)=>mc(Object.assign({q,explain:ex,key:q+'|'+a},o||{}),a,w);
+const SKILL=[['Memerhati','menggunakan deria untuk mengumpul maklumat tentang objek'],['Mengelas','mengasingkan dan mengumpulkan objek mengikut ciri yang sama'],['Mengukur','menggunakan alat seperti pembaris untuk mendapat nombor'],['Berkomunikasi','menyampaikan maklumat secara lakaran, lisan atau carta']];
+const LEGS=[['🦆','itik',2],['🦅','helang',2],['🐔','ayam',2],['🐦','burung',2],['🐄','lembu',4],['🐰','arnab',4],['🐱','kucing',4],['🐐','kambing',4]];
+const SENSE=[['👁️','Mata','lihat'],['👂','Telinga','dengar'],['👃','Hidung','bau'],['👅','Lidah','rasa'],['✋','Kulit','sentuh']];
+const SITU=[['Bunga mawar berbau wangi.',2],['Roti yang dibakar berbau sedap.',2],['Durian terasa manis.',3],['Garam terasa masin.',3],['Hon kereta berbunyi kuat.',1],['Burung berkicau di pagi hari.',1],['Melihat pokok di sekeliling.',0],['Pelangi berwarna-warni.',0],['Ais terasa sejuk.',4],['Kain sutera terasa lembut.',4]];
+const TRAITS=[['Jenis rambut (lurus atau kerinting)',1],['Warna rambut',1],['Warna kulit',1],['Bentuk badan',1],['Panjang anggota badan',1],['Pandai membaca',0],['Pandai menulis',0],['Bermain muzik',0],['Pandai bersukan',0],['Pandai berenang',0]];
+const GROW=['Bayi','Kanak-kanak','Remaja','Dewasa'];
+const BIRTH=[['🐍','Ular',1],['🐔','Ayam',1],['🐢','Penyu',1],['🦆','Itik',1],['🐊','Buaya',1],['🐸','Katak',1],['🐘','Gajah',0],['🦒','Zirafah',0],['🐱','Kucing',0],['🐄','Lembu',0],['🐰','Arnab',0],['🐐','Kambing',0]];
+const NEED=[['Air','membuat makanan dan membesar'],['Udara','proses pernafasan'],['Cahaya matahari','membuat makanan'],['Nutrien','membesar dengan sihat (daripada tanah)']];
+const LIGHT=[['☀️','matahari',1],['💡','lampu',1],['🕯️','lilin',1],['🔦','lampu suluh',1],['🔥','obor',1],['🌙','bulan',0],['🪞','cermin',0],['🥄','sudu',0],['📖','buku',0],['🪨','batu',0]];
+function perms(a){const out=new Set(),r=a.join(' → ');let g=0;while(out.size<3&&g++<60){const p=shuffle(a).join(' → ');if(p!==r)out.add(p)}return [...out]}
+
+const SECTIONS=[
+ [ // Kemahiran Saintifik
+  ()=>{const [n,d]=pick(SKILL);return Q(`Kemahiran saintifik apakah ini? <i>"${d.charAt(0).toUpperCase()+d.slice(1)}."</i>`,n,SKILL.map(s=>s[0]),`${n} ialah ${d}.`,{key:'K1'+n})},
+  ()=>Q('Siti mengasingkan daun dan batu mengikut ciri yang sama. Kemahiran apakah ini?','Mengelas',['Memerhati','Mengukur','Berkomunikasi'],'Mengasingkan objek ikut ciri yang sama ialah mengelas.'),
+  ()=>Q('Yang manakah langkah mengelas yang betul?','Perhati ciri → asingkan → kumpulkan',['Kumpulkan → perhati ciri → asingkan','Asingkan → kumpulkan → perhati ciri','Kumpulkan → asingkan → perhati ciri'],'Mula-mula perhati ciri objek, asingkan ikut persamaan, kemudian kumpulkan.',{long:true}),
+  ()=>{const [e,n,l]=pick(LEGS);return Q('Haiwan ini masuk kumpulan yang mana?',l===2?'Berkaki dua':'Berkaki empat',[l===2?'Berkaki empat':'Berkaki dua'],`${n.charAt(0).toUpperCase()+n.slice(1)} ada ${l===2?'dua':'empat'} kaki.`,{pic:e,key:'K4'+n})},
+  ()=>{const n=R(5,9);return Q('Berapakah panjang buku ini?',`${n} klip kertas`,[`${n+1} klip kertas`,`${n-1} klip kertas`,`${n+2} klip kertas`],`Kira klip kertas yang diletakkan berderet: ${n}.`,{fig:clips(n,n),key:'K5'+n})},
+  ()=>Q('Bagaimanakah cara yang betul untuk mengukur dengan klip kertas?','Letak klip kertas berderet tanpa jarak',['Letak klip kertas berjarak-jarak','Letak klip kertas bertindih-tindih','Letak satu klip kertas sahaja'],'Unit mesti diletakkan berderet tanpa jarak.',{long:true}),
+  ()=>Q('Yang manakah <b>BUKAN</b> unit tidak piawai?','Pembaris (cm)',['Klip kertas','Jengkal','Tapak tangan'],'Pembaris memberi ukuran piawai dalam cm. Klip kertas, jengkal dan tapak tangan ialah unit tidak piawai.'),
+  ()=>{const h=R(6,18);return Q('Berapakah tinggi pokok ini?',`${h} cm`,[`${h+1} cm`,`${h-1} cm`,`${h+2} cm`],`Baca nombor pada pembaris di hujung pokok: ${h} cm.`,{fig:ruler(h),key:'K8'+h})},
+  ()=>Q('Alat apakah yang digunakan untuk mengukur tinggi pokok?','📏 Pembaris',['⏱️ Jam randik','⚖️ Penimbang','🌡️ Termometer'],'Pembaris mengukur panjang atau tinggi.'),
+  ()=>{const [a,ex]=pick([['Lakaran','Melukis daun'],['Lisan','Bercakap atau bertutur'],['Carta','Carta haiwan berkaki dua dan berkaki empat']]);return Q(`<i>${ex}</i> ialah cara berkomunikasi secara…`,a,['Lakaran','Lisan','Carta','Jadual'],`${ex} → ${a}.`,{key:'K10'+a})},
+ ],
+ [ // Bilik Sains
+  ()=>Q('Selepas memerhati cacing tanah, apakah yang perlu dilakukan?','Lepaskan semula ke habitat asalnya',['Buang ke dalam tong sampah','Biarkan di dalam bekas sehingga mati','Bawa pulang ke rumah'],'Kita perlu menjaga haiwan dalam persekitarannya.',{pic:'🪱',long:true}),
+  ()=>Q('Di manakah tabung uji perlu disimpan?','Di rak tabung uji',['Di dalam beg sekolah','Di atas lantai','Di dalam poket'],'Tabung uji disimpan di rak tabung uji, tegak dan kemas.',{pic:'🧪'}),
+  ()=>Q('Bagaimanakah cara menyimpan tabung uji?','Susun tegak dengan kemas',['Baringkan di tepi meja','Tindih-tindihkan','Campak ke dalam laci'],'Susun tegak dengan kemas supaya tidak jatuh atau pecah.'),
+  ()=>Q('Kamu dapati peralatan sains rosak. Apakah yang perlu kamu buat?','Laporkan kepada guru',['Sorokkan','Buang','Bawa pulang'],'Laporkan kepada guru jika peralatan rosak atau tidak selamat.'),
+  ()=>Q('Selepas digunakan, peralatan sains perlu…','Dibersihkan dan disimpan di tempat asal',['Dibiarkan di atas meja','Dibuang','Dibawa pulang'],'Bersihkan dan simpan di tempat yang sesuai.',{long:true}),
+  ()=>Q('Murid menyimpan peralatan sains dengan kemas selepas digunakan. Kemahiran manipulatif yang ditunjukkan ialah…','Menyimpan peralatan sains',['Mengelas objek','Mengukur panjang objek','Melukis gambar'],'Ini kemahiran manipulatif: menyimpan peralatan sains dengan kemas.',{long:true}),
+  ()=>{const ok=pick([['🖍️','pensel warna'],['🖊️','pen']]);return Q('Objek manakah <b>BOLEH</b> dibawa masuk ke bilik sains?',ok[0],['🎒','🍔','⚽'],`${ok[1].charAt(0).toUpperCase()+ok[1].slice(1)} boleh dibawa. Beg sekolah, makanan dan bola tidak boleh.`,{key:'B7'+ok[1]})},
+  ()=>Q('Objek manakah <b>TIDAK BOLEH</b> dibawa masuk ke bilik sains?','🎒',['🖍️','🖊️','📒'],'Beg sekolah tidak boleh dibawa masuk. Pensel warna, pen dan buku nota boleh.'),
+  ()=>Q('Yang manakah peraturan bilik sains yang <b>BETUL</b>?','Masuk dengan kebenaran guru',['Berlari di dalam bilik sains','Makan di dalam bilik sains','Rasa bahan di dalam bilik sains'],'Masuk hanya dengan kebenaran guru. Jangan berlari, makan atau merasa bahan.',{long:true}),
+ ],
+ [ // Organ Deria
+  ()=>{const [s,k]=pick(SITU);return Q(`<i>"${s}"</i> Organ deria manakah yang digunakan?`,SENSE[k][0],SENSE.map(x=>x[0]).filter((_,i)=>i!==k).slice(0,3),`${SENSE[k][0]} ${SENSE[k][1]}: deria ${SENSE[k][2]}.`,{key:'D1'+s})},
+  ()=>{const [e,n,d]=pick(SENSE);return Q('Apakah deria bagi organ ini?',`Deria ${d}`,shuffle(SENSE.filter(x=>x[2]!==d)).map(x=>'Deria '+x[2]),`${n} → deria ${d}.`,{pic:e,key:'D2'+n})},
+  ()=>{const [e,n,d]=pick(SENSE);return Q(`Organ manakah untuk deria <b>${d}</b>?`,n,shuffle(SENSE.filter(x=>x[2]!==d)).map(x=>x[1]),`Deria ${d} → ${e} ${n}.`,{key:'D3'+n})},
+  ()=>Q('Lihat gambar secawan kopi. Deria manakah yang terlibat untuk mengenal pasti kopi?','Bau dan rasa',['Lihat dan dengar','Dengar dan sentuh','Sentuh dan dengar'],'Hidung menghidu bau kopi, lidah merasa kopi.',{pic:'☕'}),
+  ()=>Q('Kita menggunakan organ deria untuk…','Menerima maklumat daripada persekitaran',['Membesar dengan cepat','Membuat makanan','Tidur dengan lena'],'Organ deria menerima maklumat daripada persekitaran.',{long:true}),
+  ()=>Q('Berapakah bilangan organ deria manusia?','5',['3','4','6'],'Mata, telinga, hidung, lidah dan kulit: 5 organ deria.'),
+ ],
+ [ // Manusia
+  ()=>{const [t,y]=pick(TRAITS);return Q(`<i>${t}</i>. Adakah ciri ini diwarisi daripada ibu bapa?`,y?'Ya, diwarisi':'Tidak, ia dipelajari',[y?'Tidak, ia dipelajari':'Ya, diwarisi'],y?`${t} diwarisi daripada ibu, bapa atau keturunan.`:`${t} datang daripada pembelajaran dan latihan.`,{key:'M1'+t})},
+  ()=>{const yes=TRAITS.filter(x=>x[1]),no=shuffle(TRAITS.filter(x=>!x[1]));const r=pick(yes)[0];return Q('Yang manakah ciri yang <b>diwarisi</b>?',r,no.slice(0,3).map(x=>x[0]),`${r} diwarisi. Yang lain dipelajari.`,{long:true,key:'M2'+r})},
+  ()=>Q('Kebolehan bermain gitar diperoleh melalui…','Pembelajaran dan latihan',['Warisan daripada ibu bapa','Makanan berkhasiat','Tidur yang cukup'],'Bermain muzik tidak diwarisi. Ia dipelajari.',{pic:'🎸',long:true}),
+  ()=>Q('Susun peringkat tumbesaran manusia.',GROW.join(' → '),perms(GROW),'Bayi → kanak-kanak → remaja → dewasa.',{long:true}),
+  ()=>{const i=R(1,3);return Q(`Peringkat manakah yang datang <b>selepas</b> ${GROW[i-1].toLowerCase()}?`,GROW[i],GROW.filter(x=>x!==GROW[i]),GROW.join(' → '),{key:'M5'+i})},
+  ()=>Q('Bayi bergerak dengan cara…','Merangkak',['Berlari','Berbasikal','Melompat'],'Bayi merangkak. Kanak-kanak berjalan.',{pic:'👶'}),
+  ()=>Q('Semasa membesar, apakah yang <b>bertambah</b>?','Tinggi dan berat badan',['Bilangan jari tangan','Bilangan anggota badan','Bilangan mata'],'Tinggi, berat dan saiz badan bertambah.',{long:true}),
+  ()=>Q('Apakah yang <b>TIDAK berubah</b> semasa manusia membesar?','Bilangan jari tangan',['Tinggi badan','Berat badan','Saiz badan'],'Bilangan jari tangan dan anggota badan tidak berubah.'),
+  ()=>Q('Azman menjadi ___ apabila membesar.','semakin tinggi',['semakin pendek','semakin kecil','semakin ringan'],'Semasa membesar, manusia menjadi semakin tinggi.',{pic:'🧒➡️🧑'}),
+ ],
+ [ // Haiwan
+  ()=>{const [e,n,egg]=pick(BIRTH);return Q('Haiwan ini bertelur atau melahirkan anak?',egg?'Bertelur':'Melahirkan anak',[egg?'Melahirkan anak':'Bertelur'],`${n} ${egg?'bertelur':'melahirkan anak'}.`,{pic:e,key:'H1'+n})},
+  ()=>{const egg=Math.random()<.5,r=pick(BIRTH.filter(x=>x[2]===+egg));return Q(`Haiwan manakah yang <b>${egg?'bertelur':'melahirkan anak'}</b>?`,r[0],shuffle(BIRTH.filter(x=>x[2]!==+egg)).map(x=>x[0]),`${r[0]} ${r[1]} ${egg?'bertelur':'melahirkan anak'}.`,{key:'H2'+r[1]})},
+  ()=>{const r=pick([['🐟','Ikan'],['🐸','Katak'],['🦟','Nyamuk']]);return Q('Haiwan manakah yang bertelur dengan <b>banyak</b>?',r[0],['🐘','🐱','🐄'],'Ikan, katak dan nyamuk bertelur dengan banyak.',{key:'H3'+r[1]})},
+  ()=>{const L=shuffle(['W','X','Y','Z']),shown=shuffle([0,1,2,3]);const fig=`<div class="cyc">${shown.map(i=>`<div>${frog(i)}<b>${L[i]}</b></div>`).join('')}</div>`;
+    const right=L.join(', ');const w=perms([0,1,2,3]).map(p=>p.split(' → ').map(i=>L[i]).join(', '));
+    return Q('Susun tumbesaran katak mengikut urutan yang betul.',right,w,`${FROG.map((n,i)=>`${L[i]} = ${n.toLowerCase()}`).join(', ')}.`,{fig,key:'H4'+right})},
+  ()=>{const i=R(0,2);return Q(`Peringkat manakah selepas <b>${FROG[i].toLowerCase()}</b> dalam kitaran hidup katak?`,FROG[i+1],FROG.filter((_,j)=>j!==i+1),FROG.join(' → '),{fig:`<div class="cyc one"><div>${frog(i)}</div></div>`,key:'H5'+i})},
+  ()=>{const r=pick([['🐐','kambing'],['🐱','kucing'],['🐄','lembu']]);return Q('Anak haiwan manakah yang <b>sama</b> bentuk dengan induknya?',r[0],['🦋','🐸','🦟'],`Anak ${r[1]} sama bentuk dengan induknya. Anak rama-rama (ulat), katak (berudu) dan nyamuk (jentik-jentik) tidak sama.`,{key:'H6'+r[1]})},
+  ()=>{const [a,b]=pick([['katak','Berudu'],['rama-rama','Ulat'],['nyamuk','Jentik-jentik']]);return Q(`Apakah nama anak ${a}?`,b,['Berudu','Ulat','Jentik-jentik','Anak ayam'].filter(x=>x!==b),`Anak ${a} dipanggil ${b.toLowerCase()}.`,{key:'H7'+a})},
+ ],
+ [ // Tumbuhan
+  ()=>{const [n,d]=pick(NEED);return Q(`Tumbuhan memerlukan ___ untuk <b>${d}</b>.`,n,NEED.filter(x=>x[0]!==n&&!(/makanan/.test(x[1])&&/makanan/.test(d))).map(x=>x[0]),`${n}: untuk ${d}.`,{key:'T1'+d})},
+  ()=>Q('Yang manakah <b>BUKAN</b> keperluan tumbuhan untuk membesar?','Tempat yang gelap',['Air','Udara','Cahaya matahari'],'Tumbuhan perlukan air, udara, cahaya matahari dan nutrien.'),
+  ()=>Q('Semasa percambahan, bahagian apakah yang tumbuh <b>dahulu</b>?','Akar',['Daun','Batang','Bunga'],'Akar tumbuh dahulu.',{fig:`<div class="cyc one"><div>${germ(1)}</div></div>`}),
+  ()=>Q('Apakah syarat biji benih untuk bercambah?','Air, udara dan suhu yang sesuai',['Cahaya matahari, tanah dan baja','Air, tempat gelap dan sejuk beku','Tanah sahaja'],'Biji benih perlukan air, udara dan suhu yang sesuai.',{long:true}),
+  ()=>Q('Anak pokok diperhati selama 3 minggu. Apakah perubahan yang berlaku?','Bilangan daun bertambah',['Bilangan daun berkurang','Anak pokok menjadi pendek','Saiz batang mengecil'],'Bilangan daun bertambah, batang semakin besar, pokok lebih tinggi.',{long:true}),
+  ()=>{const L=['P','Q','R'],o=shuffle([0,1,2]),old=L[o.indexOf(2)];const P=[[26,2],[46,4],[72,6]];
+    return Q('Anak pokok manakah yang paling <b>lama</b> ditanam?',old,L.filter(x=>x!==old),'Anak pokok yang paling tinggi dan paling banyak daun telah lama membesar.',{fig:`<div class="cyc">${o.map((s,i)=>`<div>${plant(P[s][0],P[s][1],L[i])}</div>`).join('')}</div>`,key:'T6'+old})},
+  ()=>{const [p,u]=pick([['🌾 Padi','Sumber makanan'],['🪵 Kayu','Membuat perabot'],['🌺 Bunga','Hiasan']]);return Q(`Apakah kegunaan tumbuhan ini kepada manusia? <b>${p}</b>`,u,['Sumber makanan','Membuat perabot','Hiasan','Bahan api roket'].filter(x=>x!==u),`${p}: ${u.toLowerCase()}.`,{key:'T7'+p})},
+ ],
+ [ // Cahaya
+  ()=>Q('Bayang-bayang terbentuk apabila…','Objek menghalang cahaya',['Objek memantulkan bunyi','Objek berada di dalam air','Objek dicat hitam'],'Bayang-bayang terbentuk apabila objek menghalang cahaya.',{long:true}),
+  ()=>Q('Tangan diletakkan di depan lampu seperti dalam gambar. Apakah bentuk bayang-bayang?','Arnab',['Burung','Ikan','Kucing'],'Bentuk bayang-bayang sama dengan bentuk objek (tangan berbentuk arnab).',{fig:`<div class="shwfig"><span>✌️</span><span class="dark">🐇</span></div>`}),
+  ()=>{const r=pick(LIGHT.filter(x=>x[2]));return Q('Yang manakah <b>sumber cahaya</b>?',r[0],shuffle(LIGHT.filter(x=>!x[2])).map(x=>x[0]),`${r[0]} ${r[1]} mengeluarkan cahaya sendiri.`,{key:'C3'+r[1]})},
+  ()=>{const r=pick(LIGHT.filter(x=>!x[2]));return Q('Yang manakah <b>BUKAN</b> sumber cahaya?',r[0],shuffle(LIGHT.filter(x=>x[2])).map(x=>x[0]),r[1]==='bulan'?'Bulan memantulkan cahaya matahari. Ia bukan sumber cahaya.':`${r[1].charAt(0).toUpperCase()+r[1].slice(1)} tidak mengeluarkan cahaya.`,{key:'C4'+r[1]})},
+  ()=>Q('Untuk melihat dalam keadaan gelap, kita memerlukan…','🔦 Lampu suluh',['🕶️ Cermin mata hitam','☂️ Payung','🧢 Topi'],'Lampu suluh ialah sumber cahaya.',{pic:'🌑'}),
+  ()=>Q('Lampu suluh dipadamkan. Apakah yang berlaku kepada bayang-bayang?','Bayang-bayang hilang',['Bayang-bayang menjadi besar','Bayang-bayang bertukar warna','Bayang-bayang menjadi dua'],'Tiada cahaya, maka tiada bayang-bayang.',{long:true}),
+  ()=>{const near=Math.random()<.5;return Q(`Objek digerakkan <b>${near?'lebih dekat dengan':'lebih jauh dari'}</b> lampu. Bayang-bayang menjadi…`,near?'Lebih besar':'Lebih kecil',[near?'Lebih kecil':'Lebih besar','Hilang','Bertukar warna'],near?'Dekat dengan lampu → bayang-bayang besar.':'Jauh dari lampu → bayang-bayang kecil.',{key:'C7'+near})},
+ ],
+];
+const FINAL=5,PRACTICE=8; // questions per section in the full test / when practising one topic
+function makeSec(k,n){
+  const qs=[],seen=new Set();let g=0;
+  while(qs.length<n&&g++<500){const q=pick(SECTIONS[k])();if(seen.has(q.key))continue;seen.add(q.key);q.sec=k;qs.push(q)}
+  return qs;
+}
+
+/* ---------- screens ---------- */
+const app=document.getElementById('app');
+let G=null;
+const stars=n=>[1,2,3].map(i=>`<span class="${i<=n?'on':''}">★</span>`).join('');
+const starsFor=(c,n)=>c/n>=.9?3:c/n>=.7?2:c/n>=.5?1:0;
+if(!store.read)store.read={};
+function header(sub){return `<a class="crumb" href="../">← Semua subjek</a><div class="top">${cat('happy')}<div><h1>Sains</h1><p>${sub}</p></div><button class="snd" id="snd" aria-pressed="${store.sound}">${store.sound?'🔊 Bunyi: Hidup':'🔇 Bunyi: Mati'}</button></div>`}
+function wireSound(){const b=document.getElementById('snd');b.onclick=()=>{store.sound=!store.sound;save();b.setAttribute('aria-pressed',store.sound);b.textContent=store.sound?'🔊 Bunyi: Hidup':'🔇 Bunyi: Mati';if(store.sound)ding()}}
+function home(){
+  G=null;scrollTo(0,0);const total=TOPICS.length*FINAL;
+  app.innerHTML=header('Nota ringkas dan ujian')+`<div class="card hero"><h2>📖 Nota Ringkas</h2><p>Baca setiap topik. Tekan, susun dan main untuk ingat!</p>
+   <div class="topics">${TOPICS.map((t,i)=>`<button data-n="${i}"><span class="ti">${t.icon}</span><span><b>${i+1}. ${t.name}</b><em>${stars(store.best[i]||0)}</em></span><span class="rd">${store.read[i]?'✔':''}</span></button>`).join('')}</div></div>
+   <div class="card hero" style="margin-top:14px"><h2>📝 Ujian Sains</h2><p>${total} soalan dari semua topik. Tekan jawapan sahaja. Di hujung ada senarai semua jawapan betul dan salah.</p>
+   <button class="go" id="final">Mula Ujian</button>
+   <p class="best">${store.best.final!=null?`Markah terbaik: ${store.best.final}/${total}`:'Baca nota dahulu, kemudian cuba ujian!'}</p></div>
+   <div class="card" style="margin-top:14px"><p class="lbl">Atau uji satu topik (${PRACTICE} soalan)</p><div class="rev">${TOPICS.map((t,i)=>`<button data-p="${i}">${t.icon} Topik ${i+1}<span>${t.name}</span></button>`).join('')}</div></div>
+   <p class="foot">Hati-hati! Jawapan salah akan BOOM 💥 · Semoga berjaya, Safiyyah!</p>`;
+  document.getElementById('final').onclick=()=>{actx();start('final')};
+  app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{actx();start(+b.dataset.p)});
+  app.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{actx();note(+b.dataset.n)});
+  wireSound();
+}
+
+/* note widgets: each returns html; init(el) wires it after render */
+const W={
+  p:b=>({h:`<p class="np">${b.h}</p>`}),
+  h:b=>({h:`<h3 class="nh">${b.h}</h3>`}),
+  facts:b=>({h:`<div class="facts">${b.items.map(([e,t,d])=>`<div><span class="fe">${e}</span><b>${t}</b><span>${d}</span></div>`).join('')}</div>`}),
+  flip:b=>({h:`<div class="flips">${b.items.map(([f,k])=>`<button class="flip" aria-expanded="false"><span class="ff">${f}</span><span class="fk">${k}</span><small>Tekan untuk lihat</small></button>`).join('')}</div>`,
+    init:el=>el.querySelectorAll('.flip').forEach(x=>x.onclick=()=>{const o=x.classList.toggle('open');x.setAttribute('aria-expanded',o);if(o)ding()})}),
+  steps:b=>({h:`<div class="steps${b.grow?' grow':''}">${b.items.map(([p,c],i)=>`<button class="st" data-s="${i}" style="--i:${i}">${p}<span>${c}</span></button>${i<b.items.length-1?'<i>➜</i>':''}`).join('')}</div><button class="playb">▶ Main langkah demi langkah</button>`,
+    init:el=>{const st=[...el.querySelectorAll('.st')],arr=[...el.querySelectorAll('.steps i')],btn=el.querySelector('.playb');let tm=null;
+      btn.onclick=()=>{clearInterval(tm);st.forEach(s=>s.classList.add('dim'));arr.forEach(a=>a.classList.add('dim'));let k=0;
+        const show=()=>{if(k>=st.length){clearInterval(tm);btn.textContent='↻ Main semula';return}st[k].classList.remove('dim');st[k].classList.add('pop');if(k>0)arr[k-1].classList.remove('dim');tone([[523+k*130,0,.25]]);k++};
+        show();tm=setInterval(show,1600)};
+      st.forEach(s=>s.onclick=()=>{s.classList.remove('dim');s.classList.remove('pop');void s.offsetWidth;s.classList.add('pop')})}}),
+  sort:b=>({h:`<div class="sortw"><p class="sh">${b.h}</p><div class="cur"></div><div class="bins">${b.bins.map((n,i)=>`<button data-bin="${i}"><b>${n}</b><span class="got"></span></button>`).join('')}</div><p class="msg" aria-live="polite"></p></div>`,
+    init:el=>{let q=shuffle(b.items);const cur=el.querySelector('.cur'),msg=el.querySelector('.msg'),bins=[...el.querySelectorAll('[data-bin]')];
+      const draw=()=>{if(!q.length){cur.innerHTML=`<div class="done">🎉 Syabas! Semua betul.</div><button class="playb again">↻ Cuba lagi</button>`;cur.querySelector('.again').onclick=()=>{q=shuffle(b.items);bins.forEach(x=>x.querySelector('.got').textContent='');msg.textContent='';draw()};return}
+        cur.innerHTML=`<span class="e">${q[0][0]}</span><b>${q[0][1]}</b><small>Masukkan ke kotak yang betul ↓</small>`};
+      bins.forEach(x=>x.onclick=()=>{if(!q.length)return;const it=q[0];if(+x.dataset.bin===it[2]){ding();x.querySelector('.got').textContent+=it[0];msg.textContent=`✔ Betul! ${it[1]}: ${b.bins[it[2]]}.`;q.shift();draw()}else{buzz();msg.textContent=`✘ Cuba lagi. ${it[1]} bukan ${b.bins[+x.dataset.bin]}.`;cur.classList.remove('shake');void cur.offsetWidth;cur.classList.add('shake')}});
+      draw()}}),
+  clips:()=>({h:`<div class="wid"><div class="cv"></div><div class="row c"><button class="btn main" data-a="add">📎 Letak klip kertas</button><button class="btn" data-a="reset">↻ Semula</button></div><p class="msg"></p></div>`,
+    init:el=>{const N=8;let k=0;const cv=el.querySelector('.cv'),msg=el.querySelector('.msg'),add=el.querySelector('[data-a=add]');
+      const draw=()=>{cv.innerHTML=clips(N,k);add.disabled=k>=N;msg.innerHTML=k>=N?'Panjang buku = <b>8 klip kertas</b> 🎉 (berderet tanpa jarak)':`Klip kertas: ${k}`};
+      add.onclick=()=>{if(k<N){k++;tone([[600+k*40,0,.15]]);draw()}};el.querySelector('[data-a=reset]').onclick=()=>{k=0;draw()};draw()}}),
+  ruler:()=>({h:`<div class="wid"><div class="cv"></div><label class="sl">🌱 Gerakkan untuk membesarkan pokok<input type="range" min="3" max="18" value="15"></label><p class="msg"></p></div>`,
+    init:el=>{const cv=el.querySelector('.cv'),r=el.querySelector('input'),msg=el.querySelector('.msg');
+      const draw=()=>{cv.innerHTML=ruler(+r.value);msg.innerHTML=`Baca nombor di hujung pokok: tinggi pokok = <b>${r.value} cm</b>`};r.oninput=draw;draw()}}),
+  shadow:()=>({h:`<div class="wid"><div class="stage on"><span class="torch">🔦</span><span class="beam"></span><span class="obj">🐇</span><span class="wall"><span class="shd">🐇</span></span></div>
+    <label class="sl">Jauh dari lampu ⟷ dekat dengan lampu<input type="range" min="0" max="100" value="40"></label>
+    <div class="row c"><button class="btn main" data-a="lamp">💡 Lampu: Hidup</button></div><p class="msg"></p></div>`,
+    init:el=>{const st=el.querySelector('.stage'),obj=el.querySelector('.obj'),shd=el.querySelector('.shd'),r=el.querySelector('input'),lamp=el.querySelector('[data-a=lamp]'),msg=el.querySelector('.msg');let on=true;
+      const draw=()=>{const x=72-(+r.value)*.42;obj.style.left=x+'%';shd.style.fontSize=Math.min(120,32*80/(x-6))+'px';st.classList.toggle('on',on);lamp.textContent=on?'💡 Lampu: Hidup':'🌑 Lampu: Mati';
+        msg.innerHTML=!on?'Lampu mati → <b>tiada bayang-bayang</b>.':+r.value>60?'Dekat dengan lampu → bayang-bayang <b>BESAR</b>.':+r.value<30?'Jauh dari lampu → bayang-bayang <b>KECIL</b>.':'Objek menghalang cahaya → terbentuk <b>bayang-bayang</b> yang sama bentuk.'};
+      r.oninput=draw;lamp.onclick=()=>{on=!on;tone([[on?880:330,0,.15]]);draw()};draw()}}),
+};
+function note(i){
+  G=null;const t=TOPICS[i];store.read[i]=true;save();scrollTo(0,0);
+  const parts=t.blocks.map(b=>W[b.t](b));
+  app.innerHTML=header('Nota ringkas')+`<div class="card note"><span class="tag">Topik ${i+1} daripada ${TOPICS.length}</span><h2>${t.icon} ${t.name}</h2>${parts.map((p,k)=>`<div data-b="${k}">${p.h}</div>`).join('')}</div>
+   <div class="card" style="margin-top:14px;text-align:center"><p class="lbl">Sudah faham? Uji diri!</p><button class="go" id="test">Uji topik ini (${PRACTICE} soalan)</button></div>
+   <div class="row nav">${i>0?`<button class="btn" id="prev">← ${TOPICS[i-1].name}</button>`:''}<button class="btn" id="menu">☰ Semua topik</button>${i<TOPICS.length-1?`<button class="btn main" id="next">${TOPICS[i+1].name} →</button>`:''}</div>`;
+  parts.forEach((p,k)=>{if(p.init)p.init(app.querySelector(`[data-b="${k}"]`))});
+  wireSound();
+  document.getElementById('test').onclick=()=>start(i);
+  document.getElementById('menu').onclick=home;
+  const pv=document.getElementById('prev');if(pv)pv.onclick=()=>note(i-1);
+  const nx=document.getElementById('next');if(nx)nx.onclick=()=>note(i+1);
+}
+
+function start(mode){
+  const qs=mode==='final'?TOPICS.flatMap((_,k)=>makeSec(k,FINAL)):makeSec(mode,PRACTICE);
+  G={mode,qs,i:0,score:0,done:false,bySec:{}};scrollTo(0,0);play();
+}
+const title=()=>G.mode==='final'?'Ujian Sains':`Topik ${G.mode+1}: ${TOPICS[G.mode].name}`;
+const isEmo=c=>c.length<=4&&!/[A-Za-z0-9]/.test(c);
+function play(){
+  const q=G.qs[G.i],N=G.qs.length;
+  let body=`<span class="tag">${TOPICS[q.sec].icon} ${TOPICS[q.sec].name}</span><p class="q">${q.q}</p>`;
+  if(q.pic)body+=`<div class="pic">${q.pic}</div>`;
+  if(q.fig)body+=`<div class="figw">${q.fig}</div>`;
+  const cls=q.choices.every(isEmo)?' emo':(q.long||q.choices.some(c=>c.length>16))?' long':'';
+  body+=`<div class="ch${cls}">${q.choices.map((c,i)=>`<button data-c="${i}" ${G.done?'disabled':''} class="${G.done&&i===q.right?'right':''}${G.done&&i===G.pick&&i!==q.right?' wrong':''}"><span class="k">${'ABCD'[i]}</span><span>${c}</span></button>`).join('')}</div>`;
+  app.innerHTML=header(title())+`<div class="hud"><span>${G.i+1}/${N}</span><div class="prog"><i style="width:${G.i/N*100}%"></i></div><span>★ ${G.score}</span></div>
+  <div class="card">${body}<div id="fb"></div></div>
+  <div class="row" style="justify-content:center"><button class="btn" id="quit">Berhenti</button></div>`;
+  wireSound();
+  app.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{G.pick=+b.dataset.c;check()});
+  document.getElementById('quit').onclick=home;
+  if(G.done)fb();
+}
+function check(){
+  const q=G.qs[G.i];G.done=true;q.given=q.choices[G.pick];q.ok=G.pick===q.right;G.ok=q.ok;
+  const b=G.bySec[q.sec]||(G.bySec[q.sec]={c:0,n:0});b.n++;
+  if(q.ok){G.score++;b.c++;ding()}else explode();
+  play();
+}
+const PRAISE=['Bagus!','Syabas!','Hebat!','Pandai!','Betul!','Tahniah!'];
+function fb(){
+  const q=G.qs[G.i],last=G.i===G.qs.length-1,el=document.getElementById('fb');
+  el.innerHTML=`<div class="fb ${G.ok?'ok':'no'} pop">${cat(G.ok?'happy':'sad')}<div class="t"><b>${G.ok?pick(PRAISE):'BOOM! Jawapan: '+q.choices[q.right]}</b>${q.explain}</div><button class="next" id="nx">${last?'Lihat sijil saya':'Seterusnya →'}</button></div>`;
+  const nx=document.getElementById('nx');nx.focus({preventScroll:true});
+  nx.onclick=()=>{if(last)result();else{G.i++;G.done=false;G.pick=null;play()}};
+}
+document.addEventListener('keydown',e=>{
+  if(!G||e.key!=='Enter')return;const nx=document.getElementById('nx');if(nx){e.preventDefault();nx.click()}
+});
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const cv=document.getElementById('confetti'),c=cv.getContext('2d');cv.width=innerWidth;cv.height=innerHeight;
+  const cols=['#6A4C9C','#F2B33D','#1F6E94','#3A8F36','#D85F22','#C2306B'];
+  const ps=Array.from({length:160},()=>({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.5,vx:(Math.random()-.5)*3,vy:2+Math.random()*3,r:Math.random()*6.28,s:6+Math.random()*6,c:pick(cols)}));
+  let f=0;(function tick(){c.clearRect(0,0,cv.width,cv.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=.1;c.save();c.translate(p.x,p.y);c.rotate(p.r);c.fillStyle=p.c;c.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);c.restore()});if(++f<240)requestAnimationFrame(tick);else c.clearRect(0,0,cv.width,cv.height)})();
+}
+// question text for the answer list: drop markup, keep the picture
+function shortQ(q){const d=document.createElement('div');d.innerHTML=q.q;return (q.pic?q.pic+' ':'')+d.textContent.replace(/\s+/g,' ').trim()}
+function review(){
+  return `<div class="review"><p class="lbl">Semua jawapan (${G.score} betul, ${G.qs.length-G.score} salah)</p><ol>${G.qs.map(q=>`<li class="${q.ok?'ok':'no'}"><span class="mk">${q.ok?'✔':'✘'}</span><div><small>${TOPICS[q.sec].icon} ${TOPICS[q.sec].name}</small><p>${esc(shortQ(q))}</p><p>Jawapan dia: <b>${esc(q.given)}</b>${q.ok?'':` · Jawapan betul: <b class="r">${esc(q.choices[q.right])}</b>`}</p>${q.ok?'':`<p class="ex">${q.explain}</p>`}</div></li>`).join('')}</ol></div>`;
+}
+function result(){
+  const N=G.qs.length,s=starsFor(G.score,N),pct=Math.round(G.score/N*100);
+  if(G.mode==='final'){if((store.best.final||0)<G.score)store.best.final=G.score;TOPICS.forEach((_,k)=>{const b=G.bySec[k];if(b){const st=starsFor(b.c,b.n);if((store.best[k]||0)<st)store.best[k]=st}})}
+  else if((store.best[G.mode]||0)<s)store.best[G.mode]=s;
+  save();scrollTo(0,0);
+  const medal=pct>=90?['🥇','Emas! Kamu sudah bersedia untuk peperiksaan!']:pct>=70?['🥈','Perak! Hampir sempurna. Ulang kaji jawapan yang salah.']:pct>=50?['🥉','Gangsa! Baca semula nota topik yang kurang bintang.']:['💪','Teruskan berlatih! Baca nota dahulu, kemudian cuba lagi.'];
+  app.innerHTML=header(title())+`<div class="card cert pop">
+   <p class="lbl" style="color:var(--muted)">Sijil</p><div class="medal">${medal[0]}</div>
+   <div class="big">${G.score}/${N}</div><div class="stars">${stars(s)}</div>
+   <p style="font-weight:800;font-size:1.15rem;margin:6px 0">${medal[1]}</p>
+   ${G.mode==='final'?`<div class="bypart">${TOPICS.map((t,k)=>{const b=G.bySec[k]||{c:0,n:0};return `<div><span>${t.icon} ${t.name}</span><span>${b.c}/${b.n}</span></div>`}).join('')}</div>`:''}
+   <div class="row"><button class="btn main" id="again">Cuba lagi</button><button class="btn" id="menu">Kembali</button></div></div>
+   <div class="card" style="margin-top:14px">${review()}<div class="row" style="justify-content:center"><button class="btn" id="print">🖨️ Cetak senarai ini</button></div></div>`;
+  wireSound();
+  document.getElementById('again').onclick=()=>start(G.mode);document.getElementById('menu').onclick=home;document.getElementById('print').onclick=()=>window.print();
+  if(pct>=70){fanfare();confetti()}
+}
+home();
+</script>
+<script src="../music.js"></script>
+</body>
+</html>
