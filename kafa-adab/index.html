@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Adab KAFA · Safiyyah Belajar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Noto+Naskh+Arabic:wght@500;700&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout (Adab KAFA Tahun 2): home with two cards (interactive notes by topic, then the test) -> note pages with tap cards, sorting games and step animations -> one question at a time -> certificate and every answer for revision. */
+:root{
+  --bg:#F2F7F5; --surface:#FFFFFF; --ink:#1D2A31; --muted:#58696F; --line:#D5E4DF; --sun:#F2B33D;
+  --en:#2E7D32; --en-soft:#E3F2E1; --good:#278A4C; --good-bg:#E3F4E8; --bad:#C8463F; --bad-bg:#FBE7E5;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif; --body:"Nunito","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0F191C; --surface:#172529; --ink:#E7F0ED; --muted:#9DB2AC; --line:#2A3F40; --sun:#F5C25B;
+  --en:#78C873; --en-soft:#173019; --good:#5CCB83; --good-bg:#173525; --bad:#F07E77; --bad-bg:#3A1F1E; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);-webkit-text-size-adjust:100%;overflow-x:hidden}
+.wrap{max-width:640px;margin:0 auto;padding-block:20px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.crumb{display:inline-block;margin-bottom:14px;font-weight:800;color:var(--muted);text-decoration:none;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.top svg{width:60px;height:60px;flex:none}
+.top h1{font-size:clamp(1.6rem,6vw,2.2rem);font-weight:800;color:var(--en)}
+.top p{margin:0;color:var(--muted);font-size:.95rem}
+.snd{margin-left:auto;flex:none;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-weight:800;font-size:.9rem}
+.card{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:18px}
+.lbl{font-family:var(--display);font-weight:800;font-size:1.15rem;margin:0 0 8px}
+.hero{text-align:center;background:linear-gradient(135deg,var(--en-soft),var(--surface));}
+.hero h2{font-size:clamp(1.6rem,7vw,2.3rem);font-weight:800;color:var(--en)}
+.hero p{margin:6px 0 0}
+.parts{display:grid;gap:8px;margin:14px 0 4px;text-align:left}
+.parts div{display:flex;gap:10px;align-items:center;font-weight:700}
+.parts b{flex:none;width:30px;height:30px;border-radius:50%;background:var(--en);color:#fff;display:grid;place-items:center;font-family:var(--display)}
+.parts .st{margin-left:auto;color:var(--line);letter-spacing:1px}
+.parts .st .on{color:var(--sun)}
+.go{display:block;width:100%;margin-top:14px;border:0;background:var(--en);color:#fff;border-radius:16px;padding:14px;font-family:var(--display);font-weight:800;font-size:1.35rem}
+.best{margin:8px 0 0;color:var(--muted);font-size:.9rem;text-align:center}
+.rev{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.rev button{border:2px solid var(--line);background:var(--bg);border-radius:16px;padding:10px;text-align:left;font-weight:800;min-height:56px}
+.rev em{font-style:normal;color:var(--line);letter-spacing:1px}
+.rev em .on{color:var(--sun)}
+.rev button>span{display:block;color:var(--muted);font-weight:600;font-size:.85rem}
+.hud{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:800;font-variant-numeric:tabular-nums}
+.prog{flex:1;height:12px;background:var(--line);border-radius:999px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--en);transition:width .3s}
+.tag{display:inline-block;font-size:.75rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--en);background:var(--en-soft);border-radius:999px;padding:2px 10px;margin-bottom:8px}
+.q{font-family:var(--display);font-weight:800;font-size:clamp(1.25rem,5.2vw,1.6rem);line-height:1.25;margin:0 0 10px}
+.blank{display:inline-block;min-width:2.6em;border-bottom:4px solid var(--en);color:var(--en);text-align:center}
+.pic{font-size:clamp(4rem,22vw,6rem);line-height:1.1;text-align:center;margin:4px 0 8px}
+.pic.row{font-size:clamp(2.2rem,11vw,3rem);letter-spacing:4px}
+.story{background:var(--en-soft);border-radius:16px;padding:12px 14px;margin:0 0 12px;font-size:1.05rem;line-height:1.6}
+.story h3{font-size:1.2rem;color:var(--en);margin-bottom:4px}
+.say{display:flex;justify-content:center;margin:6px 0 12px}
+.say button{border:0;background:var(--en);color:#fff;border-radius:999px;padding:14px 26px;font-family:var(--display);font-weight:800;font-size:1.3rem}
+.ch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:6px}
+.ch.long{grid-template-columns:1fr}
+.ch button{display:flex;align-items:center;gap:10px;text-align:left;min-height:56px;border:2px solid var(--line);background:var(--bg);border-radius:16px;padding:8px 12px;font-family:var(--display);font-weight:800;font-size:1.25rem;overflow-wrap:anywhere}
+.ch.emo button{justify-content:center;font-size:2.6rem;min-height:84px}
+.ch button .k{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--en);color:#fff;font-size:.95rem;font-family:var(--display)}
+.ch.emo button{position:relative}
+.ch.emo button .k{position:absolute;top:6px;left:6px;width:24px;height:24px;font-size:.8rem}
+.ch button.right{background:var(--good-bg);border-color:var(--good)}
+.ch button.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.ch button:disabled{cursor:default}
+.word{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:8px 0 14px}
+.word span{width:44px;height:52px;border-bottom:4px solid var(--en);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.8rem;text-transform:lowercase}
+.tiles{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.tiles button{width:52px;height:56px;border:2px solid var(--en);background:var(--en-soft);border-radius:14px;font-family:var(--display);font-weight:800;font-size:1.7rem}
+.tiles button:disabled{opacity:.25}
+.hint{text-align:center;color:var(--muted);font-weight:700;letter-spacing:.08em;margin:0 0 8px}
+.write{display:flex;gap:8px;margin-top:6px}
+.write.inl{justify-content:center}
+.q select,.story select{max-width:100%;font:800 1.1rem/1.2 var(--body);color:var(--en);background:var(--en-soft);border:3px solid var(--en);border-radius:12px;padding:6px 8px;margin:2px 0;vertical-align:middle;min-height:44px}
+.q select.right,.story select.right{border-color:var(--good);background:var(--good-bg);color:var(--good)}
+.q select.wrong,.story select.wrong{border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
+.write:not(.inl){flex-direction:column}
+.write select{min-height:52px;font-size:1rem}
+.picked{font-size:1.1rem;line-height:1.4;color:var(--muted)}
+.picked b{color:var(--ink);font-family:var(--display);font-size:1.2rem}
+.write input,.write select{flex:1;min-width:0;font:800 1.35rem/1.2 var(--body);color:var(--ink);background:var(--bg);border:3px solid var(--en);border-radius:14px;padding:10px 12px}
+.write #in:focus{outline:3px solid var(--sun);outline-offset:1px}
+.write #in.right{border-color:var(--good);background:var(--good-bg)}
+.write #in.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.write .ok{flex:none;border:0;background:var(--en);color:#fff;border-radius:14px;padding:0 16px;font-family:var(--display);font-weight:800;font-size:1.15rem;min-height:52px}
+.write .ok:disabled{opacity:.4}
+.sentence{min-height:56px;border:3px dashed var(--en);border-radius:14px;padding:10px 12px;margin:4px 0 12px;font-family:var(--display);font-weight:800;font-size:1.3rem;line-height:1.4}
+.sentence em{color:var(--muted);font-weight:600;font-family:var(--body);font-size:1rem}
+.wtiles{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.wtiles button{border:2px solid var(--en);background:var(--en-soft);border-radius:12px;padding:8px 12px;min-height:48px;font-family:var(--display);font-weight:800;font-size:1.2rem}
+.wtiles button:disabled{opacity:.25}
+.sec{margin:12px 0 6px;font-family:var(--display);font-weight:800;color:var(--en)}
+.rev.one{grid-template-columns:1fr}
+.spell{letter-spacing:.15em;white-space:nowrap}
+.house{width:min(100%,260px);height:auto}
+.daycard{display:inline-block;font-family:var(--display);font-size:1.3rem;letter-spacing:0;vertical-align:middle;border:3px solid var(--en);border-radius:12px;padding:2px 10px;margin-right:10px;background:var(--en-soft);color:var(--en)}
+.undo{display:block;margin:10px auto 0;border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 16px;font-weight:800;min-height:44px}
+.scene{display:flex;justify-content:center;margin:0 0 8px}
+.scene svg{width:200px;height:auto}
+.fb{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px;border-radius:16px;padding:12px 14px;border:2px solid var(--line)}
+.fb svg{width:50px;height:50px;flex:none}
+.fb.ok{background:var(--good-bg);border-color:var(--good)}
+.fb.no{background:var(--bad-bg);border-color:var(--bad)}
+.fb b{font-family:var(--display);font-size:1.25rem;display:block}
+.fb .t{flex:1 1 160px;min-width:0}
+.fb .next{flex:1 0 100%;border:0;background:var(--en);color:#fff;border-radius:999px;padding:10px;font-weight:800;font-size:1.05rem}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 18px;font-weight:800}
+.btn.main{background:var(--en);border-color:var(--en);color:#fff}
+.cert{text-align:center;border:4px double var(--sun)}
+.cert svg{width:96px;height:96px}
+.cert .medal{font-size:4rem;line-height:1}
+.big{font-family:var(--display);font-size:3rem;font-weight:800;color:var(--en);font-variant-numeric:tabular-nums}
+.stars{font-size:2.4rem;letter-spacing:6px;color:var(--line)}
+.stars .on{color:var(--sun)}
+.bypart{display:grid;gap:4px;margin:10px auto;max-width:320px;text-align:left;font-weight:700}
+.bypart div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:2px 0}
+.wrongs{text-align:left;margin-top:12px}
+.wrongs div{border-bottom:1px dashed var(--line);padding:6px 2px;font-weight:700}
+.wrongs div span{color:var(--good);font-weight:800}
+.cert .row{justify-content:center}
+.foot{margin-top:24px;text-align:center;color:var(--muted);font-size:.85rem}
+#boom{position:fixed;inset:0;z-index:60;pointer-events:none;display:none;place-items:center;background:radial-gradient(circle,rgba(255,236,150,.95) 0,rgba(255,140,40,.85) 28%,rgba(200,40,20,.55) 52%,rgba(0,0,0,0) 75%)}
+#boom.go{display:grid;animation:flash .9s ease-out forwards}
+#boom svg{width:min(80vw,420px);height:auto;animation:burst .9s ease-out forwards}
+@keyframes flash{0%{opacity:0}8%{opacity:1}70%{opacity:.85}100%{opacity:0}}
+@keyframes burst{0%{transform:scale(.2) rotate(-8deg)}25%{transform:scale(1.15) rotate(3deg)}100%{transform:scale(1.3) rotate(0)}}
+.shake{animation:shake .5s linear}
+@keyframes shake{0%,100%{transform:translate(0,0)}10%{transform:translate(-12px,6px)}20%{transform:translate(11px,-8px)}30%{transform:translate(-9px,-5px)}40%{transform:translate(8px,7px)}50%{transform:translate(-6px,4px)}60%{transform:translate(5px,-4px)}70%{transform:translate(-3px,3px)}80%{transform:translate(2px,-2px)}}
+@keyframes pop{0%{transform:scale(.92)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
+.pop{animation:pop .3s ease}
+#confetti{position:fixed;inset:0;z-index:55;pointer-events:none}
+@media (pointer:coarse){.btn,.snd,.crumb{min-height:44px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}#boom.go{opacity:.9}}
+.topics{display:grid;gap:8px;margin-top:14px;text-align:left}
+.topics button{display:flex;align-items:center;gap:12px;border:2px solid var(--line);background:var(--surface);border-radius:16px;padding:8px 12px;min-height:60px}
+.topics .ti{font-size:1.9rem;flex:none;width:44px;text-align:center}
+.topics b{display:block;font-family:var(--display);font-size:1.15rem}
+.topics em{font-style:normal;color:var(--line);letter-spacing:1px;font-size:.9rem}
+.topics em .on{color:var(--sun)}
+.topics .rd{margin-left:auto;color:var(--good);font-weight:800;font-size:1.3rem}
+.note h2{font-size:clamp(1.6rem,7vw,2.1rem);color:var(--en);margin-bottom:8px}
+.np{margin:8px 0;font-size:1.08rem}
+.nh{font-size:1.3rem;color:var(--en);margin:20px 0 8px;padding-top:12px;border-top:2px dashed var(--line)}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:8px 0}
+.facts div{background:var(--en-soft);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px}
+.facts .fe{font-size:2rem;line-height:1.1}
+.facts b{font-family:var(--display);font-size:1.1rem}
+.facts span:last-child{font-size:.95rem;color:var(--muted)}
+.flips{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin:8px 0}
+.flip{border:2px solid var(--en);background:var(--surface);border-radius:16px;padding:12px;text-align:left;min-height:90px;display:flex;flex-direction:column;gap:6px}
+.flip .ff{font-family:var(--display);font-weight:800;font-size:1.15rem;line-height:1.25}
+.flip .fk{display:none;font-size:1.02rem;background:var(--good-bg);border-radius:10px;padding:6px 8px}
+.flip small{color:var(--muted);font-weight:700}
+.flip.open{border-color:var(--good)}
+.flip.open .fk{display:block;animation:pop .3s ease}
+.flip.open small{display:none}
+.steps{display:flex;align-items:center;justify-content:center;gap:3px;margin:8px 0}
+.steps .st{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:6px;display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 1 100px;min-width:62px;transition:opacity .4s}
+.steps .st span:not(.em){font-size:.9rem;text-align:center;line-height:1.2}
+.steps .em{font-size:2.2rem;line-height:1.2}
+.steps.grow .st:nth-of-type(1) .em{font-size:1.6rem}.steps.grow .st:nth-of-type(2) .em{font-size:2.1rem}.steps.grow .st:nth-of-type(3) .em{font-size:2.6rem}.steps.grow .st:nth-of-type(4) .em{font-size:3.1rem}
+.steps i{font-style:normal;color:var(--en);font-weight:800;transition:opacity .4s}
+.steps .dim{opacity:.12}
+.pl{width:64px;height:auto;color:var(--ink)}
+.fr{width:70px;height:auto}
+.playb{display:block;margin:6px auto 0;border:2px solid var(--en);background:var(--en-soft);color:var(--en);border-radius:999px;padding:8px 18px;font-weight:800;min-height:44px}
+.sortw{border:2px dashed var(--en);border-radius:18px;padding:12px;margin:12px 0}
+.sortw .sh{font-family:var(--display);font-weight:800;font-size:1.15rem;margin:0 0 8px}
+.sortw .cur{text-align:center;display:flex;flex-direction:column;align-items:center;min-height:120px;justify-content:center}
+.sortw .cur .e{font-size:3.4rem;line-height:1.1}
+.sortw .cur b{font-family:var(--display);font-size:1.3rem}
+.sortw .cur small{color:var(--muted);font-weight:700}
+.sortw .done{font-family:var(--display);font-weight:800;font-size:1.4rem;color:var(--good)}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.bins button{border:3px solid var(--en);background:var(--en-soft);border-radius:16px;padding:10px 6px;min-height:84px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bins b{font-family:var(--display);font-size:1.1rem;line-height:1.15}
+.bins .got{font-size:1.3rem;letter-spacing:2px;overflow-wrap:anywhere}
+.sortw .msg,.wid .msg{text-align:center;font-weight:700;min-height:1.5em;margin:8px 0 0}
+.wid{border:2px dashed var(--en);border-radius:18px;padding:12px;margin:10px 0;text-align:center}
+.fig{width:100%;height:auto;display:block;margin:0 auto}
+.row.c{justify-content:center}
+.btn:disabled{opacity:.4}
+.sl{display:flex;flex-direction:column;gap:4px;font-weight:700;color:var(--muted);margin-top:8px}
+.sl input{width:100%;accent-color:var(--en);min-height:36px}
+.stage{position:relative;height:170px;border-radius:14px;background:#1E2A33;overflow:hidden}
+.stage .torch{position:absolute;left:2%;top:50%;transform:translateY(-50%) scaleX(-1) rotate(45deg);font-size:2.2rem}
+.stage .beam{position:absolute;left:10%;right:8%;top:0;bottom:0;background:linear-gradient(90deg,rgba(255,236,150,.7),rgba(255,236,150,.35));clip-path:polygon(0 42%,100% 0,100% 100%,0 58%);opacity:0;transition:opacity .3s}
+.stage.on .beam{opacity:1}
+.stage .obj{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:32px;z-index:2}
+.stage .wall{position:absolute;right:0;top:0;bottom:0;width:30%;background:#C9CED1;display:grid;place-items:center;overflow:hidden}
+.stage.on .wall{background:#FFF4C8}
+.stage .shd{filter:brightness(0);opacity:.85;line-height:1;transition:font-size .15s}
+.stage:not(.on) .shd{opacity:0}
+.figw{display:flex;justify-content:center;margin:0 0 8px}
+.cyc{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.cyc div{border:2px solid var(--line);border-radius:12px;padding:4px 6px;display:flex;flex-direction:column;align-items:center;background:var(--surface)}
+.cyc b{font-family:var(--display);font-size:1.3rem;line-height:1}
+.cyc .fr{width:60px}
+.shwfig{display:flex;gap:14px;align-items:center;justify-content:center;font-size:3.4rem;background:#FFF4C8;border-radius:14px;padding:6px 18px}
+.shwfig .dark{filter:brightness(0);opacity:.85}
+.nav{justify-content:center}
+.review ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.review li{display:flex;gap:10px;align-items:flex-start;border:2px solid var(--line);border-radius:14px;padding:8px 10px}
+.review li.ok{border-color:var(--good);background:var(--good-bg)}
+.review li.no{border-color:var(--bad);background:var(--bad-bg)}
+.review .mk{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;background:var(--good)}
+.review li.no .mk{background:var(--bad)}
+.review li div{min-width:0}
+.review small{color:var(--muted);font-weight:700}
+.review p{margin:2px 0;overflow-wrap:anywhere}
+.review b.r{color:var(--good)}
+.review .ex{font-size:.92rem;color:var(--muted)}
+@media print{body{background:#fff}.crumb,.snd,.cert,.music-btn,#boom,#confetti,.row{display:none!important}.review li{break-inside:avoid}}
+.ar{font-family:"Noto Naskh Arabic","Amiri","Traditional Arabic",serif;font-weight:700;unicode-bidi:isolate}
+.np .ar{display:block;font-size:1.7rem;line-height:1.9;text-align:center}
+.doa{background:var(--en-soft);border-radius:16px;padding:12px 14px;margin:8px 0}
+.doa .dw{font-family:var(--display);font-size:1.15rem;color:var(--en)}
+.doa .big{font-size:clamp(1.45rem,6.5vw,1.9rem);line-height:2;text-align:center;margin:4px 0}
+.doa .rumi{font-style:italic;font-weight:700;margin:2px 0;text-align:center}
+.doa .mk{margin:6px 0 0;font-size:.95rem;color:var(--muted)}
+.hide-rumi .doa .rumi,.hide-rumi .doa .mk{filter:blur(6px)}
+.figw .doa{width:100%;margin:0}
+.steps{flex-wrap:wrap;row-gap:8px}
+.steps .st{flex:0 1 88px;min-width:80px;padding:4px}
+.steps .st span:not(.em){font-size:.85rem}
+.steps .em{font-size:1.8rem}
+.flip .fk .ar{display:block;font-size:1.5rem;line-height:1.9;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div id="boom" aria-hidden="true"><svg viewBox="0 0 200 200"><path d="M100 4 L118 62 L172 26 L142 80 L196 92 L144 112 L178 164 L120 136 L104 196 L86 138 L30 172 L60 116 L4 104 L58 84 L24 32 L82 62 Z" fill="#FFD23F" stroke="#E2401C" stroke-width="6" stroke-linejoin="round"/><text x="100" y="114" text-anchor="middle" font-family="Baloo 2,Trebuchet MS,sans-serif" font-weight="800" font-size="40" fill="#C2181B">BOOM!</text></svg></div>
+<script>
+function cat(m){return `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M18 40 L22 10 L44 28 Z" fill="#F0A64A"/><path d="M82 40 L78 10 L56 28 Z" fill="#F0A64A"/><path d="M24 34 L25 18 L37 28 Z" fill="#F7C9D0"/><path d="M76 34 L75 18 L63 28 Z" fill="#F7C9D0"/><ellipse cx="50" cy="56" rx="36" ry="32" fill="#F5B861"/><path d="M50 26 q-4 8 0 14 q4 -6 0 -14" fill="#E08F2E"/><ellipse cx="50" cy="66" rx="17" ry="12" fill="#FFF3E2"/>${m==='sad'?'<circle cx="38" cy="49" r="4.5" fill="#3a2a22"/><circle cx="62" cy="49" r="4.5" fill="#3a2a22"/><path d="M42 66 q8 -6 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/>':'<path d="M33 49 q5 -6 10 0 M57 49 q5 -6 10 0" fill="none" stroke="#3a2a22" stroke-width="3.5" stroke-linecap="round"/><path d="M42 62 q8 9 16 0" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/><circle cx="28" cy="62" r="5" fill="#F7A8B3" opacity=".7"/><circle cx="72" cy="62" r="5" fill="#F7A8B3" opacity=".7"/>'}<path d="M46 57 h8 l-4 4 z" fill="#E86A7E"/><path d="M22 60 h-14 M22 65 h-13 M78 60 h14 M78 65 h13" stroke="#3a2a22" stroke-width="1.6" stroke-linecap="round"/></svg>`}
+
+/* ---------- storage ---------- */
+const KEY='kafaAdab.v1';let store={sound:true,best:{}};
+try{store=Object.assign(store,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}};
+
+/* ---------- sounds (Web Audio, no files) and speech ---------- */
+let ax=null;
+function actx(){
+  try{
+    if(navigator.audioSession)navigator.audioSession.type='playback'; // iPad: play even in silent mode
+    if(!ax){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ax=new AC()}
+    if(ax.state==='suspended')ax.resume();
+    return ax;
+  }catch(e){return null}
+}
+function tone(notes){const c=store.sound&&actx();if(!c)return;const t=c.currentTime+.02;
+  notes.forEach(([f,d,len])=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t+d);g.gain.exponentialRampToValueAtTime(.35,t+d+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d+(len||.45));o.connect(g);g.connect(c.destination);o.start(t+d);o.stop(t+d+(len||.45)+.05)})}
+const ding=()=>tone([[880,0],[1320,.12]]);
+const fanfare=()=>tone([[523,0,.3],[659,.15,.3],[784,.3,.3],[1047,.45,.8]]);
+// a falling whistle, then a loud blast: noise through a closing low-pass, a deep thump, and distortion for grit
+function boomSound(){
+  const c=store.sound&&actx();if(!c)return 0;
+  const t=c.currentTime+.02,b=t+.36;
+  const comp=c.createDynamicsCompressor();comp.threshold.value=-8;comp.knee.value=0;comp.ratio.value=12;comp.attack.value=.002;comp.release.value=.25;
+  const dist=c.createWaveShaper(),curve=new Float32Array(1024);for(let i=0;i<1024;i++){const x=i/511.5-1;curve[i]=Math.tanh(3*x)}dist.curve=curve;
+  const out=c.createGain();out.gain.value=1;dist.connect(comp);comp.connect(out);out.connect(c.destination);
+  const w=c.createOscillator(),wg=c.createGain();w.type='sine';w.frequency.setValueAtTime(1900,t);w.frequency.exponentialRampToValueAtTime(450,b);
+  wg.gain.setValueAtTime(.0001,t);wg.gain.exponentialRampToValueAtTime(.3,t+.05);wg.gain.setValueAtTime(.3,b-.04);wg.gain.exponentialRampToValueAtTime(.0001,b);
+  w.connect(wg);wg.connect(comp);w.start(t);w.stop(b+.05);
+  const len=Math.floor(c.sampleRate*2.4),buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
+  const n=c.createBufferSource();n.buffer=buf;
+  const lp=c.createBiquadFilter();lp.type='lowpass';lp.Q.value=.8;lp.frequency.setValueAtTime(5000,b);lp.frequency.exponentialRampToValueAtTime(90,b+1.8);
+  const ng=c.createGain();ng.gain.setValueAtTime(.0001,b);ng.gain.exponentialRampToValueAtTime(2,b+.008);ng.gain.exponentialRampToValueAtTime(.0001,b+2.2);
+  n.connect(lp);lp.connect(ng);ng.connect(dist);n.start(b);n.stop(b+2.4);
+  const o=c.createOscillator(),og=c.createGain();o.type='sine';o.frequency.setValueAtTime(150,b);o.frequency.exponentialRampToValueAtTime(28,b+.9);
+  og.gain.setValueAtTime(.0001,b);og.gain.exponentialRampToValueAtTime(2.5,b+.01);og.gain.exponentialRampToValueAtTime(.0001,b+1.3);
+  o.connect(og);og.connect(dist);o.start(b);o.stop(b+1.4);
+  return 360;
+}
+function explode(){
+  const delay=boomSound();
+  setTimeout(()=>{
+    const el=document.getElementById('boom');el.classList.remove('go');void el.offsetWidth;el.classList.add('go');
+    app.classList.remove('shake');void app.offsetWidth;app.classList.add('shake');
+    try{navigator.vibrate&&navigator.vibrate([350,80,200])}catch(e){}
+  },delay);
+}
+let voice=null;
+function pickVoice(){try{const v=speechSynthesis.getVoices();voice=v.find(x=>/en-GB/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null}catch(e){}}
+if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+function speak(text){
+  if(!('speechSynthesis' in window))return false;
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-GB';if(voice)u.voice=voice;u.rate=.8;speechSynthesis.speak(u);return true}catch(e){return false}
+}
+
+/* ---------- helpers ---------- */
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const blank='<span class="blank">?</span>';
+function mc(o,right,wrongs){
+  const seen=new Set([right]),w=[];for(const x of wrongs){if(!seen.has(x)){seen.add(x);w.push(x)}if(w.length===3)break}
+  const all=shuffle([right,...w]);return Object.assign(o,{choices:all,right:all.indexOf(right)});
+}
+
+/* ---------- Adab KAFA Tahun 2 (Kurikulum KAFA JAKIM 2.0): Adab dengan Rasulullah, and adab in daily life ---------- */
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const buzz=()=>tone([[196,0,.35]]);
+const ar=s=>`<span class="ar" lang="ar" dir="rtl">${s}</span>`;
+const SAW='ﷺ';
+// [when, arabic, rumi, maksud]
+const DOA={
+ tidur:['sebelum tidur','بِاسْمِكَ اللَّهُمَّ أَحْيَا وَبِاسْمِكَ أَمُوتُ','Bismikallahumma ahya wa bismika amut.','Dengan nama-Mu ya Allah, aku hidup dan dengan nama-Mu aku mati.'],
+ bangun:['bangun tidur','الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ',"Alhamdulillahil-lazi ahyana ba'da ma amatana wa ilaihin-nusyur.",'Segala puji bagi Allah yang menghidupkan kami selepas mematikan kami, dan kepada-Nya kami akan dibangkitkan.'],
+ masukTandas:['masuk tandas','اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبُثِ وَالْخَبَائِثِ',"Allahumma inni a'uzubika minal-khubusi wal-khaba'is.",'Ya Allah, aku berlindung kepada-Mu daripada syaitan lelaki dan syaitan perempuan.'],
+ keluarTandas:['keluar tandas','غُفْرَانَكَ، الْحَمْدُ لِلَّهِ الَّذِي أَذْهَبَ عَنِّي الْأَذَى وَعَافَانِي',"Ghufranaka, alhamdulillahil-lazi azhaba 'annil-aza wa 'afani.",'Aku memohon keampunan-Mu. Segala puji bagi Allah yang menghilangkan kotoran daripadaku dan menyihatkan aku.'],
+ pakai:['memakai pakaian','الْحَمْدُ لِلَّهِ الَّذِي كَسَانِي هَذَا وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ','Alhamdulillahil-lazi kasani haza wa razaqanihi min ghairi haulin minni wa la quwwah.','Segala puji bagi Allah yang memberi aku pakaian ini dan merezekikannya kepadaku tanpa daya dan kekuatan daripadaku.'],
+ makan:['sebelum makan','اللَّهُمَّ بَارِكْ لَنَا فِيمَا رَزَقْتَنَا وَقِنَا عَذَابَ النَّارِ',"Allahumma barik lana fima razaqtana wa qina 'azaban-nar.",'Ya Allah, berkatilah rezeki yang Engkau berikan kepada kami dan peliharalah kami daripada azab api neraka.'],
+ lepasMakan:['selepas makan','الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مُسْلِمِينَ',"Alhamdulillahil-lazi at'amana wa saqana wa ja'alana muslimin.",'Segala puji bagi Allah yang memberi kami makan dan minum, dan menjadikan kami orang Islam.'],
+ keluarRumah:['keluar rumah','بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ، لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',"Bismillahi tawakkaltu 'alallah, la haula wa la quwwata illa billah.",'Dengan nama Allah, aku berserah kepada Allah. Tiada daya dan kekuatan melainkan dengan Allah.'],
+ masukRumah:['masuk rumah','اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ الْمَوْلِجِ وَخَيْرَ الْمَخْرَجِ، بِسْمِ اللَّهِ وَلَجْنَا، وَبِسْمِ اللَّهِ خَرَجْنَا، وَعَلَى اللَّهِ رَبِّنَا تَوَكَّلْنَا',"Allahumma inni as'aluka khairal-maulij wa khairal-makhraj, bismillahi walajna, wa bismillahi kharajna, wa 'alallahi rabbina tawakkalna.",'Ya Allah, aku memohon kebaikan ketika masuk dan kebaikan ketika keluar. Dengan nama Allah kami masuk, dengan nama Allah kami keluar, dan kepada Allah Tuhan kami, kami berserah.'],
+ kenderaan:['menaiki kenderaan','سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ، وَإِنَّا إِلَى رَبِّنَا لَمُنْقَلِبُونَ','Subhanallazi sakhkhara lana haza wa ma kunna lahu muqrinin, wa inna ila rabbina lamunqalibun.','Maha Suci Allah yang memudahkan kenderaan ini untuk kami, sedangkan kami tidak mampu menguasainya. Dan sesungguhnya kepada Tuhan kami, kami akan kembali.'],
+};
+const DOA_KEYS=Object.keys(DOA);
+const doaCard=k=>{const [w,a,r,m]=DOA[k];return `<div class="doa"><b class="dw">🤲 Doa ${w}</b><p class="ar big" lang="ar" dir="rtl">${a}</p><p class="rumi">${r}</p><p class="mk"><b>Maksudnya:</b> ${m}</p></div>`};
+const BAD_END=['Mendapat pahala','Badan menjadi sihat','Disayangi oleh semua orang','Hidup menjadi berkat'];
+
+const TOPICS=[
+ {name:'Adab dengan Rasulullah',icon:'🕌',
+  intro:[
+   {t:'p',h:`Adab dengan Rasulullah ${SAW} ialah <b>menghormati, memuliakan dan mencintai</b> Nabi Muhammad ${SAW}. Hukum beradab dengan Rasulullah ialah <b>WAJIB</b>.`},
+   {t:'h',h:'Berselawat'},
+   {t:'p',h:`Apabila mendengar nama Nabi Muhammad, kita ucapkan:<br>${ar('صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ')}<br><i>Sallallahu 'alaihi wasallam</i> (semoga Allah memberi rahmat dan kesejahteraan kepada baginda).`},
+   {t:'h',h:'Akhlak mulia Rasulullah — tekan kad'},
+   {t:'flip',items:[['🤝 Jujur dan amanah','Baginda digelar <b>Al-Amin</b> (yang dipercayai) kerana sangat jujur.'],['💗 Penyayang','Baginda sayang kepada kanak-kanak, orang tua dan haiwan.'],['🕊️ Pemaaf','Baginda memaafkan orang yang berbuat jahat kepadanya.'],['⏳ Sabar','Baginda sabar walaupun disakiti.'],['🎁 Pemurah','Baginda suka memberi dan bersedekah.'],['🧼 Pembersih','Baginda sentiasa menjaga kebersihan diri dan pakaian.']]},
+   {t:'h',h:'Kisah teladan'},
+   {t:'steps',items:[['<span class="em">🗑️</span>','Seorang wanita selalu membuang sampah ke arah Nabi.'],['<span class="em">🤒</span>','Suatu hari wanita itu jatuh sakit.'],['<span class="em">🤲</span>','Nabi datang melawat dan mendoakannya.'],['<span class="em">💚</span>','Wanita itu terharu lalu memeluk Islam.']]},
+   {t:'p',h:'Teladan: Nabi bersifat <b>pemaaf dan baik hati</b>. Kita juga perlu memaafkan orang lain.'},
+  ],
+  hikmah:[['🌟','Mendapat syafaat baginda di akhirat'],['💚','Dikasihi oleh Allah'],['🎁','Mendapat pahala'],['🏡','Hidup diberkati']],
+  good:[['🤲','Berselawat apabila mendengar nama baginda'],['🌙','Mengamalkan sunnah baginda'],['💗','Mencintai baginda'],['📖','Mempelajari kisah (sirah) baginda'],['🤫','Mendengar hadis dengan senyap dan tekun'],['🙏','Menyebut nama baginda dengan hormat']],
+  bad:[['🗣️','Bercakap kuat ketika hadis dibaca'],['😶','Tidak berselawat apabila nama baginda disebut'],['😝','Mengejek amalan sunnah'],['🙄','Menyebut nama baginda tanpa hormat']],
+  akibat:['Berdosa kerana tidak menghormati Rasulullah','Tidak mendapat syafaat baginda','Dimurkai oleh Allah'],
+  doa:[],
+  extra:[
+   ()=>Q(`Apakah hukum beradab dengan Rasulullah ${SAW}?`,'Wajib',['Sunat','Harus','Makruh'],`Beradab dengan Rasulullah ${SAW} adalah wajib.`),
+   ()=>Q(`Nabi Muhammad ${SAW} digelar <b>Al-Amin</b> kerana baginda…`,'Jujur dan amanah',['Kuat dan gagah','Kaya dan pemurah','Pandai berniaga'],'Al-Amin bermaksud yang dipercayai.'),
+   ()=>Q(`Apakah yang kita ucapkan apabila mendengar nama Nabi Muhammad ${SAW}?`,'Sallallahu alaihi wasallam',['Subhanallah','Alhamdulillah','Astaghfirullah'],'Kita berselawat: Sallallahu alaihi wasallam.',{long:true}),
+   ()=>Q(`Adab dengan Rasulullah ${SAW} bermaksud…`,'Menghormati, memuliakan dan mencintai baginda',['Melawat makam baginda sahaja','Menyebut nama baginda dengan kuat','Membaca buku cerita'],'Adab dengan Rasulullah ialah menghormati, memuliakan dan mencintai baginda.',{long:true}),
+   ()=>Q('Wanita yang selalu membuang sampah ke arah Nabi jatuh sakit. Apakah yang Nabi lakukan?','Melawat dan mendoakannya',['Membalas perbuatannya','Tidak mempedulikannya','Memarahinya'],'Nabi pemaaf dan baik hati. Wanita itu akhirnya memeluk Islam.',{long:true}),
+   ()=>{const [e,h]=pick(TOPICS[0].hikmah);return Q(`Apakah hikmah beradab dengan Rasulullah ${SAW}?`,h,['Menjadi kaya-raya','Menjadi terkenal','Tidak perlu belajar'],`${h}.`,{key:'R6'+h,long:true})},
+   ()=>{const a=pick([['Jujur','Al-Amin, sentiasa bercakap benar'],['Penyayang','sayang kepada kanak-kanak dan haiwan'],['Pemaaf','memaafkan orang yang berbuat jahat']]);return Q(`Rasulullah ${SAW} ${a[1]}. Ini menunjukkan baginda bersifat…`,a[0],['Jujur','Penyayang','Pemaaf','Sombong'].filter(x=>x!==a[0]),`Sifat ${a[0].toLowerCase()}.`,{key:'R7'+a[0]})},
+  ]},
+ {name:'Adab Tidur',icon:'🛏️',
+  intro:[{t:'h',h:'Langkah sebelum tidur'},{t:'steps',items:[['<span class="em">🚿</span>','Berwuduk'],['<span class="em">🪥</span>','Gosok gigi'],['<span class="em">🛏️</span>','Kibas tempat tidur'],['<span class="em">➡️</span>','Baring mengiring ke kanan'],['<span class="em">🤲</span>','Baca doa']]}],
+  good:[['🚿','Berwuduk sebelum tidur'],['🪥','Menggosok gigi sebelum tidur'],['🛏️','Mengibas tempat tidur'],['➡️','Baring mengiring ke kanan'],['🌙','Tidur awal'],['☀️','Bangun awal untuk solat Subuh']],
+  bad:[['📱','Bermain telefon sehingga lewat malam'],['😴','Tidur meniarap'],['🍫','Tidur tanpa menggosok gigi'],['⏰','Bangun lewat sehingga tertinggal Subuh']],
+  akibat:['Lambat bangun dan tertinggal solat Subuh','Badan tidak sihat','Mudah diganggu syaitan'],
+  doa:['tidur','bangun'],
+  extra:[
+   ()=>Q('Ketika tidur, kita baring mengiring ke sebelah…','Kanan',['Kiri','Meniarap','Terlentang'],'Ikut sunnah Nabi: baring mengiring ke kanan.',{pic:'🛏️'}),
+   ()=>Q('Apakah yang kita lakukan pada tempat tidur sebelum berbaring?','Mengibas tempat tidur',['Melompat di atas tilam','Makan di atas tilam','Membiarkannya bersepah'],'Kibas tempat tidur supaya bersih.',{long:true}),
+  ]},
+ {name:'Adab Mandi & Qada\' Hajat',icon:'🚽',
+  intro:[{t:'h',h:'Langkah ke tandas'},{t:'steps',items:[['<span class="em">🤲</span>','Baca doa di luar'],['<span class="em">🦶</span>','Masuk kaki <b>kiri</b>'],['<span class="em">🚽</span>','Istinjak, siram bersih'],['<span class="em">🦶</span>','Keluar kaki <b>kanan</b>'],['<span class="em">🤲</span>','Baca doa keluar']]},
+   {t:'p',h:'Ketika <b>mandi</b>: tutup aurat, mulakan dengan <i>Bismillah</i>, bersihkan seluruh badan dan <b>jimat air</b>.'}],
+  good:[['🦶','Masuk tandas dengan kaki kiri'],['🚪','Keluar tandas dengan kaki kanan'],['🤫','Tidak bercakap di dalam tandas'],['✋','Beristinjak dengan tangan kiri'],['🚽','Menyiram tandas sehingga bersih'],['🧼','Membasuh tangan selepas keluar'],['💧','Menjimatkan air ketika mandi'],['🙈','Menutup aurat ketika mandi']],
+  bad:[['🎤','Menyanyi di dalam tandas'],['📖','Membawa benda yang tertulis nama Allah ke dalam tandas'],['💦','Membazir air ketika mandi'],['🚽','Tidak menyiram tandas selepas digunakan']],
+  akibat:['Badan dan pakaian kotor kerana najis','Solat tidak sah','Mudah dijangkiti penyakit'],
+  doa:['masukTandas','keluarTandas'],
+  extra:[
+   ()=>Q('Kita masuk ke tandas dengan kaki…','Kiri',['Kanan','Kedua-dua kaki','Melompat'],'Masuk tandas kaki kiri, keluar kaki kanan.',{pic:'🚽'}),
+   ()=>Q('Kita keluar dari tandas dengan kaki…','Kanan',['Kiri','Kedua-dua kaki','Melompat'],'Keluar tandas dengan kaki kanan.',{pic:'🚪'}),
+   ()=>Q('Di manakah doa masuk tandas dibaca?','Di luar tandas, sebelum masuk',['Di dalam tandas','Selepas keluar','Di dalam bilik tidur'],'Doa dibaca sebelum masuk, di luar tandas.',{long:true}),
+   ()=>Q('Kita beristinjak dengan tangan…','Kiri',['Kanan','Kedua-dua tangan','Tidak perlu'],'Beristinjak dengan tangan kiri. Tangan kanan untuk makan.'),
+  ]},
+ {name:'Adab Berpakaian',icon:'👗',
+  intro:[{t:'facts',items:[['➡️','Memakai','mulakan sebelah kanan'],['⬅️','Menanggalkan','mulakan sebelah kiri'],['🧕','Menutup aurat','pakaian tidak ketat dan tidak nipis'],['✨','Bersih dan kemas','sesuai dengan tempat']]}],
+  good:[['🧕','Memakai pakaian yang menutup aurat'],['👕','Memakai pakaian yang bersih dan kemas'],['➡️','Memakai baju bermula dengan tangan kanan'],['⬅️','Menanggalkan baju bermula dengan tangan kiri'],['🧺','Melipat dan menyimpan pakaian dengan kemas']],
+  bad:[['👚','Memakai pakaian yang ketat dan nipis'],['🤵','Perempuan memakai pakaian lelaki'],['🧦','Memakai pakaian yang kotor'],['⬅️','Memakai baju bermula dengan tangan kiri']],
+  akibat:['Berdosa kerana tidak menutup aurat','Dipandang buruk oleh orang lain','Mudah dapat penyakit kerana pakaian kotor'],
+  doa:['pakai'],
+  extra:[
+   ()=>Q('Ketika memakai pakaian, kita mulakan dengan sebelah…','Kanan',['Kiri','Atas','Belakang'],'Memakai: kanan dahulu. Menanggalkan: kiri dahulu.',{pic:'👕'}),
+   ()=>Q('Ketika menanggalkan pakaian, kita mulakan dengan sebelah…','Kiri',['Kanan','Atas','Depan'],'Menanggalkan pakaian: kiri dahulu.'),
+   ()=>Q('Pakaian seorang muslimah mestilah…','Menutup aurat, tidak ketat dan tidak nipis',['Ketat dan berwarna terang','Nipis supaya sejuk','Mengikut fesyen sahaja'],'Pakaian mesti menutup aurat.',{long:true}),
+  ]},
+ {name:'Adab Makan & Minum',icon:'🍚',
+  intro:[{t:'h',h:'Langkah makan'},{t:'steps',items:[['<span class="em">🧼</span>','Basuh tangan'],['<span class="em">🤲</span>','Baca doa'],['<span class="em">✋</span>','Makan tangan kanan'],['<span class="em">🍽️</span>','Habiskan makanan'],['<span class="em">🤲</span>','Doa selepas makan']]},
+   {t:'flip',items:[['😮 Terlupa baca doa di awal makan? Baca…',`${ar('بِسْمِ اللَّهِ أَوَّلَهُ وَآخِرَهُ')}<br><i>Bismillahi awwalahu wa akhirahu</i> (Dengan nama Allah, pada awal dan akhirnya).`]]}],
+  good:[['🧼','Membasuh tangan sebelum dan selepas makan'],['✋','Makan dan minum dengan tangan kanan'],['🪑','Duduk ketika makan dan minum'],['🍽️','Mengambil makanan yang dekat'],['🥤','Minum perlahan-lahan, tiga teguk'],['🍚','Menghabiskan makanan']],
+  bad:[['🌬️','Meniup makanan yang panas'],['🗣️','Bercakap ketika mulut penuh'],['🚶','Makan sambil berjalan'],['👎','Mencela makanan'],['🗑️','Membazir makanan'],['🤚','Makan dengan tangan kiri']],
+  akibat:['Makanan tidak berkat','Syaitan turut makan bersama','Mudah sakit perut'],
+  doa:['makan','lepasMakan'],
+  extra:[
+   ()=>Q('Kita makan dan minum dengan tangan…','Kanan',['Kiri','Kedua-dua tangan','Mana-mana tangan'],'Makan dan minum dengan tangan kanan.',{pic:'🍚'}),
+   ()=>Q('Jika terlupa membaca doa di awal makan, kita baca…','Bismillahi awwalahu wa akhirahu',['Alhamdulillah','Subhanallah','Astaghfirullah'],'Bismillahi awwalahu wa akhirahu: dengan nama Allah pada awal dan akhirnya.',{long:true}),
+   ()=>Q('Makanan sangat panas. Apakah yang patut kamu buat?','Tunggu sehingga sejuk',['Tiup makanan itu','Buang makanan itu','Cela makanan itu'],'Jangan meniup makanan. Tunggu sehingga sejuk.'),
+  ]},
+ {name:'Adab Masuk & Keluar Rumah',icon:'🏠',
+  intro:[{t:'h',h:'Keluar rumah'},{t:'steps',items:[['<span class="em">🙋</span>','Minta izin ibu bapa'],['<span class="em">🦶</span>','Keluar kaki <b>kiri</b>'],['<span class="em">🤲</span>','Baca doa'],['<span class="em">👋</span>','Beri salam']]},
+   {t:'h',h:'Masuk rumah'},{t:'steps',items:[['<span class="em">🦶</span>','Masuk kaki <b>kanan</b>'],['<span class="em">👋</span>','Beri salam'],['<span class="em">🤲</span>','Baca doa']]}],
+  good:[['🙋','Meminta izin ibu bapa sebelum keluar'],['👋','Memberi salam ketika masuk rumah'],['🦶','Masuk rumah dengan kaki kanan'],['🦶','Keluar rumah dengan kaki kiri'],['👟','Menyusun kasut dengan kemas'],['🚪','Mengetuk pintu dan meminta izin di rumah orang']],
+  bad:[['🏃','Keluar rumah tanpa izin ibu bapa'],['🤐','Masuk rumah tanpa memberi salam'],['💥','Menghempas pintu'],['👀','Mengintai ke dalam rumah orang']],
+  akibat:['Ibu bapa risau','Syaitan masuk bersama ke dalam rumah','Dipandang tidak sopan'],
+  doa:['keluarRumah','masukRumah'],
+  extra:[
+   ()=>Q('Kita masuk ke rumah dengan kaki…','Kanan',['Kiri','Kedua-dua kaki','Melompat'],'Masuk rumah kaki kanan, keluar rumah kaki kiri.',{pic:'🏠'}),
+   ()=>Q('Kita keluar dari rumah dengan kaki…','Kiri',['Kanan','Kedua-dua kaki','Melompat'],'Keluar rumah dengan kaki kiri.'),
+   ()=>Q('Apakah yang kita ucapkan apabila masuk ke rumah?','Assalamualaikum',['Selamat tinggal','Terima kasih','Maaf'],'Beri salam: Assalamualaikum.'),
+   ()=>Q('Sebelum keluar bermain, Safiyyah perlu…','Meminta izin ibu bapa',['Keluar senyap-senyap','Menghempas pintu','Pergi tanpa memberitahu'],'Minta izin supaya ibu bapa tidak risau.',{long:true}),
+  ]},
+ {name:'Adab Menaiki Kenderaan',icon:'🚗',
+  intro:[{t:'facts',items:[['🤲','Baca doa','sebelum kenderaan bergerak'],['🔒','Tali pinggang','pakai tali pinggang keledar'],['🪑','Duduk sopan','jangan bising atau berdiri'],['🧓','Hormat','beri tempat duduk kepada orang tua']]}],
+  good:[['🤲','Membaca doa menaiki kenderaan'],['🔒','Memakai tali pinggang keledar'],['🪑','Duduk dengan sopan'],['🧓','Memberi tempat duduk kepada orang tua'],['🚌','Beratur ketika menaiki bas'],['🛍️','Menyimpan sampah di dalam beg']],
+  bad:[['🙆','Menjulurkan kepala atau tangan keluar tingkap'],['🗑️','Membuang sampah keluar tingkap'],['📢','Membuat bising di dalam kenderaan'],['🏃','Berebut-rebut menaiki bas']],
+  akibat:['Kemalangan dan cedera','Mengganggu pemandu','Mencemarkan jalan raya'],
+  doa:['kenderaan'],
+  extra:[
+   ()=>Q('Apakah yang perlu dipakai ketika menaiki kereta?','Tali pinggang keledar',['Topi keledar sahaja','Kasut sukan','Cermin mata hitam'],'Tali pinggang keledar menjaga keselamatan.',{pic:'🚗'}),
+   ()=>Q('Seorang nenek naik bas yang penuh. Apakah yang patut kamu buat?','Beri tempat duduk kepada nenek',['Pura-pura tidur','Duduk di tempat lain','Biarkan nenek berdiri'],'Hormati orang tua: beri tempat duduk.',{pic:'🚌',long:true}),
+  ]},
+];
+// fill each topic's notes: its own intro, then doa cards, a sorting game and the consequences
+TOPICS.forEach(t=>{
+  t.blocks=[...t.intro];
+  if(t.doa.length)t.blocks.push({t:'h',h:'Doa'},{t:'doa',keys:t.doa});
+  t.blocks.push({t:'sort',h:'Beradab atau tidak beradab?',bins:['👍 Beradab','👎 Tidak beradab'],items:shuffle(t.good).slice(0,4).map(x=>[x[0],x[1],0]).concat(shuffle(t.bad).slice(0,4).map(x=>[x[0],x[1],1]))});
+  if(t.hikmah)t.blocks.push({t:'h',h:'Hikmah'},{t:'facts',items:t.hikmah.map(([e,h])=>[e,h,''])});
+  t.blocks.push({t:'h',h:'Akibat tidak beradab'},{t:'facts',items:t.akibat.map(a=>['⚠️',a,''])});
+});
+
+/* ---------- quiz: one section per topic, built from the same lists ---------- */
+const Q=(q,a,w,ex,o)=>mc(Object.assign({q,explain:ex,key:q+'|'+a},o||{}),a,w);
+const lower=s=>s.charAt(0).toLowerCase()+s.slice(1);
+const doaFig=(k,rumi)=>`<div class="doa"><p class="ar big" lang="ar" dir="rtl">${DOA[k][1]}</p>${rumi?`<p class="rumi">${DOA[k][2]}</p>`:''}</div>`;
+const SECTIONS=TOPICS.map((t,ti)=>{
+  const f=[
+    ()=>{const g=pick(t.good),b=shuffle(t.bad);return Q(`Yang manakah adab yang <b>BETUL</b>? (${t.name})`,g[1],b.map(x=>x[1]),`${g[1]} ialah adab yang betul.`,{long:true,key:'G'+ti+g[1]})},
+    ()=>{const b=pick(t.bad),g=shuffle(t.good);return Q(`Yang manakah perbuatan yang <b>TIDAK beradab</b>? (${t.name})`,b[1],g.map(x=>x[1]),`${b[1]}: tidak beradab.`,{long:true,key:'B'+ti+b[1]})},
+    ()=>{const it=Math.random()<.5?[pick(t.good),1]:[pick(t.bad),0];return Q(`${it[0][0]} <i>${it[0][1]}</i>. Adakah ini adab yang baik?`,it[1]?'Ya, beradab':'Tidak, tidak beradab',[it[1]?'Tidak, tidak beradab':'Ya, beradab'],it[1]?'Ini adab yang baik.':'Perbuatan ini tidak beradab.',{key:'Y'+ti+it[0][1]})},
+    ()=>{const a=pick(t.akibat);return Q(`Apakah akibat tidak menjaga ${lower(t.name)}?`,a,BAD_END,`${a}.`,{long:true,key:'A'+ti+a})},
+    ...t.extra,
+  ];
+  t.doa.forEach(k=>{
+    f.push(()=>Q('Doa ini dibaca bila?',`${DOA[k][0].charAt(0).toUpperCase()+DOA[k][0].slice(1)}`,shuffle(DOA_KEYS.filter(x=>x!==k)).map(x=>DOA[x][0].charAt(0).toUpperCase()+DOA[x][0].slice(1)),`Doa ${DOA[k][0]}: ${DOA[k][2]}`,{fig:doaFig(k,true),key:'W'+k}));
+    f.push(()=>Q(`Apakah doa <b>${DOA[k][0]}</b>?`,DOA[k][2],shuffle(DOA_KEYS.filter(x=>x!==k)).map(x=>DOA[x][2]),`Maksudnya: ${DOA[k][3]}`,{long:true,key:'R'+k}));
+    f.push(()=>Q('Apakah maksud doa ini?',DOA[k][3],shuffle(DOA_KEYS.filter(x=>x!==k)).map(x=>DOA[x][3]),`Ini doa ${DOA[k][0]}.`,{fig:doaFig(k,true),long:true,key:'M'+k}));
+  });
+  return f;
+});
+const FINAL=5,PRACTICE=8; // questions per section in the full test / when practising one topic
+function makeSec(k,n){
+  const qs=[],seen=new Set();let g=0;
+  while(qs.length<n&&g++<500){const q=pick(SECTIONS[k])();if(seen.has(q.key))continue;seen.add(q.key);q.sec=k;qs.push(q)}
+  return qs;
+}
+
+/* ---------- screens ---------- */
+const app=document.getElementById('app');
+let G=null;
+const stars=n=>[1,2,3].map(i=>`<span class="${i<=n?'on':''}">★</span>`).join('');
+const starsFor=(c,n)=>c/n>=.9?3:c/n>=.7?2:c/n>=.5?1:0;
+if(!store.read)store.read={};
+function header(sub){return `<a class="crumb" href="../">← Semua subjek</a><div class="top">${cat('happy')}<div><h1>Adab KAFA</h1><p>${sub}</p></div><button class="snd" id="snd" aria-pressed="${store.sound}">${store.sound?'🔊 Bunyi: Hidup':'🔇 Bunyi: Mati'}</button></div>`}
+function wireSound(){const b=document.getElementById('snd');b.onclick=()=>{store.sound=!store.sound;save();b.setAttribute('aria-pressed',store.sound);b.textContent=store.sound?'🔊 Bunyi: Hidup':'🔇 Bunyi: Mati';if(store.sound)ding()}}
+function home(){
+  G=null;scrollTo(0,0);const total=TOPICS.length*FINAL;
+  app.innerHTML=header('Tahun 2 · nota ringkas dan ujian')+`<div class="card hero"><h2>📖 Nota Ringkas</h2><p>Baca setiap topik. Hafal doa, susun dan main untuk ingat!</p>
+   <div class="topics">${TOPICS.map((t,i)=>`<button data-n="${i}"><span class="ti">${t.icon}</span><span><b>${i+1}. ${t.name}</b><em>${stars(store.best[i]||0)}</em></span><span class="rd">${store.read[i]?'✔':''}</span></button>`).join('')}</div></div>
+   <div class="card hero" style="margin-top:14px"><h2>📝 Ujian Adab</h2><p>${total} soalan dari semua topik. Tekan jawapan sahaja. Di hujung ada senarai semua jawapan betul dan salah.</p>
+   <button class="go" id="final">Mula Ujian</button>
+   <p class="best">${store.best.final!=null?`Markah terbaik: ${store.best.final}/${total}`:'Baca nota dahulu, kemudian cuba ujian!'}</p></div>
+   <div class="card" style="margin-top:14px"><p class="lbl">Atau uji satu topik (${PRACTICE} soalan)</p><div class="rev">${TOPICS.map((t,i)=>`<button data-p="${i}">${t.icon} Topik ${i+1}<span>${t.name}</span></button>`).join('')}</div></div>
+   <p class="foot">Hati-hati! Jawapan salah akan BOOM 💥 · Semoga berjaya, Safiyyah!</p>`;
+  document.getElementById('final').onclick=()=>{actx();start('final')};
+  app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{actx();start(+b.dataset.p)});
+  app.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{actx();note(+b.dataset.n)});
+  wireSound();
+}
+
+/* note widgets: each returns html; init(el) wires it after render */
+const W={
+  p:b=>({h:`<p class="np">${b.h}</p>`}),
+  h:b=>({h:`<h3 class="nh">${b.h}</h3>`}),
+  facts:b=>({h:`<div class="facts">${b.items.map(([e,t,d])=>`<div><span class="fe">${e}</span><b>${t}</b><span>${d}</span></div>`).join('')}</div>`}),
+  flip:b=>({h:`<div class="flips">${b.items.map(([f,k])=>`<button class="flip" aria-expanded="false"><span class="ff">${f}</span><span class="fk">${k}</span><small>Tekan untuk lihat</small></button>`).join('')}</div>`,
+    init:el=>el.querySelectorAll('.flip').forEach(x=>x.onclick=()=>{const o=x.classList.toggle('open');x.setAttribute('aria-expanded',o);if(o)ding()})}),
+  steps:b=>({h:`<div class="steps${b.grow?' grow':''}">${b.items.map(([p,c],i)=>`<button class="st" data-s="${i}" style="--i:${i}">${p}<span>${c}</span></button>${i<b.items.length-1?'<i>➜</i>':''}`).join('')}</div><button class="playb">▶ Main langkah demi langkah</button>`,
+    init:el=>{const st=[...el.querySelectorAll('.st')],arr=[...el.querySelectorAll('.steps i')],btn=el.querySelector('.playb');let tm=null;
+      btn.onclick=()=>{clearInterval(tm);st.forEach(s=>s.classList.add('dim'));arr.forEach(a=>a.classList.add('dim'));let k=0;
+        const show=()=>{if(k>=st.length){clearInterval(tm);btn.textContent='↻ Main semula';return}st[k].classList.remove('dim');st[k].classList.add('pop');if(k>0)arr[k-1].classList.remove('dim');tone([[523+k*130,0,.25]]);k++};
+        show();tm=setInterval(show,1600)};
+      st.forEach(s=>s.onclick=()=>{s.classList.remove('dim');s.classList.remove('pop');void s.offsetWidth;s.classList.add('pop')})}}),
+  sort:b=>({h:`<div class="sortw"><p class="sh">${b.h}</p><div class="cur"></div><div class="bins">${b.bins.map((n,i)=>`<button data-bin="${i}"><b>${n}</b><span class="got"></span></button>`).join('')}</div><p class="msg" aria-live="polite"></p></div>`,
+    init:el=>{let q=shuffle(b.items);const cur=el.querySelector('.cur'),msg=el.querySelector('.msg'),bins=[...el.querySelectorAll('[data-bin]')];
+      const draw=()=>{if(!q.length){cur.innerHTML=`<div class="done">🎉 Syabas! Semua betul.</div><button class="playb again">↻ Cuba lagi</button>`;cur.querySelector('.again').onclick=()=>{q=shuffle(b.items);bins.forEach(x=>x.querySelector('.got').textContent='');msg.textContent='';draw()};return}
+        cur.innerHTML=`<span class="e">${q[0][0]}</span><b>${q[0][1]}</b><small>Masukkan ke kotak yang betul ↓</small>`};
+      bins.forEach(x=>x.onclick=()=>{if(!q.length)return;const it=q[0];if(+x.dataset.bin===it[2]){ding();x.querySelector('.got').textContent+=it[0];msg.textContent=`✔ Betul! ${it[1]}: ${b.bins[it[2]]}.`;q.shift();draw()}else{buzz();msg.textContent=`✘ Cuba lagi. ${it[1]} bukan ${b.bins[+x.dataset.bin]}.`;cur.classList.remove('shake');void cur.offsetWidth;cur.classList.add('shake')}});
+      draw()}}),
+  clips:()=>({h:`<div class="wid"><div class="cv"></div><div class="row c"><button class="btn main" data-a="add">📎 Letak klip kertas</button><button class="btn" data-a="reset">↻ Semula</button></div><p class="msg"></p></div>`,
+    init:el=>{const N=8;let k=0;const cv=el.querySelector('.cv'),msg=el.querySelector('.msg'),add=el.querySelector('[data-a=add]');
+      const draw=()=>{cv.innerHTML=clips(N,k);add.disabled=k>=N;msg.innerHTML=k>=N?'Panjang buku = <b>8 klip kertas</b> 🎉 (berderet tanpa jarak)':`Klip kertas: ${k}`};
+      add.onclick=()=>{if(k<N){k++;tone([[600+k*40,0,.15]]);draw()}};el.querySelector('[data-a=reset]').onclick=()=>{k=0;draw()};draw()}}),
+  ruler:()=>({h:`<div class="wid"><div class="cv"></div><label class="sl">🌱 Gerakkan untuk membesarkan pokok<input type="range" min="3" max="18" value="15"></label><p class="msg"></p></div>`,
+    init:el=>{const cv=el.querySelector('.cv'),r=el.querySelector('input'),msg=el.querySelector('.msg');
+      const draw=()=>{cv.innerHTML=ruler(+r.value);msg.innerHTML=`Baca nombor di hujung pokok: tinggi pokok = <b>${r.value} cm</b>`};r.oninput=draw;draw()}}),
+  shadow:()=>({h:`<div class="wid"><div class="stage on"><span class="torch">🔦</span><span class="beam"></span><span class="obj">🐇</span><span class="wall"><span class="shd">🐇</span></span></div>
+    <label class="sl">Jauh dari lampu ⟷ dekat dengan lampu<input type="range" min="0" max="100" value="40"></label>
+    <div class="row c"><button class="btn main" data-a="lamp">💡 Lampu: Hidup</button></div><p class="msg"></p></div>`,
+    init:el=>{const st=el.querySelector('.stage'),obj=el.querySelector('.obj'),shd=el.querySelector('.shd'),r=el.querySelector('input'),lamp=el.querySelector('[data-a=lamp]'),msg=el.querySelector('.msg');let on=true;
+      const draw=()=>{const x=72-(+r.value)*.42;obj.style.left=x+'%';shd.style.fontSize=Math.min(120,32*80/(x-6))+'px';st.classList.toggle('on',on);lamp.textContent=on?'💡 Lampu: Hidup':'🌑 Lampu: Mati';
+        msg.innerHTML=!on?'Lampu mati → <b>tiada bayang-bayang</b>.':+r.value>60?'Dekat dengan lampu → bayang-bayang <b>BESAR</b>.':+r.value<30?'Jauh dari lampu → bayang-bayang <b>KECIL</b>.':'Objek menghalang cahaya → terbentuk <b>bayang-bayang</b> yang sama bentuk.'};
+      r.oninput=draw;lamp.onclick=()=>{on=!on;tone([[on?880:330,0,.15]]);draw()};draw()}}),
+};
+function note(i){
+  G=null;const t=TOPICS[i];store.read[i]=true;save();scrollTo(0,0);
+  const parts=t.blocks.map(b=>W[b.t](b));
+  app.innerHTML=header('Nota ringkas')+`<div class="card note"><span class="tag">Topik ${i+1} daripada ${TOPICS.length}</span><h2>${t.icon} ${t.name}</h2>${parts.map((p,k)=>`<div data-b="${k}">${p.h}</div>`).join('')}</div>
+   <div class="card" style="margin-top:14px;text-align:center"><p class="lbl">Sudah faham? Uji diri!</p><button class="go" id="test">Uji topik ini (${PRACTICE} soalan)</button></div>
+   <div class="row nav">${i>0?`<button class="btn" id="prev">← ${TOPICS[i-1].name}</button>`:''}<button class="btn" id="menu">☰ Semua topik</button>${i<TOPICS.length-1?`<button class="btn main" id="next">${TOPICS[i+1].name} →</button>`:''}</div>`;
+  parts.forEach((p,k)=>{if(p.init)p.init(app.querySelector(`[data-b="${k}"]`))});
+  wireSound();
+  document.getElementById('test').onclick=()=>start(i);
+  document.getElementById('menu').onclick=home;
+  const pv=document.getElementById('prev');if(pv)pv.onclick=()=>note(i-1);
+  const nx=document.getElementById('next');if(nx)nx.onclick=()=>note(i+1);
+}
+
+function start(mode){
+  const qs=mode==='final'?TOPICS.flatMap((_,k)=>makeSec(k,FINAL)):makeSec(mode,PRACTICE);
+  G={mode,qs,i:0,score:0,done:false,bySec:{}};scrollTo(0,0);play();
+}
+const title=()=>G.mode==='final'?'Ujian Adab':`Topik ${G.mode+1}: ${TOPICS[G.mode].name}`;
+const isEmo=c=>c.length<=4&&!/[A-Za-z0-9]/.test(c);
+function play(){
+  const q=G.qs[G.i],N=G.qs.length;
+  let body=`<span class="tag">${TOPICS[q.sec].icon} ${TOPICS[q.sec].name}</span><p class="q">${q.q}</p>`;
+  if(q.pic)body+=`<div class="pic">${q.pic}</div>`;
+  if(q.fig)body+=`<div class="figw">${q.fig}</div>`;
+  const cls=q.choices.every(isEmo)?' emo':(q.long||q.choices.some(c=>c.length>16))?' long':'';
+  body+=`<div class="ch${cls}">${q.choices.map((c,i)=>`<button data-c="${i}" ${G.done?'disabled':''} class="${G.done&&i===q.right?'right':''}${G.done&&i===G.pick&&i!==q.right?' wrong':''}"><span class="k">${'ABCD'[i]}</span><span>${c}</span></button>`).join('')}</div>`;
+  app.innerHTML=header(title())+`<div class="hud"><span>${G.i+1}/${N}</span><div class="prog"><i style="width:${G.i/N*100}%"></i></div><span>★ ${G.score}</span></div>
+  <div class="card">${body}<div id="fb"></div></div>
+  <div class="row" style="justify-content:center"><button class="btn" id="quit">Berhenti</button></div>`;
+  wireSound();
+  app.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{G.pick=+b.dataset.c;check()});
+  document.getElementById('quit').onclick=home;
+  if(G.done)fb();
+}
+function check(){
+  const q=G.qs[G.i];G.done=true;q.given=q.choices[G.pick];q.ok=G.pick===q.right;G.ok=q.ok;
+  const b=G.bySec[q.sec]||(G.bySec[q.sec]={c:0,n:0});b.n++;
+  if(q.ok){G.score++;b.c++;ding()}else explode();
+  play();
+}
+const PRAISE=['Bagus!','Syabas!','Hebat!','Pandai!','Betul!','Tahniah!'];
+function fb(){
+  const q=G.qs[G.i],last=G.i===G.qs.length-1,el=document.getElementById('fb');
+  el.innerHTML=`<div class="fb ${G.ok?'ok':'no'} pop">${cat(G.ok?'happy':'sad')}<div class="t"><b>${G.ok?pick(PRAISE):'BOOM! Jawapan: '+q.choices[q.right]}</b>${q.explain}</div><button class="next" id="nx">${last?'Lihat sijil saya':'Seterusnya →'}</button></div>`;
+  const nx=document.getElementById('nx');nx.focus({preventScroll:true});
+  nx.onclick=()=>{if(last)result();else{G.i++;G.done=false;G.pick=null;play()}};
+}
+document.addEventListener('keydown',e=>{
+  if(!G||e.key!=='Enter')return;const nx=document.getElementById('nx');if(nx){e.preventDefault();nx.click()}
+});
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const cv=document.getElementById('confetti'),c=cv.getContext('2d');cv.width=innerWidth;cv.height=innerHeight;
+  const cols=['#2E7D32','#F2B33D','#1F6E94','#3A8F36','#D85F22','#C2306B'];
+  const ps=Array.from({length:160},()=>({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.5,vx:(Math.random()-.5)*3,vy:2+Math.random()*3,r:Math.random()*6.28,s:6+Math.random()*6,c:pick(cols)}));
+  let f=0;(function tick(){c.clearRect(0,0,cv.width,cv.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=.1;c.save();c.translate(p.x,p.y);c.rotate(p.r);c.fillStyle=p.c;c.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);c.restore()});if(++f<240)requestAnimationFrame(tick);else c.clearRect(0,0,cv.width,cv.height)})();
+}
+// question text for the answer list: drop markup, keep the picture
+function shortQ(q){const d=document.createElement('div');d.innerHTML=q.q;return (q.pic?q.pic+' ':'')+d.textContent.replace(/\s+/g,' ').trim()}
+function review(){
+  return `<div class="review"><p class="lbl">Semua jawapan (${G.score} betul, ${G.qs.length-G.score} salah)</p><ol>${G.qs.map(q=>`<li class="${q.ok?'ok':'no'}"><span class="mk">${q.ok?'✔':'✘'}</span><div><small>${TOPICS[q.sec].icon} ${TOPICS[q.sec].name}</small><p>${esc(shortQ(q))}</p><p>Jawapan dia: <b>${esc(q.given)}</b>${q.ok?'':` · Jawapan betul: <b class="r">${esc(q.choices[q.right])}</b>`}</p>${q.ok?'':`<p class="ex">${q.explain}</p>`}</div></li>`).join('')}</ol></div>`;
+}
+function result(){
+  const N=G.qs.length,s=starsFor(G.score,N),pct=Math.round(G.score/N*100);
+  if(G.mode==='final'){if((store.best.final||0)<G.score)store.best.final=G.score;TOPICS.forEach((_,k)=>{const b=G.bySec[k];if(b){const st=starsFor(b.c,b.n);if((store.best[k]||0)<st)store.best[k]=st}})}
+  else if((store.best[G.mode]||0)<s)store.best[G.mode]=s;
+  save();scrollTo(0,0);
+  const medal=pct>=90?['🥇','Emas! Kamu sudah bersedia untuk peperiksaan!']:pct>=70?['🥈','Perak! Hampir sempurna. Ulang kaji jawapan yang salah.']:pct>=50?['🥉','Gangsa! Baca semula nota topik yang kurang bintang.']:['💪','Teruskan berlatih! Baca nota dahulu, kemudian cuba lagi.'];
+  app.innerHTML=header(title())+`<div class="card cert pop">
+   <p class="lbl" style="color:var(--muted)">Sijil</p><div class="medal">${medal[0]}</div>
+   <div class="big">${G.score}/${N}</div><div class="stars">${stars(s)}</div>
+   <p style="font-weight:800;font-size:1.15rem;margin:6px 0">${medal[1]}</p>
+   ${G.mode==='final'?`<div class="bypart">${TOPICS.map((t,k)=>{const b=G.bySec[k]||{c:0,n:0};return `<div><span>${t.icon} ${t.name}</span><span>${b.c}/${b.n}</span></div>`}).join('')}</div>`:''}
+   <div class="row"><button class="btn main" id="again">Cuba lagi</button><button class="btn" id="menu">Kembali</button></div></div>
+   <div class="card" style="margin-top:14px">${review()}<div class="row" style="justify-content:center"><button class="btn" id="print">🖨️ Cetak senarai ini</button></div></div>`;
+  wireSound();
+  document.getElementById('again').onclick=()=>start(G.mode);document.getElementById('menu').onclick=home;document.getElementById('print').onclick=()=>window.print();
+  if(pct>=70){fanfare();confetti()}
+}
+W.doa=b=>({h:`<div class="doas">${b.keys.map(doaCard).join('')}<button class="playb">🙈 Sorok rumi dan maksud (cuba hafal)</button></div>`,
+  init:el=>{const d=el.querySelector('.doas'),btn=el.querySelector('.playb');btn.onclick=()=>{const on=d.classList.toggle('hide-rumi');btn.textContent=on?'👀 Tunjuk rumi dan maksud':'🙈 Sorok rumi dan maksud (cuba hafal)'}}});
+home();
+</script>
+<script src="../music.js"></script>
+</body>
+</html>
