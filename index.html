@@ -38,6 +38,9 @@ a.sub:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
 .sub.soon{border-style:dashed;opacity:.75}
 .sub.soon .ic{background:var(--line);color:var(--muted)}
 .sub.soon .tag{background:var(--line);color:var(--muted)}
+.sec{font-size:1.5rem;font-weight:800;margin:26px 0 12px;padding-bottom:6px;border-bottom:2px dashed var(--line)}
+.sec:first-child{margin-top:0}
+.sec span{font-size:1rem;color:var(--muted);font-weight:600}
 .foot{margin-top:28px;text-align:center;color:var(--muted);font-size:.85rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -60,14 +63,23 @@ a.sub:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
     <div><h1>Safiyyah Belajar</h1><p>Pilih subjek. Belajar, main, kumpul bintang!</p></div>
   </header>
 
-  <main class="grid">
+  <main>
+  <h2 class="sec">🏫 Sekolah</h2>
+  <div class="grid">
     <a class="sub" href="pendidikan-islam/" style="--c:var(--pi)"><span class="ic">ع</span><span class="tag">Buka</span><h2>Pendidikan Islam</h2><p>Al-Quran, Jawi, Akidah, Ibadah, Adab</p></a>
-    <a class="sub" href="kafa-adab/" style="--c:var(--pi)"><span class="ic">🤲</span><span class="tag">Buka</span><h2>Adab KAFA</h2><p>Tahun 2: adab dengan Rasulullah, adab harian dan doa</p></a>
     <a class="sub" href="matematik/" style="--c:var(--mt)"><span class="ic">÷</span><span class="tag">Buka</span><h2>Matematik</h2><p>Year 2 final exam in English: numbers to 1000, add, subtract</p></a>
     <a class="sub" href="english/" style="--c:var(--en)"><span class="ic">Aa</span><span class="tag">Buka</span><h2>English</h2><p>Year 2 final exam (Section A and B)</p></a>
     <a class="sub" href="bahasa-arab/" style="--c:var(--ba)"><span class="ic">ع</span><span class="tag">Buka</span><h2>Bahasa Arab</h2><p>Ujian Akhir (UASA) Tahun 2</p></a>
     <a class="sub" href="bahasa-melayu/" style="--c:var(--bm)"><span class="ic">Bm</span><span class="tag">Buka</span><h2>Bahasa Melayu</h2><p>Bina ayat berdasarkan gambar</p></a>
     <a class="sub" href="sains/" style="--c:var(--sn)"><span class="ic">✿</span><span class="tag">Buka</span><h2>Sains</h2><p>Nota ringkas interaktif dan ujian</p></a>
+  </div>
+
+  <h2 class="sec">🕌 KAFA <span>Tahun 2</span></h2>
+  <div class="grid">
+    <a class="sub" href="kafa-adab/" style="--c:var(--pi)"><span class="ic">🤲</span><span class="tag">Buka</span><h2>Adab</h2><p>Adab dengan Rasulullah, adab harian dan doa</p></a>
+    <a class="sub" href="kafa-akidah/" style="--c:var(--mt)"><span class="ic">☝️</span><span class="tag">Buka</span><h2>Akidah</h2><p>Malaikat, rasul, sifat wajib bagi Allah, Ulul Azmi</p></a>
+    <a class="sub" href="kafa-ibadah/" style="--c:var(--ba)"><span class="ic">💧</span><span class="tag">Buka</span><h2>Ibadah</h2><p>Wuduk, tayamum, najis, istinjak, azan, bacaan solat</p></a>
+  </div>
   </main>
 
   <p class="foot">Dibina dengan kasih sayang untuk Safiyyah.</p>
