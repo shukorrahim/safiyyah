@@ -12,13 +12,13 @@
 /* Layout: a cat-guided home with one big tile per school subject; live subjects in colour, upcoming ones dashed. */
 :root{
   --bg:#F2F7F5; --surface:#FFFFFF; --ink:#1D2A31; --muted:#58696F; --line:#D5E4DF; --sun:#F2B33D;
-  --pi:#3A8F36; --mt:#1F6E94; --en:#C2306B; --bm:#D85F22; --sn:#6A4C9C; --ba:#0F7C7A;
+  --pi:#3A8F36; --mt:#1F6E94; --en:#C2306B; --bm:#D85F22; --sn:#6A4C9C; --ba:#0F7C7A; --sr:#8A5A12;
   --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif; --body:"Nunito","Segoe UI",system-ui,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root{
   --bg:#0F191C; --surface:#172529; --ink:#E7F0ED; --muted:#9DB2AC; --line:#2A3F40; --sun:#F5C25B;
-  --pi:#78C873; --mt:#5FAED6; --en:#EE6C9C; --bm:#F28D58; --sn:#A98BDB; --ba:#4FC3BC; color-scheme:dark}}
+  --pi:#78C873; --mt:#5FAED6; --en:#EE6C9C; --bm:#F28D58; --sn:#A98BDB; --ba:#4FC3BC; --sr:#E3B55E; color-scheme:dark}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 .wrap{max-width:860px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -79,6 +79,9 @@ a.sub:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
     <a class="sub" href="kafa-adab/" style="--c:var(--pi)"><span class="ic">🤲</span><span class="tag">Buka</span><h2>Adab</h2><p>Adab dengan Rasulullah, adab harian dan doa</p></a>
     <a class="sub" href="kafa-akidah/" style="--c:var(--mt)"><span class="ic">☝️</span><span class="tag">Buka</span><h2>Akidah</h2><p>Malaikat, rasul, sifat wajib bagi Allah, Ulul Azmi</p></a>
     <a class="sub" href="kafa-ibadah/" style="--c:var(--ba)"><span class="ic">💧</span><span class="tag">Buka</span><h2>Ibadah</h2><p>Wuduk, tayamum, najis, istinjak, azan, bacaan solat</p></a>
+    <a class="sub" href="kafa-jawi/" style="--c:var(--bm)"><span class="ic">ج</span><span class="tag">Buka</span><h2>Jawi</h2><p>Diftong, vokal berganding, digraf, hamzah, imbuhan, baca ayat</p></a>
+    <a class="sub" href="kafa-sirah/" style="--c:var(--sr)"><span class="ic">🐫</span><span class="tag">Buka</span><h2>Sirah</h2><p>Selepas kelahiran Nabi, keperibadian Nabi, sifat wajib Nabi</p></a>
+    <a class="sub" href="kafa-lughatul-quran/" style="--c:var(--sn)"><span class="ic">ل</span><span class="tag">Buka</span><h2>Lughatul Quran</h2><p>Anggota badan, alat tulis, kelas, kata tanya, nombor 11–20</p></a>
   </div>
   </main>
 
